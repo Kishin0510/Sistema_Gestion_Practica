@@ -1,40 +1,376 @@
 require('dotenv').config();
-const db = require('../conexion'); // Ya es una instancia, no necesita "new"
+const db = require('../conexion');
+const fs = require('fs');
+const path = require('path');
 
-const daysBetween = d => Math.ceil((new Date(d) - new Date()) / 86400000);
 const logError = (tag, err) => console.error(` ${tag}`, err.message || err);
 
-const documentosController = {
-    apiVehiculos: async (req, res) => {
+const documentoVehiculoController = {
+    // Mostrar vista principal con todos los documentos
+    mostrarDocumentos: async (req, res) => {
         try {
+            // 1. Obtener todos los vehículos activos
             const [vehiculos] = await db.execute(`
                 SELECT 
-                    v.id_vehiculo, 
-                    v.patente, 
-                    v.marca, 
+                    v.id_vehiculo,
+                    v.patente,
+                    v.marca,
                     v.modelo,
                     v.anio,
                     v.color,
                     v.capacidad,
                     c.nombre_cliente,
-                    c.rut_cliente
+                    c.id_cliente
                 FROM vehiculos v
                 LEFT JOIN clientes c ON v.id_cliente = c.id_cliente
                 WHERE v.activo = 1
-                ORDER BY v.patente
+                ORDER BY v.patente ASC
             `);
 
-            // Formatear para el select
-            const formatted = vehiculos.map(v => ({
-                id: v.id_vehiculo,
-                text: `${v.patente} - ${v.marca} ${v.modelo}`,
-                datos: v
-            }));
+            // 2. Obtener tipos de documentos activos
+            const [tiposDocumentos] = await db.execute(`
+                SELECT 
+                    id_tipo_documento_veh,
+                    nombre_documento,
+                    descripcion,
+                    dias_alerta,
+                    obligatorio,
+                    activo
+                FROM tipos_documento_veh 
+                WHERE activo = 1
+                ORDER BY nombre_documento ASC
+            `);
+
+            // 3. Obtener todos los documentos con información completa
+            const [documentos] = await db.execute(`
+                SELECT 
+                    dv.id_documento_veh,
+                    dv.id_vehiculo,
+                    dv.id_tipo_documento_veh,
+                    dv.numero_documento,
+                    dv.fecha_emision,
+                    dv.fecha_vencimiento,
+                    dv.nombre_archivo,
+                    dv.ruta_archivo,
+                    dv.observaciones,
+                    dv.fecha_subida,
+                    dv.estado,
+                    v.patente,
+                    v.marca,
+                    v.modelo,
+                    COALESCE(td.nombre_documento, 'Sin tipo') as tipo_documento_nombre,
+                    u.nombre_completo as usuario_subida_nombre
+                FROM documentos_vehiculo dv
+                LEFT JOIN vehiculos v ON dv.id_vehiculo = v.id_vehiculo
+                LEFT JOIN tipos_documento_veh td ON dv.id_tipo_documento_veh = td.id_tipo_documento_veh
+                LEFT JOIN usuarios u ON dv.usuario_subida = u.id_usuario
+                ORDER BY dv.fecha_vencimiento ASC, dv.fecha_subida DESC
+            `);
+
+            // Calcular estado de cada documento
+            const hoy = new Date();
+            const documentosConEstado = documentos.map(doc => {
+                const vencimiento = new Date(doc.fecha_vencimiento);
+                const diffTime = vencimiento - hoy;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                let estado = 'vigente';
+                let estadoClass = 'success';
+                let estadoBadge = 'bg-success';
+                let estadoTexto = 'Vigente';
+
+                if (diffDays <= 0) {
+                    estado = 'vencido';
+                    estadoClass = 'danger';
+                    estadoBadge = 'bg-danger';
+                    estadoTexto = 'Vencido';
+                } else if (diffDays <= 7) {
+                    estado = 'urgente';
+                    estadoClass = 'danger';
+                    estadoBadge = 'bg-danger';
+                    estadoTexto = 'Urgente (≤7 días)';
+                } else if (diffDays <= 30) {
+                    estado = 'por_vencer';
+                    estadoClass = 'warning';
+                    estadoBadge = 'bg-warning text-dark';
+                    estadoTexto = 'Por vencer';
+                }
+
+                return {
+                    ...doc,
+                    dias_restantes: diffDays,
+                    estado_original: doc.estado,
+                    estado_calculado: estado,
+                    estado_class: estadoClass,
+                    estado_badge: estadoBadge,
+                    estado_texto: estadoTexto
+                };
+            });
+
+            // Separar documentos próximos a vencer (30 días o menos)
+            const documentosProximos = documentosConEstado.filter(doc =>
+                doc.dias_restantes > 0 && doc.dias_restantes <= 30
+            ).sort((a, b) => a.dias_restantes - b.dias_restantes);
+
+            // Estadísticas
+            const totalDocumentos = documentos.length;
+            const documentosVigentes = documentosConEstado.filter(d => d.dias_restantes > 30).length;
+            const documentosPorVencer = documentosConEstado.filter(d => d.dias_restantes > 0 && d.dias_restantes <= 30).length;
+            const documentosVencidos = documentosConEstado.filter(d => d.dias_restantes <= 0).length;
+
+            res.render('documentos', {
+                title: 'Gestión Documental - Vehículos',
+                layout: 'layouts/main',
+                vehiculos: vehiculos,
+                tiposDocumentos: tiposDocumentos,
+                documentos: documentosConEstado,
+                documentosProximos: documentosProximos,
+                totalDocumentos: totalDocumentos,
+                documentosVigentes: documentosVigentes,
+                documentosPorVencer: documentosPorVencer,
+                documentosVencidos: documentosVencidos,
+                fecha: new Date(),
+                success_msg: req.query.success || null,
+                error_msg: req.query.error || null,
+                // Para debugging
+                debug: process.env.NODE_ENV === 'development'
+            });
+
+        } catch (err) {
+            logError('MOSTRAR DOCUMENTOS', err);
+            console.error('Error detallado:', err);
+
+            res.render('documentos', {
+                title: 'Gestión Documental',
+                layout: 'layouts/main',
+                vehiculos: [],
+                tiposDocumentos: [],
+                documentos: [],
+                documentosProximos: [],
+                totalDocumentos: 0,
+                documentosVigentes: 0,
+                documentosPorVencer: 0,
+                documentosVencidos: 0,
+                fecha: new Date(),
+                error_msg: 'Error al cargar los documentos: ' + err.message,
+                debug: process.env.NODE_ENV === 'development'
+            });
+        }
+    },
+
+    // AGREGAR NUEVO DOCUMENTO (MODIFICADO PARA MANEJAR FK CORRECTAMENTE)
+    agregarDocumento: async (req, res) => {
+        let conn;
+        try {
+            conn = await db.pool.promise().getConnection();
+            await conn.beginTransaction();
+
+            const {
+                id_vehiculo,
+                tipo_documento_nombre,
+                numero_documento,
+                fecha_emision,
+                fecha_vencimiento,
+                observaciones,
+                enviar_alerta
+            } = req.body;
+
+            // Validaciones básicas
+            if (!id_vehiculo || !tipo_documento_nombre || !numero_documento || !fecha_vencimiento) {
+                throw new Error('Faltan campos obligatorios');
+            }
+
+            // Verificar que el vehículo existe
+            const [vehiculo] = await conn.execute(
+                'SELECT id_vehiculo, id_cliente FROM vehiculos WHERE id_vehiculo = ? AND activo = 1',
+                [id_vehiculo]
+            );
+
+            if (vehiculo.length === 0) {
+                throw new Error('El vehículo seleccionado no existe o está inactivo');
+            }
+
+            const id_cliente = vehiculo[0].id_cliente;
+
+            // PROCESAR TIPO DE DOCUMENTO
+            let id_tipo_documento_veh = null;
+
+            // 1. Buscar si ya existe el tipo de documento por nombre
+            const [tipoExistente] = await conn.execute(
+                'SELECT id_tipo_documento_veh FROM tipos_documento_veh WHERE nombre_documento = ? AND activo = 1',
+                [tipo_documento_nombre.trim()]
+            );
+
+            if (tipoExistente.length > 0) {
+                // Usar el tipo existente
+                id_tipo_documento_veh = tipoExistente[0].id_tipo_documento_veh;
+            } else {
+                // 2. Crear nuevo tipo de documento
+                const [nuevoTipo] = await conn.execute(
+                    `INSERT INTO tipos_documento_veh 
+                     (id_cliente, nombre_documento, descripcion, dias_alerta, obligatorio, activo) 
+                     VALUES (?, ?, ?, ?, ?, 1)`,
+                    [
+                        id_cliente,
+                        tipo_documento_nombre.trim(),
+                        'Creado automáticamente al registrar documento',
+                        30, // días de alerta por defecto
+                        false // no obligatorio por defecto
+                    ]
+                );
+                id_tipo_documento_veh = nuevoTipo.insertId;
+
+                console.log(`✅ Nuevo tipo de documento creado: ${tipo_documento_nombre} (ID: ${id_tipo_documento_veh})`);
+            }
+
+            // Procesar archivo si existe
+            let nombre_archivo = null;
+            let ruta_archivo = null;
+
+            if (req.file) {
+                nombre_archivo = req.file.filename;
+                ruta_archivo = `/uploads/documentos/${req.file.filename}`;
+            }
+
+            // Insertar documento (AHORA CON ID VÁLIDO)
+            const [result] = await conn.execute(`
+                INSERT INTO documentos_vehiculo (
+                    id_vehiculo,
+                    id_tipo_documento_veh,
+                    numero_documento,
+                    fecha_emision,
+                    fecha_vencimiento,
+                    nombre_archivo,
+                    ruta_archivo,
+                    observaciones,
+                    fecha_subida,
+                    usuario_subida,
+                    estado
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, 'vigente')
+            `, [
+                id_vehiculo,
+                id_tipo_documento_veh, // AHORA SIEMPRE ES UN ID VÁLIDO
+                numero_documento.trim(),
+                fecha_emision || null,
+                fecha_vencimiento,
+                nombre_archivo,
+                ruta_archivo,
+                observaciones || null,
+                req.session?.usuario?.id_usuario || null
+            ]);
+
+            // Si se marcó enviar alerta, crear registro en tabla alertas
+            if (enviar_alerta === 'on' || enviar_alerta === 'true') {
+                const diasParaVencer = Math.ceil((new Date(fecha_vencimiento) - new Date()) / (1000 * 60 * 60 * 24));
+
+                if (diasParaVencer <= 30 && diasParaVencer > 0) {
+                    await conn.execute(`
+                        INSERT INTO alertas (
+                            tipo_entidad,
+                            id_entidad,
+                            id_documento,
+                            tipo_alerta,
+                            mensaje,
+                            fecha_generacion
+                        ) VALUES (?, ?, ?, ?, ?, NOW())
+                    `, [
+                        'vehiculo',
+                        id_vehiculo,
+                        result.insertId,
+                        'documento_por_vencer',
+                        `Documento ${tipo_documento_nombre} N°${numero_documento} vence en ${diasParaVencer} días`
+                    ]);
+                }
+            }
+
+            await conn.commit();
+
+            console.log(`Documento registrado exitosamente. ID: ${result.insertId}, Tipo: ${tipo_documento_nombre}`);
+
+            res.redirect(`/documentos?success=Documento registrado exitosamente`);
+
+        } catch (err) {
+            if (conn) await conn.rollback();
+            logError('AGREGAR DOCUMENTO', err);
+
+            let errorMsg = 'Error al guardar el documento';
+            if (err.code === 'ER_DUP_ENTRY') {
+                errorMsg = 'El número de documento ya existe para este tipo';
+            } else if (err.message) {
+                errorMsg = err.message;
+            }
+
+            res.redirect(`/documentos?error=${encodeURIComponent(errorMsg)}`);
+        } finally {
+            if (conn) conn.release();
+        }
+    },
+
+    // Buscar vehículo por patente (API)
+    buscarVehiculoPorPatente: async (req, res) => {
+        try {
+            const { patente } = req.params;
+
+            const [vehiculos] = await db.execute(`
+                SELECT 
+                    v.id_vehiculo,
+                    v.patente,
+                    v.marca,
+                    v.modelo,
+                    v.anio,
+                    v.color,
+                    v.capacidad,
+                    v.activo,
+                    c.nombre_cliente,
+                    c.id_cliente
+                FROM vehiculos v
+                LEFT JOIN clientes c ON v.id_cliente = c.id_cliente
+                WHERE v.patente = ? AND v.activo = 1
+            `, [patente.toUpperCase()]);
+
+            if (vehiculos.length === 0) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Vehículo no encontrado'
+                });
+            }
 
             res.json({
                 success: true,
-                vehiculos: formatted,
-                total: vehiculos.length
+                vehiculo: vehiculos[0]
+            });
+
+        } catch (err) {
+            logError('BUSCAR VEHICULO POR PATENTE', err);
+            res.status(500).json({
+                success: false,
+                error: 'Error al buscar vehículo'
+            });
+        }
+    },
+
+    // Obtener todos los vehículos (API)
+    apiVehiculos: async (req, res) => {
+        try {
+            const [vehiculos] = await db.execute(`
+                SELECT 
+                    v.id_vehiculo,
+                    v.patente,
+                    v.marca,
+                    v.modelo,
+                    v.anio,
+                    v.color,
+                    v.capacidad,
+                    c.nombre_cliente
+                FROM vehiculos v
+                LEFT JOIN clientes c ON v.id_cliente = c.id_cliente
+                WHERE v.activo = 1
+                ORDER BY v.patente ASC
+            `);
+
+            res.json({
+                success: true,
+                vehiculos: vehiculos
             });
 
         } catch (err) {
@@ -46,557 +382,122 @@ const documentosController = {
         }
     },
 
-    buscarVehiculoPorID: async (req, res) => {
-        try {
-            const { id } = req.params;
-
-            const [[vehiculo]] = await db.execute(`
-                SELECT 
-                    v.id_vehiculo,
-                    v.patente,
-                    v.marca,
-                    v.modelo,
-                    v.anio,
-                    v.color,
-                    v.capacidad,
-                    v.numero_chasis,
-                    v.numero_motor,
-                    v.activo,
-                    c.nombre_cliente,
-                    c.rut_cliente
-                FROM vehiculos v
-                LEFT JOIN clientes c ON v.id_cliente = c.id_cliente
-                WHERE v.id_vehiculo = ?
-            `, [id]);
-
-            if (!vehiculo) {
-                return res.json({
-                    success: false,
-                    message: 'Vehículo no encontrado'
-                });
-            }
-
-            res.json({
-                success: true,
-                vehiculo
-            });
-
-        } catch (err) {
-            logError('BUSCAR VEHICULO POR ID', err);
-            res.status(500).json({
-                success: false,
-                error: 'Error al buscar vehículo'
-            });
-        }
-    },
-
-    buscarVehiculoPorPatente: async (req, res) => {
-        try {
-            const { patente } = req.params;
-
-            const [[vehiculo]] = await db.execute(`
-                SELECT 
-                    v.id_vehiculo,
-                    v.patente,
-                    v.marca,
-                    v.modelo,
-                    v.anio,
-                    v.color,
-                    v.capacidad,
-                    v.numero_chasis,
-                    v.numero_motor,
-                    v.activo,
-                    c.nombre_cliente,
-                    c.rut_cliente
-                FROM vehiculos v
-                LEFT JOIN clientes c ON v.id_cliente = c.id_cliente
-                WHERE v.patente = ?
-            `, [patente]);
-
-            if (!vehiculo) {
-                return res.json({
-                    success: false,
-                    message: 'Vehículo no encontrado'
-                });
-            }
-
-            res.json({
-                success: true,
-                vehiculo
-            });
-
-        } catch (err) {
-            logError('BUSCAR VEHICULO POR PATENTE', err);
-            res.status(500).json({
-                success: false,
-                error: 'Error al buscar vehículo por patente'
-            });
-        }
-    },
-
-    verificarVehiculo: async (req, res) => {
-        try {
-            const { id } = req.params;
-
-            const [[vehiculo]] = await db.execute(`
-                SELECT id_vehiculo, patente, activo 
-                FROM vehiculos 
-                WHERE id_vehiculo = ?
-            `, [id]);
-
-            if (!vehiculo) {
-                return res.json({
-                    success: false,
-                    exists: false,
-                    message: 'Vehículo no encontrado'
-                });
-            }
-
-            res.json({
-                success: true,
-                exists: true,
-                vehiculo: {
-                    id: vehiculo.id_vehiculo,
-                    patente: vehiculo.patente,
-                    activo: vehiculo.activo
-                }
-            });
-
-        } catch (err) {
-            logError('VERIFICAR VEHICULO', err);
-            res.status(500).json({
-                success: false,
-                error: 'Error al verificar vehículo'
-            });
-        }
-    },
-
-    apiTipos: async (req, res) => {
+    // Obtener tipos de documento (API)
+    apiTiposDocumentos: async (req, res) => {
         try {
             const [tipos] = await db.execute(`
-                SELECT * FROM tipos_documento_veh 
+                SELECT 
+                    id_tipo_documento_veh,
+                    nombre_documento,
+                    descripcion
+                FROM tipos_documento_veh 
                 WHERE activo = 1
-                ORDER BY nombre_documento
+                ORDER BY nombre_documento ASC
             `);
 
             res.json({
                 success: true,
-                tipos
+                tipos: tipos
             });
 
         } catch (err) {
             logError('API TIPOS', err);
             res.status(500).json({
                 success: false,
-                error: 'Error al cargar tipos'
+                error: 'Error al cargar tipos de documentos'
             });
         }
     },
 
-    mostrarDocumentos: async (req, res) => {
-        try {
-            // 1. Obtener vehículos para el modal
-            const [vehiculos] = await db.execute(`
-                SELECT 
-                    v.id_vehiculo,
-                    v.patente,
-                    v.marca,
-                    v.modelo,
-                    c.nombre_cliente,
-                    v.anio,
-                    v.color
-                FROM vehiculos v
-                LEFT JOIN clientes c ON v.id_cliente = c.id_cliente
-                WHERE v.activo = 1
-                ORDER BY v.patente
-            `);
-
-            // 2. Obtener tipos de documento
-            const [tiposDocumentos] = await db.execute(`
-                SELECT * FROM tipos_documento_veh 
-                WHERE activo = 1
-                ORDER BY nombre_documento
-            `);
-
-            // 3. Obtener documentos con JOIN
-            const [documentos] = await db.execute(`
-                SELECT 
-                    dv.*,
-                    v.patente,
-                    v.marca,
-                    v.modelo,
-                    td.nombre_documento as tipo_documento
-                FROM documentos_vehiculo dv
-                LEFT JOIN vehiculos v ON dv.id_vehiculo = v.id_vehiculo
-                LEFT JOIN tipos_documento_veh td ON dv.id_tipo_documento_veh = td.id_tipo_documento_veh
-                ORDER BY dv.fecha_vencimiento DESC
-                LIMIT 100
-            `);
-
-            const hoy = new Date();
-            const documentosConEstado = documentos.map(doc => {
-                const vencimiento = new Date(doc.fecha_vencimiento);
-                const diff = Math.ceil((vencimiento - hoy) / (1000 * 60 * 60 * 24));
-
-                let estado = 'vigente';
-                if (diff <= 0) estado = 'vencido';
-                else if (diff <= 7) estado = 'urgente';
-                else if (diff <= 30) estado = 'por_vencer';
-
-                return { ...doc, dias_restantes: diff, estado };
-            });
-
-            const documentosProximos = documentosConEstado.filter(d =>
-                d.dias_restantes > 0 && d.dias_restantes <= 30
-            );
-
-            res.render('documentos', {
-                title: 'Gestión Documental',
-                vehiculos,
-                tiposDocumentos,
-                documentos: documentosConEstado,
-                documentosProximos,
-                totalDocumentos: documentos.length,
-                documentosVigentes: documentosConEstado.filter(d => d.estado === 'vigente').length,
-                documentosPorVencer: documentosConEstado.filter(d => d.estado === 'por_vencer').length,
-                documentosVencidos: documentosConEstado.filter(d => d.estado === 'vencido').length,
-                fecha: hoy,
-                success_msg: req.query.success,
-                error_msg: req.query.error
-            });
-
-        } catch (err) {
-            logError('MOSTRAR DOCUMENTOS', err);
-            console.error('Error detallado:', err);
-
-            res.render('documentos', {
-                title: 'Gestión Documental',
-                vehiculos: [],
-                tiposDocumentos: [],
-                documentos: [],
-                documentosProximos: [],
-                totalDocumentos: 0,
-                documentosVigentes: 0,
-                documentosPorVencer: 0,
-                documentosVencidos: 0,
-                fecha: new Date(),
-                error_msg: 'Error al cargar datos. Intente nuevamente.'
-            });
-        }
-    },
-
-    agregarDocumento: async (req, res) => {
-        let conn;
-        try {
-            conn = await db.pool.promise().getConnection();
-            await conn.beginTransaction();
-
-            const id_vehiculo = req.body.id_vehiculo || req.body.id_vehiculo_final;
-            const {
-                id_tipo_documento_veh,
-                numero_documento,
-                fecha_emision,
-                fecha_vencimiento,
-                observaciones
-            } = req.body;
-
-            // Validaciones básicas
-            if (!id_vehiculo || !id_tipo_documento_veh || !numero_documento || !fecha_vencimiento) {
-                return res.redirect('/documentos?error=Faltan campos obligatorios');
-            }
-
-            const [[vehiculoExiste]] = await conn.execute(
-                'SELECT id_vehiculo FROM vehiculos WHERE id_vehiculo = ? AND activo = 1',
-                [id_vehiculo]
-            );
-
-            if (!vehiculoExiste) {
-                return res.redirect('/documentos?error=El vehículo seleccionado no existe o está inactivo');
-            }
-
-            // Procesar archivo si existe
-            const nombre_archivo = req.file ? req.file.filename : null;
-            const ruta_archivo = req.file ? `/uploads/documentos/${req.file.filename}` : null;
-
-            await conn.execute(`
-                INSERT INTO documentos_vehiculo (
-                    id_vehiculo,
-                    id_tipo_documento_veh,
-                    numero_documento,
-                    fecha_emision,
-                    fecha_vencimiento,
-                    nombre_archivo,
-                    ruta_archivo,
-                    observaciones,
-                    fecha_subida,
-                    estado
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'vigente')
-            `, [
-                id_vehiculo,
-                id_tipo_documento_veh,
-                numero_documento.trim(),
-                fecha_emision || null,
-                fecha_vencimiento,
-                nombre_archivo,
-                ruta_archivo,
-                observaciones || null
-            ]);
-
-            await conn.commit();
-            res.redirect('/documentos?success=Documento registrado exitosamente');
-
-        } catch (err) {
-            if (conn) await conn.rollback();
-            logError('AGREGAR DOCUMENTO', err);
-
-            let errorMsg = 'Error al guardar el documento';
-            if (err.code === 'ER_DUP_ENTRY') {
-                errorMsg = 'El número de documento ya existe';
-            } else if (err.code === 'ER_NO_REFERENCED_ROW_2') {
-                errorMsg = 'El vehículo o tipo de documento no existe';
-            }
-
-            res.redirect(`/documentos?error=${encodeURIComponent(errorMsg)}`);
-        } finally {
-            if (conn) conn.release();
-        }
-    },
-
-    obtenerDetalle: async (req, res) => {
-        try {
-            const { id } = req.params;
-
-            const [[documento]] = await db.execute(`
-                SELECT 
-                    dv.*,
-                    v.patente,
-                    v.marca,
-                    v.modelo,
-                    v.color,
-                    td.nombre_documento as tipo_documento,
-                    td.descripcion
-                FROM documentos_vehiculo dv
-                LEFT JOIN vehiculos v ON dv.id_vehiculo = v.id_vehiculo
-                LEFT JOIN tipos_documento_veh td ON dv.id_tipo_documento_veh = td.id_tipo_documento_veh
-                WHERE dv.id_documento_veh = ?
-            `, [id]);
-
-            if (!documento) {
-                return res.status(404).json({
-                    success: false,
-                    error: 'Documento no encontrado'
-                });
-            }
-
-            res.json({ success: true, documento });
-
-        } catch (err) {
-            logError('DETALLE DOCUMENTO', err);
-            res.status(500).json({
-                success: false,
-                error: 'Error al obtener detalle'
-            });
-        }
-    },
-
-    crearTipoDocumento: async (req, res) => {
-        try {
-            const { nombre_documento, descripcion } = req.body;
-
-            if (!nombre_documento) {
-                return res.redirect('/documentos?error=El nombre del tipo es obligatorio');
-            }
-
-            await db.execute(`
-                INSERT INTO tipos_documento_veh (nombre_documento, descripcion, activo)
-                VALUES (?, ?, 1)
-            `, [nombre_documento, descripcion || null]);
-
-            res.redirect('/documentos?success=Tipo de documento creado exitosamente');
-
-        } catch (err) {
-            logError('CREAR TIPO DOCUMENTO', err);
-            res.redirect('/documentos?error=Error al crear tipo de documento');
-        }
-    },
-
-    editarDocumento: async (req, res) => {
-        let conn;
-        try {
-            const { id } = req.params;
-            const {
-                id_vehiculo,
-                id_tipo_documento_veh,
-                numero_documento,
-                fecha_emision,
-                fecha_vencimiento,
-                observaciones
-            } = req.body;
-
-            conn = await db.pool.promise().getConnection();
-            await conn.beginTransaction();
-
-            // Procesar archivo si existe
-            if (req.file) {
-                const nombre_archivo = req.file.filename;
-                const ruta_archivo = `/uploads/documentos/${req.file.filename}`;
-
-                await conn.execute(
-                    'UPDATE documentos_vehiculo SET nombre_archivo = ?, ruta_archivo = ? WHERE id_documento_veh = ?',
-                    [nombre_archivo, ruta_archivo, id]
-                );
-            }
-
-            await conn.execute(`
-                UPDATE documentos_vehiculo 
-                SET id_vehiculo = ?,
-                    id_tipo_documento_veh = ?,
-                    numero_documento = ?,
-                    fecha_emision = ?,
-                    fecha_vencimiento = ?,
-                    observaciones = ?,
-                    fecha_actualizacion = NOW()
-                WHERE id_documento_veh = ?
-            `, [
-                id_vehiculo,
-                id_tipo_documento_veh,
-                numero_documento.trim(),
-                fecha_emision || null,
-                fecha_vencimiento,
-                observaciones || null,
-                id
-            ]);
-
-            await conn.commit();
-            res.redirect('/documentos?success=Documento actualizado exitosamente');
-
-        } catch (err) {
-            if (conn) await conn.rollback();
-            logError('EDITAR DOCUMENTO', err);
-            res.redirect('/documentos?error=Error al actualizar documento');
-        } finally {
-            if (conn) conn.release();
-        }
-    },
-
+    // Eliminar documento
     eliminarDocumento: async (req, res) => {
+        let conn;
         try {
             const { id } = req.params;
 
-            await db.execute(
+            conn = await db.pool.promise().getConnection();
+            await conn.beginTransaction();
+
+            // Obtener información del documento
+            const [documento] = await conn.execute(
+                'SELECT id_vehiculo, ruta_archivo FROM documentos_vehiculo WHERE id_documento_veh = ?',
+                [id]
+            );
+
+            if (documento.length === 0) {
+                throw new Error('Documento no encontrado');
+            }
+
+            // Eliminar archivo físico si existe
+            if (documento[0].ruta_archivo) {
+                const filePath = path.join(__dirname, '../public', documento[0].ruta_archivo);
+                if (fs.existsSync(filePath)) {
+                    fs.unlinkSync(filePath);
+                }
+            }
+
+            // Eliminar alertas relacionadas
+            await conn.execute(
+                'DELETE FROM alertas WHERE id_documento = ?',
+                [id]
+            );
+
+            // Eliminar documento
+            await conn.execute(
                 'DELETE FROM documentos_vehiculo WHERE id_documento_veh = ?',
                 [id]
             );
 
-            res.redirect('/documentos?success=Documento eliminado exitosamente');
+            await conn.commit();
+
+            res.json({
+                success: true,
+                message: 'Documento eliminado exitosamente'
+            });
 
         } catch (err) {
+            if (conn) await conn.rollback();
             logError('ELIMINAR DOCUMENTO', err);
-            res.redirect('/documentos?error=Error al eliminar documento');
-        }
-    },
-
-    listarDocumentosPorVehiculo: async (req, res) => {
-        try {
-            const [vehiculosConDocumentos] = await db.execute(`
-                SELECT 
-                    v.id_vehiculo,
-                    v.patente,
-                    v.marca,
-                    v.modelo,
-                    COUNT(dv.id_documento_veh) as total_documentos,
-                    SUM(CASE WHEN dv.fecha_vencimiento > NOW() THEN 1 ELSE 0 END) as vigentes,
-                    SUM(CASE WHEN dv.fecha_vencimiento < NOW() THEN 1 ELSE 0 END) as vencidos
-                FROM vehiculos v
-                LEFT JOIN documentos_vehiculo dv ON v.id_vehiculo = dv.id_vehiculo
-                WHERE v.activo = 1
-                GROUP BY v.id_vehiculo, v.patente, v.marca, v.modelo
-                ORDER BY v.patente
-            `);
-
-            res.render('documentos_vehiculos', {
-                title: 'Documentos por Vehículo',
-                vehiculos: vehiculosConDocumentos,
-                fecha: new Date()
+            res.status(500).json({
+                success: false,
+                error: err.message || 'Error al eliminar documento'
             });
-
-        } catch (err) {
-            logError('LISTAR DOCUMENTOS POR VEHICULO', err);
-            res.redirect('/documentos?error=Error al cargar documentos por vehículo');
+        } finally {
+            if (conn) conn.release();
         }
     },
 
-    documentosPorVehiculo: async (req, res) => {
+    // Actualizar estado de documentos (tarea programada)
+    actualizarEstadosDocumentos: async () => {
+        let conn;
         try {
-            const { id } = req.params;
+            conn = await db.pool.promise().getConnection();
 
-            const [[vehiculo]] = await db.execute(`
-                SELECT * FROM vehiculos WHERE id_vehiculo = ?
-            `, [id]);
+            const hoy = new Date().toISOString().split('T')[0];
 
-            if (!vehiculo) {
-                return res.redirect('/documentos?error=Vehículo no encontrado');
-            }
+            // Actualizar documentos vencidos
+            await conn.execute(`
+                UPDATE documentos_vehiculo 
+                SET estado = 'vencido' 
+                WHERE fecha_vencimiento < ? AND estado != 'vencido'
+            `, [hoy]);
 
-            const [documentos] = await db.execute(`
-                SELECT 
-                    dv.*,
-                    td.nombre_documento as tipo_documento
-                FROM documentos_vehiculo dv
-                LEFT JOIN tipos_documento_veh td ON dv.id_tipo_documento_veh = td.id_tipo_documento_veh
-                WHERE dv.id_vehiculo = ?
-                ORDER BY dv.fecha_vencimiento
-            `, [id]);
+            // Actualizar documentos por vencer
+            await conn.execute(`
+                UPDATE documentos_vehiculo 
+                SET estado = 'por_vencer' 
+                WHERE fecha_vencimiento BETWEEN ? AND DATE_ADD(?, INTERVAL 30 DAY)
+                AND estado NOT IN ('vencido', 'por_vencer')
+            `, [hoy, hoy]);
 
-            const hoy = new Date();
-            const documentosConEstado = documentos.map(doc => {
-                const vencimiento = new Date(doc.fecha_vencimiento);
-                const diff = Math.ceil((vencimiento - hoy) / (1000 * 60 * 60 * 24));
-
-                let estado = 'vigente';
-                if (diff <= 0) estado = 'vencido';
-                else if (diff <= 7) estado = 'urgente';
-                else if (diff <= 30) estado = 'por_vencer';
-
-                return { ...doc, dias_restantes: diff, estado };
-            });
-
-            res.render('documentos_vehiculo', {
-                title: `Documentos - ${vehiculo.patente}`,
-                vehiculo,
-                documentos: documentosConEstado,
-                fecha: hoy
-            });
+            console.log(' Estados de documentos actualizados automáticamente');
 
         } catch (err) {
-            logError('DOCUMENTOS POR VEHICULO', err);
-            res.redirect('/documentos?error=Error al cargar documentos del vehículo');
-        }
-    },
-
-    enviarRecordatorio: async (req, res) => {
-        try {
-            const { id } = req.params;
-            console.log(`Enviando recordatorio para documento ID: ${id}`);
-            res.redirect('/documentos?success=Recordatorio enviado exitosamente');
-
-        } catch (err) {
-            logError('ENVIAR RECORDATORIO', err);
-            res.redirect('/documentos?error=Error al enviar recordatorio');
-        }
-    },
-
-    generarReporte: async (req, res) => {
-        try {
-            const { tipo } = req.params;
-            console.log(`Generando reporte tipo: ${tipo}`);
-            res.redirect('/documentos?success=Reporte generado exitosamente');
-
-        } catch (err) {
-            logError('GENERAR REPORTE', err);
-            res.redirect('/documentos?error=Error al generar reporte');
+            logError('ACTUALIZAR ESTADOS', err);
+        } finally {
+            if (conn) conn.release();
         }
     }
 };
 
-module.exports = documentosController;
+module.exports = documentoVehiculoController;

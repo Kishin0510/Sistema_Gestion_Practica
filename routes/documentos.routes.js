@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const documentosController = require('../db/controllers/documentoController');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const documentoVehiculoController = require('../db/controllers/documentoController');
 
 
 const storage = multer.diskStorage({
@@ -19,16 +19,16 @@ const storage = multer.diskStorage({
         const ext = path.extname(file.originalname);
         const name = path.basename(file.originalname, ext)
             .replace(/\s+/g, '_')
+            .replace(/[^a-zA-Z0-9_]/g, '')
             .toLowerCase()
-            .substring(0, 50);
-
-        cb(null, name + '-' + uniqueSuffix + ext);
+            .substring(0, 30);
+        cb(null, `doc_${name}_${uniqueSuffix}${ext}`);
     }
 });
 
 const upload = multer({
-    storage,
-    limits: { fileSize: 10 * 1024 * 1024 },
+    storage: storage,
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
     fileFilter: (req, file, cb) => {
         const allowedTypes = [
             'application/pdf',
@@ -41,53 +41,35 @@ const upload = multer({
         if (allowedTypes.includes(file.mimetype)) {
             cb(null, true);
         } else {
-            cb(new Error('Tipo de archivo no permitido. Solo PDF, JPG, PNG, WEBP'));
+            cb(new Error('Tipo de archivo no permitido. Solo PDF, JPG, PNG'));
         }
     }
 });
 
-
-
-router.get('/api/vehiculos', documentosController.apiVehiculos);
-router.get('/api/vehiculo/patente/:patente', documentosController.buscarVehiculoPorPatente);
-router.get('/api/vehiculo/:id', documentosController.buscarVehiculoPorID);
-router.get('/api/tipos', documentosController.apiTipos);
-router.get('/api/documento/:id', documentosController.obtenerDetalle);
-router.get('/api/verificar-vehiculo/:id', documentosController.verificarVehiculo);
-router.get('/reporte/:id', documentosController.generarReporte);
-router.get('/', documentosController.mostrarDocumentos);
-router.get('/vehiculos', documentosController.listarDocumentosPorVehiculo);
-router.get('/vehiculo/:id', documentosController.documentosPorVehiculo);
-router.post(
-    '/vehiculo/registrar',
+router.get('/', documentoVehiculoController.mostrarDocumentos);
+router.get('/api/vehiculos', documentoVehiculoController.apiVehiculos);
+router.get('/api/tipos', documentoVehiculoController.apiTiposDocumentos);
+router.get('/api/vehiculo/patente/:patente', documentoVehiculoController.buscarVehiculoPorPatente);
+router.post('/vehiculo/registrar',
     upload.single('archivo_documento'),
-    documentosController.agregarDocumento
+    documentoVehiculoController.agregarDocumento
 );
-router.post('/tipos/nuevo', documentosController.crearTipoDocumento);
-router.post(
-    '/editar/:id',
-    upload.single('archivo_documento'),
-    documentosController.editarDocumento
-);
-router.post('/eliminar/:id', documentosController.eliminarDocumento);
-router.post('/recordatorio/:id', documentosController.enviarRecordatorio);
+router.delete('/eliminar/:id', documentoVehiculoController.eliminarDocumento);
 router.use((err, req, res, next) => {
+    console.error('Error en multer:', err);
+
     if (err instanceof multer.MulterError) {
         if (err.code === 'LIMIT_FILE_SIZE') {
             return res.redirect('/documentos?error=Archivo demasiado grande (máx. 10MB)');
         }
-        return res.redirect('/documentos?error=Error al subir archivo');
+        return res.redirect('/documentos?error=Error al subir archivo: ' + err.message);
     }
 
     if (err) {
-        console.error('Error:', err.message);
-        return res.redirect(`/documentos?error=${encodeURIComponent(err.message)}`);
+        return res.redirect('/documentos?error=' + encodeURIComponent(err.message));
     }
 
     next();
 });
 
-router.use((req, res) => {
-    res.status(404).redirect('/documentos?error=Ruta no encontrada');
-});
 module.exports = router;
