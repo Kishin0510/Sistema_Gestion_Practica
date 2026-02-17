@@ -3,300 +3,125 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>
         <%= title || 'Gestión Documental - Personas' %>
     </title>
-
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-
-    <!-- DataTables -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-
-    <!-- Select2 -->
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
-
-    <style>
-        :root {
-            --primary-custom: #0d6efd;
-            --secondary-custom: #6c757d;
-            --success-custom: #198754;
-            --warning-custom: #ffc107;
-            --danger-custom: #dc3545;
-        }
-
-        .bg-primary-custom {
-            background-color: var(--primary-custom) !important;
-        }
-
-        .btn-primary-custom {
-            background-color: var(--primary-custom);
-            border-color: var(--primary-custom);
-            color: white;
-        }
-
-        .btn-primary-custom:hover {
-            background-color: #0b5ed7;
-            border-color: #0a58ca;
-        }
-
-        .badge-vigente {
-            background-color: var(--success-custom);
-            color: white;
-        }
-
-        .badge-por-vencer {
-            background-color: var(--warning-custom);
-            color: #000;
-        }
-
-        .badge-vencido {
-            background-color: var(--danger-custom);
-            color: white;
-        }
-
-        .counter-card {
-            border-radius: 12px;
-            padding: 20px;
-            color: white;
-            margin-bottom: 25px;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .counter-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .counter-total {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .counter-vigente {
-            background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
-        }
-
-        .counter-por-vencer {
-            background: linear-gradient(135deg, #FF9800 0%, #FFC107 100%);
-            color: #000;
-        }
-
-        .counter-vencido {
-            background: linear-gradient(135deg, #F44336 0%, #E91E63 100%);
-        }
-
-        .counter-card h3 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
-
-        .card-header-custom {
-            background: linear-gradient(135deg, var(--primary-custom) 0%, #0b5ed7 100%);
-            color: white;
-            border-bottom: none;
-        }
-
-        .upload-area {
-            border: 2px dashed #dee2e6;
-            border-radius: 10px;
-            padding: 40px;
-            text-align: center;
-            background-color: #f8f9fa;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .upload-area:hover {
-            border-color: var(--primary-custom);
-            background-color: #e9f7fe;
-        }
-
-        .file-preview {
-            max-width: 100px;
-            max-height: 100px;
-            object-fit: cover;
-            border-radius: 5px;
-            margin: 10px 0;
-        }
-
-        .persona-info-box {
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-            padding: 10px;
-            margin-top: 10px;
-        }
-
-        .alert-urgente {
-            border-left: 5px solid var(--danger-custom);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.8;
-            }
-
-            100% {
-                opacity: 1;
-            }
-        }
-
-        .status-indicator {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 5px;
-        }
-
-        .status-vigente {
-            background-color: var(--success-custom);
-        }
-
-        .status-por-vencer {
-            background-color: var(--warning-custom);
-        }
-
-        .status-vencido {
-            background-color: var(--danger-custom);
-        }
-
-        .action-buttons .btn {
-            margin: 2px;
-            min-width: 40px;
-        }
-    </style>
+    <link rel="stylesheet" href="../public/css/Index.css">
 </head>
 
 <body>
-
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary-custom shadow-sm">
+    <!-- Navbar simple adaptado a Personas -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="/">
-                <i class="bi bi-people-fill me-2"></i>Gestión de Personas
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-users me-2"></i>Gestión de Personas
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarPersonas">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarPersonas">
+            <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="/personas">Personas</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="/documentos-personas">Documentos</a>
+                        <a class="nav-link active" href="/documentos-persona">Documentos</a>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <main class="container mt-4">
+    <div class="container mt-4">
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h1 class="text-primary-custom mb-2">
-                    <i class="bi bi-file-earmark-text me-2"></i>Gestión de Documentos - Personas
-                </h1>
-                <p class="text-muted">
-                    Control y seguimiento de documentos personales
-                </p>
-            </div>
-            <div>
-                <button class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#modalNuevoDocumento">
-                    <i class="bi bi-plus-circle me-1"></i>Nuevo Documento
-                </button>
-            </div>
+            <h2><i class="fas fa-file-alt me-2"></i>Gestión Documental - Personas</h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevoDocumento">
+                <i class="fas fa-plus me-2"></i>Nuevo Documento
+            </button>
         </div>
 
         <!-- Mensajes Flash -->
-        <% if (typeof success_msg !=='undefined' && success_msg && success_msg.length> 0) { %>
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="bi bi-check-circle me-2"></i>
+        <% if (typeof success_msg !=='undefined' && success_msg) { %>
+            <div class="alert alert-success alert-dismissible fade show">
+                <i class="fas fa-check-circle me-2"></i>
                 <%= success_msg %>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
             <% } %>
 
-                <% if (typeof error_msg !=='undefined' && error_msg && error_msg.length> 0) { %>
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="bi bi-exclamation-triangle me-2"></i>
+                <% if (typeof error_msg !=='undefined' && error_msg) { %>
+                    <div class="alert alert-danger alert-dismissible fade show">
+                        <i class="fas fa-exclamation-circle me-2"></i>
                         <%= error_msg %>
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                     <% } %>
 
-                        <!-- Contadores -->
-                        <div class="row mb-5">
-                            <div class="col-md-3 col-sm-6 mb-3">
-                                <div class="counter-card counter-total">
-                                    <i class="bi bi-files" style="font-size: 2.5rem;"></i>
-                                    <h3>
-                                        <%= typeof totalDocumentos !=='undefined' ? totalDocumentos : 0 %>
-                                    </h3>
-                                    <p>TOTAL DOCUMENTOS</p>
+                        <!-- Tarjetas de resumen -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="card text-white bg-primary">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Total</h5>
+                                        <h2>
+                                            <%= typeof totalDocumentos !=='undefined' ? totalDocumentos : 0 %>
+                                        </h2>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-3 col-sm-6 mb-3">
-                                <div class="counter-card counter-vigente">
-                                    <i class="bi bi-check-circle" style="font-size: 2.5rem;"></i>
-                                    <h3>
-                                        <%= typeof documentosVigentes !=='undefined' ? documentosVigentes : 0 %>
-                                    </h3>
-                                    <p>VIGENTES</p>
+                            <div class="col-md-3">
+                                <div class="card text-white bg-success">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Vigentes</h5>
+                                        <h2>
+                                            <%= typeof documentosVigentes !=='undefined' ? documentosVigentes : 0 %>
+                                        </h2>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-3 col-sm-6 mb-3">
-                                <div class="counter-card counter-por-vencer">
-                                    <i class="bi bi-exclamation-triangle" style="font-size: 2.5rem;"></i>
-                                    <h3>
-                                        <%= typeof documentosPorVencer !=='undefined' ? documentosPorVencer : 0 %>
-                                    </h3>
-                                    <p>POR VENCER</p>
+                            <div class="col-md-3">
+                                <div class="card text-white bg-warning">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Por Vencer</h5>
+                                        <h2>
+                                            <%= typeof documentosPorVencer !=='undefined' ? documentosPorVencer : 0 %>
+                                        </h2>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-3 col-sm-6 mb-3">
-                                <div class="counter-card counter-vencido">
-                                    <i class="bi bi-x-circle" style="font-size: 2.5rem;"></i>
-                                    <h3>
-                                        <%= typeof documentosVencidos !=='undefined' ? documentosVencidos : 0 %>
-                                    </h3>
-                                    <p>VENCIDOS</p>
+                            <div class="col-md-3">
+                                <div class="card text-white bg-danger">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Vencidos</h5>
+                                        <h2>
+                                            <%= typeof documentosVencidos !=='undefined' ? documentosVencidos : 0 %>
+                                        </h2>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Documentos Próximos a Vencer -->
-                        <% if (typeof documentosProximos !=='undefined' && documentosProximos &&
-                            documentosProximos.length> 0) { %>
-                            <div class="card shadow-sm mb-5">
-                                <div class="card-header card-header-custom">
-                                    <h5 class="mb-0">
-                                        <i class="bi bi-exclamation-triangle me-2"></i>
-                                        Documentos Próximos a Vencer (Próximos 30 días)
-                                    </h5>
-                                </div>
-                                <div class="card-body">
+                        <!-- Tabla de documentos -->
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="fas fa-list me-2"></i>Documentos Registrados</h5>
+                            </div>
+                            <div class="card-body">
+                                <!-- LÍNEA 129 CORREGIDA - Verificación segura -->
+                                <% if (typeof documentos !=='undefined' && documentos && documentos.length> 0) { %>
                                     <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <thead class="table-light">
+                                        <table id="tablaDocumentos" class="table table-striped table-hover">
+                                            <thead>
                                                 <tr>
-                                                    <th>Tipo</th>
+                                                    <th>ID</th>
                                                     <th>Persona</th>
-                                                    <th>Identificación</th>
+                                                    <th>RUN</th>
+                                                    <th>Tipo</th>
                                                     <th>Número</th>
                                                     <th>Vencimiento</th>
                                                     <th>Estado</th>
@@ -304,627 +129,247 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <% documentosProximos.forEach(function(doc) { %>
-                                                    <% const vencimiento=new Date(doc.fecha_vencimiento); const hoy=new
-                                                        Date(); const diffDays=Math.ceil((vencimiento - hoy) / (1000 *
-                                                        60 * 60 * 24)); let badgeClass=diffDays <=7 ? 'bg-danger'
-                                                        : 'bg-warning text-dark' ; %>
-                                                        <tr class="<%= diffDays <= 7 ? 'table-warning' : '' %>">
-                                                            <td>
-                                                                <span class="badge bg-info">
-                                                                    <%= doc.tipo_documento_nombre || 'Sin tipo' %>
-                                                                </span>
-                                                            </td>
-                                                            <td class="fw-bold">
-                                                                <%= doc.nombres %>
-                                                                    <%= doc.apellidos %>
-                                                            </td>
-                                                            <td>
-                                                                <%= doc.identificacion %>
-                                                            </td>
-                                                            <td><code><%= doc.numero_documento || 'N/A' %></code></td>
-                                                            <td>
-                                                                <%= vencimiento.toLocaleDateString() %>
-                                                                    <br>
-                                                                    <small class="badge <%= badgeClass %>">
-                                                                        <%= diffDays %> días
-                                                                    </small>
-                                                            </td>
-                                                            <td>
-                                                                <span class="badge <%= doc.estado === 'vigente' ? 'badge-vigente' : 
-                                            doc.estado === 'por_vencer' ? 'badge-por-vencer' : 
-                                            'badge-vencido' %>">
-                                                                    <span
-                                                                        class="status-indicator status-<%= doc.estado %>"></span>
-                                                                    <%= doc.estado ? doc.estado.replace('_', ' ' ) : ''
-                                                                        %>
-                                                                </span>
-                                                            </td>
-                                                            <td class="action-buttons">
-                                                                <button class="btn btn-sm btn-outline-primary"
-                                                                    onclick="verDetalleDocumento('<%= doc.id_documento %>')"
-                                                                    title="Ver detalle">
-                                                                    <i class="bi bi-eye"></i>
-                                                                </button>
-                                                                <% if (doc.ruta_archivo) { %>
-                                                                    <a href="/documentos-personas/descargar/<%= doc.id_documento %>"
-                                                                        class="btn btn-sm btn-outline-success"
-                                                                        title="Descargar">
-                                                                        <i class="bi bi-download"></i>
-                                                                    </a>
-                                                                    <% } %>
-                                                            </td>
-                                                        </tr>
-                                                        <% }); %>
+                                                <% for(var i=0; i < documentos.length; i++) { var doc=documentos[i]; var
+                                                    fechaVenc=new Date(doc.fecha_vencimiento); var hoy=new Date(); var
+                                                    diffTime=fechaVenc - hoy; var diffDays=Math.ceil(diffTime / (1000 *
+                                                    60 * 60 * 24)); var estadoClass='success' ; var
+                                                    estadoTexto='Vigente' ; if (diffDays <=0) { estadoClass='danger' ;
+                                                    estadoTexto='Vencido' ; } else if (diffDays <=7) {
+                                                    estadoClass='danger' ; estadoTexto='Urgente' ; } else if (diffDays
+                                                    <=30) { estadoClass='warning' ; estadoTexto='Por vencer' ; } %>
+                                                    <tr>
+                                                        <td>
+                                                            <%= doc.id_documento %>
+                                                        </td>
+                                                        <td>
+                                                            <strong>
+                                                                <%= doc.persona_nombre_completo || 'N/A' %>
+                                                            </strong>
+                                                        </td>
+                                                        <td>
+                                                            <%= doc.persona_dni || 'N/A' %>
+                                                        </td>
+                                                        <td>
+                                                            <%= doc.tipo_documento_nombre || 'Sin tipo' %>
+                                                        </td>
+                                                        <td>
+                                                            <%= doc.numero_documento || 'N/A' %>
+                                                        </td>
+                                                        <td>
+                                                            <%= fechaVenc.toLocaleDateString() %><br>
+                                                                <small>
+                                                                    <%= diffDays> 0 ? diffDays + ' días' : 'Vencido' %>
+                                                                </small>
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge bg-<%= estadoClass %>">
+                                                                <%= estadoTexto %>
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <button class="btn btn-sm btn-info ver-documento"
+                                                                onclick="verDocumento('<%= doc.id_documento %>')">
+                                                                <i class="fas fa-eye"></i>
+                                                            </button>
+
+                                                            <% if (doc.ruta_archivo) { %>
+                                                                <a href="<%= doc.ruta_archivo %>"
+                                                                    class="btn btn-sm btn-success" target="_blank">
+                                                                    <i class="fas fa-file-pdf"></i>
+                                                                </a>
+                                                                <% } %>
+
+                                                                    <button class="btn btn-sm btn-danger"
+                                                                        onclick="eliminarDocumento('<%= doc.id_documento %>')">
+                                                                        <i class="fas fa-trash"></i>
+                                                                    </button>
+                                                        </td>
+                                                    </tr>
+                                                    <% } %>
                                             </tbody>
                                         </table>
                                     </div>
-                                </div>
-                            </div>
-                            <% } %>
-
-                                <!-- Documentos Recientes -->
-                                <div class="row">
-                                    <div class="col-lg-12">
-                                        <div class="card shadow-sm">
-                                            <div class="card-header bg-light">
-                                                <h5 class="mb-0">
-                                                    <i class="bi bi-clock-history me-2"></i>Documentos Recientes
-                                                </h5>
-                                            </div>
-                                            <div class="card-body">
-                                                <% if (typeof documentos !=='undefined' && documentos &&
-                                                    documentos.length> 0) { %>
-                                                    <div class="table-responsive">
-                                                        <table id="tablaDocumentos" class="table table-hover">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th>Tipo</th>
-                                                                    <th>Persona</th>
-                                                                    <th>Identificación</th>
-                                                                    <th>Número</th>
-                                                                    <th>Vencimiento</th>
-                                                                    <th>Estado</th>
-                                                                    <th>Acciones</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                <% documentos.forEach(function(doc) { %>
-                                                                    <% const fechaVenc=new Date(doc.fecha_vencimiento);
-                                                                        const hoy=new Date(); const
-                                                                        diasRestantes=Math.ceil((fechaVenc - hoy) /
-                                                                        (1000 * 60 * 60 * 24)); %>
-                                                                        <tr>
-                                                                            <td>
-                                                                                <span class="badge bg-info">
-                                                                                    <%= doc.tipo_documento_nombre %>
-                                                                                </span>
-                                                                            </td>
-                                                                            <td class="fw-bold">
-                                                                                <%= doc.nombres %>
-                                                                                    <%= doc.apellidos %>
-                                                                            </td>
-                                                                            <td>
-                                                                                <%= doc.identificacion %>
-                                                                            </td>
-                                                                            <td>
-                                                                                <%= doc.numero_documento || 'N/A' %>
-                                                                            </td>
-                                                                            <td>
-                                                                                <%= fechaVenc.toLocaleDateString() %>
-                                                                                    <br>
-                                                                                    <small class="text-muted">
-                                                                                        <%= diasRestantes> 0 ?
-                                                                                            `${diasRestantes} días` :
-                                                                                            'Vencido' %>
-                                                                                    </small>
-                                                                            </td>
-                                                                            <td>
-                                                                                <span class="badge <%= doc.estado === 'vigente' ? 'badge-vigente' : 
-                                                    doc.estado === 'por_vencer' ? 'badge-por-vencer' : 
-                                                    'badge-vencido' %>">
-                                                                                    <%= doc.estado ?
-                                                                                        doc.estado.replace('_', ' ' )
-                                                                                        : '' %>
-                                                                                </span>
-                                                                            </td>
-                                                                            <td>
-                                                                                <div class="btn-group btn-group-sm">
-                                                                                    <button
-                                                                                        class="btn btn-outline-primary"
-                                                                                        onclick="verDetalleDocumento('<%= doc.id_documento %>')">
-                                                                                        <i class="bi bi-eye"></i>
-                                                                                    </button>
-                                                                                    <% if (doc.ruta_archivo) { %>
-                                                                                        <a href="/documentos-personas/descargar/<%= doc.id_documento %>"
-                                                                                            class="btn btn-outline-success">
-                                                                                            <i
-                                                                                                class="bi bi-download"></i>
-                                                                                        </a>
-                                                                                        <% } %>
-                                                                                </div>
-                                                                            </td>
-                                                                        </tr>
-                                                                        <% }); %>
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                    <% } else { %>
-                                                        <div class="text-center py-5">
-                                                            <i class="bi bi-file-earmark-text text-muted"
-                                                                style="font-size: 4rem;"></i>
-                                                            <h4 class="mt-3 text-muted">No hay documentos registrados
-                                                            </h4>
-                                                            <p class="text-muted">Comienza agregando el primer documento
-                                                            </p>
-                                                            <button class="btn btn-primary-custom"
-                                                                data-bs-toggle="modal"
-                                                                data-bs-target="#modalNuevoDocumento">
-                                                                <i class="bi bi-plus-circle me-1"></i>Agregar Documento
-                                                            </button>
-                                                        </div>
-                                                        <% } %>
-                                            </div>
+                                    <% } else { %>
+                                        <div class="text-center py-5">
+                                            <i class="fas fa-file-alt fa-4x text-muted mb-3"></i>
+                                            <h4 class="text-muted">No hay documentos registrados</h4>
+                                            <p>Comienza agregando tu primer documento de persona</p>
+                                            <button class="btn btn-primary" data-bs-toggle="modal"
+                                                data-bs-target="#modalNuevoDocumento">
+                                                <i class="fas fa-plus me-2"></i>Agregar Documento
+                                            </button>
                                         </div>
-                                    </div>
-                                </div>
-    </main>
+                                        <% } %>
+                            </div>
+                        </div>
+    </div>
 
     <!-- Modal Nuevo Documento -->
-    <!-- Modal Nuevo Documento de Persona -->
-    <div class="modal fade" id="modalNuevoDocumento" tabindex="-1" aria-labelledby="modalNuevoDocumentoLabel"
-        aria-hidden="true">
+    <div class="modal fade" id="modalNuevoDocumento" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header bg-primary-custom text-white">
-                    <h5 class="modal-title" id="modalNuevoDocumentoLabel">
-                        <i class="bi bi-plus-circle me-2"></i>Nuevo Documento de Persona
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-                </div>
-                <form id="formNuevoDocumento" action="/documentos-personas/registrar" method="POST"
-                    enctype="multipart/form-data">
-                    <div class="modal-body">
-                        <!-- Información de personas disponibles -->
-                        <div class="alert alert-info mb-3">
-                            <i class="bi bi-info-circle me-2"></i>
-                            <strong>Información:</strong>
-                            Puedes seleccionar una persona de la lista o buscar por RUT/identificación si conoces el
-                            número.
-                        </div>
-                        <!-- SELECCIÓN DE PERSONA - OPCIÓN 1: Select normal -->
-                        <div class="row mb-4">
-                            <div class="col-md-12 mb-3">
-                                <label class="form-label fw-bold">Selección de la Persona</label>
-
-                                <div class="d-flex mb-3">
-                                    <div class="form-check me-4">
-                                        <input class="form-check-input" type="radio" name="seleccion_persona"
-                                            id="seleccionSelect" value="select" checked>
-                                        <label class="form-check-label" for="seleccionSelect">
-                                            Seleccionar de la lista
-                                        </label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="seleccion_persona"
-                                            id="seleccionManual" value="manual">
-                                        <label class="form-check-label" for="seleccionManual">
-                                            Buscar por RUT/Identificación
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- OPCIÓN 1: Select normal -->
-                        <div class="row" id="opcionSelect">
-                            <div class="col-md-12 mb-3">
-                                <label for="id_persona_select" class="form-label">Seleccionar Persona <span
-                                        class="text-danger">*</span></label>
-                                <select class="form-select" id="id_persona_select" name="id_persona_select">
-                                    <option value="">Seleccionar persona...</option>
-                                    <% if (typeof personas !=='undefined' && personas && personas.length> 0) { %>
-                                        <% personas.forEach(function(persona) { %>
-                                            <option value="<%= persona.id_persona %>"
-                                                data-nombre="<%= persona.nombres %> <%= persona.apellidos %>"
-                                                data-identificacion="<%= persona.identificacion %>"
-                                                data-correo="<%= persona.correo || '' %>"
-                                                data-telefono="<%= persona.telefono || '' %>">
-                                                ID: <%= persona.id_persona %> - <%= persona.identificacion %> - <%=
-                                                            persona.nombres %>
-                                                            <%= persona.apellidos %>
-                                                                <% if (persona.correo) { %> (<%= persona.correo %>)<% }
-                                                                            %>
-                                            </option>
-                                            <% }); %>
-                                                <% } else { %>
-                                                    <option value="" disabled>No hay personas disponibles en la lista
-                                                    </option>
-                                                    <% } %>
-                                </select>
-                                <div class="form-text">Selecciona una persona de la lista desplegable</div>
-                            </div>
-                        </div>
-
-                        <!-- OPCIÓN 2: Buscar por RUT/Identificación -->
-                        <div class="row" id="opcionManual" style="display: none;">
-                            <div class="col-md-12 mb-3">
-                                <label for="identificacion_busqueda" class="form-label">Buscar por RUT/Identificación
-                                    <span class="text-danger">*</span></label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-person-vcard"></i></span>
-                                    <input type="text" class="form-control" id="identificacion_busqueda"
-                                        name="identificacion_busqueda"
-                                        placeholder="Ej: 12345678-9, 12.345.678-9, A12345678" maxlength="20"
-                                        style="text-transform:uppercase;">
-                                    <button type="button" class="btn btn-outline-secondary"
-                                        onclick="buscarPersonaPorIdentificacion()" id="btnBuscarPersona">
-                                        <i class="bi bi-search"></i> Buscar
-                                    </button>
-                                </div>
-                                <div class="form-text">Ingresa el RUT o identificación de la persona (ej: 12345678-9,
-                                    12.345.678-9)</div>
-
-                                <!-- Información de la persona encontrada -->
-                                <div id="personaInfo" class="persona-info-box mt-3" style="display: none;">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <h6 class="mb-0">
-                                            <i class="bi bi-check-circle text-success me-2"></i>Persona encontrada
-                                        </h6>
-                                        <button type="button" class="btn btn-sm btn-outline-danger"
-                                            onclick="limpiarBusqueda()">
-                                            <i class="bi bi-x"></i>
-                                        </button>
-                                    </div>
-                                    <div class="row small">
-                                        <div class="col-6">
-                                            <strong>ID:</strong> <span id="infoId">-</span><br>
-                                            <strong>Nombre:</strong> <span id="infoNombre">-</span><br>
-                                            <strong>Identificación:</strong> <span id="infoIdentificacion">-</span>
-                                        </div>
-                                        <div class="col-6">
-                                            <strong>Correo:</strong> <span id="infoCorreo">-</span><br>
-                                            <strong>Teléfono:</strong> <span id="infoTelefono">-</span><br>
-                                            <strong>Estado:</strong> <span id="infoEstado">-</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- Mensaje si no se encuentra la persona -->
-                                <div id="personaNoEncontrada" class="alert alert-warning mt-3" style="display: none;">
-                                    <i class="bi bi-exclamation-triangle me-2"></i>
-                                    No se encontró una persona con esa identificación. Verifica el RUT o
-                                    <a href="/personas/agregar" target="_blank" class="alert-link">registra una nueva
-                                        persona</a>
-                                    en el sistema.
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Campo oculto que se enviará al servidor -->
-                        <input type="hidden" id="id_persona_final" name="id_persona" value="">
-                        <!-- TIPO DE DOCUMENTO -->
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="id_tipo_documento" class="form-label">Tipo de Documento <span
-                                        class="text-danger">*</span></label>
-                                <select class="form-select" id="id_tipo_documento" name="id_tipo_documento" required>
-                                    <option value="">Seleccionar tipo...</option>
-                                    <% if (typeof tiposDocumentos !=='undefined' && tiposDocumentos &&
-                                        tiposDocumentos.length> 0) { %>
-                                        <% tiposDocumentos.forEach(function(tipo) { %>
-                                            <option value="<%= tipo.id_tipo_documento %>"
-                                                data-dias-alerta="<%= tipo.dias_alerta %>">
-                                                <%= tipo.nombre_documento %>
-                                                    <% if (tipo.descripcion) { %> - <%= tipo.descripcion %>
-                                                            <% } %>
-                                                                <% if (tipo.obligatorio) { %> (Obligatorio)<% } %>
-                                            </option>
-                                            <% }); %>
-                                                <% } else { %>
-                                                    <!-- Tipos por defecto -->
-                                                    <option value="1">Cédula de Identidad</option>
-                                                    <option value="2">Pasaporte</option>
-                                                    <option value="3">Licencia de Conducir</option>
-                                                    <option value="4">Certificado de Antecedentes</option>
-                                                    <option value="5">Título Profesional</option>
-                                                    <option value="6">Certificado de Matrimonio</option>
-                                                    <option value="7">Otros</option>
-                                                    <% } %>
-                                </select>
-                                <div class="form-text">Tipo de documento según catálogo</div>
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="numero_documento" class="form-label">Número de Documento <span
-                                        class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="numero_documento" name="numero_documento"
-                                    placeholder="Ej: CED-001-2024" required>
-                                <div class="form-text">Número único del documento</div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="fecha_emision" class="form-label">Fecha de Emisión</label>
-                                <input type="date" class="form-control" id="fecha_emision" name="fecha_emision">
-                                <div class="form-text">Fecha en que se emitió el documento</div>
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="fecha_vencimiento" class="form-label">Fecha de Vencimiento <span
-                                        class="text-danger">*</span></label>
-                                <input type="date" class="form-control" id="fecha_vencimiento" name="fecha_vencimiento"
-                                    required>
-                                <div class="form-text">Fecha límite de validez del documento</div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="dias_alerta" class="form-label">Días para Alerta</label>
-                                <input type="number" class="form-control" id="dias_alerta" name="dias_alerta" value="30"
-                                    min="1" max="365">
-                                <div class="form-text">Días antes del vencimiento para enviar alerta</div>
-                            </div>
-                        </div>
-
-                        <!-- Área de subida de archivo -->
-                        <div class="mb-3">
-                            <label class="form-label">Archivo Digital (Opcional)</label>
-                            <div class="upload-area" id="uploadArea"
-                                onclick="document.getElementById('archivo_documento').click()">
-                                <i class="bi bi-cloud-upload" style="font-size: 3rem; color: #6c757d;"></i>
-                                <p class="mt-2">Haz clic o arrastra un archivo aquí</p>
-                                <small class="text-muted">Formatos aceptados: PDF, JPG, PNG (Máx. 10MB)</small>
-                                <div id="filePreview" class="mt-3"></div>
-                            </div>
-                            <input type="file" class="form-control d-none" id="archivo_documento"
-                                name="archivo_documento" accept=".pdf,.jpg,.jpeg,.png" onchange="previewFile(this)">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="observaciones" class="form-label">Observaciones</label>
-                            <textarea class="form-control" id="observaciones" name="observaciones" rows="3"
-                                placeholder="Notas adicionales sobre el documento..."></textarea>
-                        </div>
-
-                        <div class="form-check mb-3">
-                            <input class="form-check-input" type="checkbox" id="enviar_alerta" name="enviar_alerta"
-                                checked>
-                            <label class="form-check-label" for="enviar_alerta">
-                                Enviar alerta por correo cuando el documento esté próximo a vencer
-                            </label>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary-custom">Guardar Documento</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    <!-- Modal Nuevo Tipo de Documento -->
-    <div class="modal fade" id="modalNuevoTipo" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-info text-white">
-                    <h5 class="modal-title">
-                        <i class="bi bi-plus-square me-2"></i>Nuevo Tipo de Documento
-                    </h5>
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-plus-circle me-2"></i>Nuevo Documento de Persona</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <form action="/documentos-personas/tipos/nuevo" method="POST">
+                <form action="/documentos-persona/registrar" method="POST" enctype="multipart/form-data">
                     <div class="modal-body">
+                        <!-- SELECCIÓN DE PERSONA -->
                         <div class="mb-3">
-                            <label for="nombreTipo" class="form-label">Nombre del Tipo *</label>
-                            <input type="text" class="form-control" id="nombreTipo" name="nombre"
-                                placeholder="Ej: Cédula, Pasaporte, Certificado" required>
+                            <label class="form-label fw-bold">Persona <span class="text-danger">*</span></label>
+                            <select class="form-select" name="id_persona" required>
+                                <option value="">Seleccione una persona...</option>
+                                <% if (typeof personas !=='undefined' && personas && personas.length> 0) { %>
+                                    <% for(var j=0; j < personas.length; j++) { var p=personas[j]; %>
+                                        <option value="<%= p.id_persona %>">
+                                            <%= p.apellido_paterno %>, <%= p.nombres %> - RUN: <%= p.run %>-<%= p.dv %>
+                                        </option>
+                                        <% } %>
+                                            <% } %>
+                            </select>
                         </div>
+
+                        <!-- TIPO DE DOCUMENTO -->
                         <div class="mb-3">
-                            <label for="descripcionTipo" class="form-label">Descripción</label>
-                            <textarea class="form-control" id="descripcionTipo" name="descripcion" rows="2"
-                                placeholder="Descripción del tipo de documento..."></textarea>
+                            <label class="form-label fw-bold">Tipo de Documento <span
+                                    class="text-danger">*</span></label>
+                            <select class="form-select" name="id_tipo_documento" required>
+                                <option value="">Seleccione un tipo...</option>
+                                <% if (typeof tiposDocumentos !=='undefined' && tiposDocumentos &&
+                                    tiposDocumentos.length> 0) { %>
+                                    <% for(var k=0; k < tiposDocumentos.length; k++) { var t=tiposDocumentos[k]; %>
+                                        <option value="<%= t.id_tipo_documento %>">
+                                            <%= t.nombre_documento %>
+                                                <% if (t.descripcion) { %> - <%= t.descripcion %>
+                                                        <% } %>
+                                        </option>
+                                        <% } %>
+                                            <% } %>
+                            </select>
                         </div>
+
+                        <!-- NÚMERO DE DOCUMENTO -->
                         <div class="mb-3">
-                            <label for="diasAlertaTipo" class="form-label">Días para Alerta</label>
-                            <input type="number" class="form-control" id="diasAlertaTipo" name="dias_alerta" value="30"
-                                min="1" max="365">
+                            <label class="form-label fw-bold">Número de Documento <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="numero_documento"
+                                placeholder="Ej: 12345678-9, ABC-123, etc." required>
                         </div>
-                        <div class="form-check mb-3">
-                            <input class="form-check-input" type="checkbox" id="obligatorio" name="obligatorio">
-                            <label class="form-check-label" for="obligatorio">
-                                Documento obligatorio
+
+                        <!-- FECHAS -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Fecha de Emisión</label>
+                                <input type="date" class="form-control" name="fecha_emision">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Fecha de Vencimiento <span
+                                        class="text-danger">*</span></label>
+                                <input type="date" class="form-control" name="fecha_vencimiento" required>
+                            </div>
+                        </div>
+
+                        <!-- ARCHIVO -->
+                        <div class="mb-3">
+                            <label class="form-label">Archivo (opcional)</label>
+                            <input type="file" class="form-control" name="archivo_documento"
+                                accept=".pdf,.jpg,.jpeg,.png">
+                            <div class="form-text">PDF, JPG, PNG (Máx. 10MB)</div>
+                        </div>
+
+                        <!-- OBSERVACIONES -->
+                        <div class="mb-3">
+                            <label class="form-label">Observaciones</label>
+                            <textarea class="form-control" name="observaciones" rows="2"></textarea>
+                        </div>
+
+                        <!-- CHECKBOX ALERTA -->
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="enviar_alerta" id="enviarAlerta"
+                                checked>
+                            <label class="form-check-label" for="enviarAlerta">
+                                Enviar alerta por correo
                             </label>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-info text-white">Guardar Tipo</button>
+                        <button type="submit" class="btn btn-primary">Guardar</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Botón oculto para abrir modal desde navbar -->
-    <button type="button" id="btnAbrirModalDocumento" data-bs-toggle="modal" data-bs-target="#modalNuevoDocumento"
-        style="display: none;"></button>
-
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         $(document).ready(function () {
-            // Inicializar DataTable
             if ($('#tablaDocumentos').length) {
                 $('#tablaDocumentos').DataTable({
                     language: {
                         url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
                     },
-                    pageLength: 10,
-                    responsive: true
+                    order: [[5, 'asc']]
                 });
-            }
-
-            // Cambio entre selección por lista o búsqueda
-            $('input[name="seleccion_persona"]').change(function () {
-                const seleccion = $(this).val();
-                if (seleccion === 'select') {
-                    $('#opcionSelect').show();
-                    $('#opcionManual').hide();
-                    limpiarBusqueda();
-                    $('#id_persona_final').val($('#id_persona_select').val());
-                } else {
-                    $('#opcionSelect').hide();
-                    $('#opcionManual').show();
-                    $('#id_persona_final').val('');
-                }
-            });
-
-            // Selección de persona de la lista
-            $('#id_persona_select').change(function () {
-                $('#id_persona_final').val($(this).val());
-            });
-
-            // Validación del formulario
-            $('#formNuevoDocumento').on('submit', function (e) {
-                e.preventDefault();
-
-                const seleccion = $('input[name="seleccion_persona"]:checked').val();
-                let personaId = '';
-
-                if (seleccion === 'select') {
-                    personaId = $('#id_persona_select').val();
-                } else {
-                    personaId = $('#id_persona_final').val();
-                }
-
-                if (!personaId) {
-                    alert('Por favor selecciona o busca una persona');
-                    return false;
-                }
-
-                const tipoDoc = $('#id_tipo_documento').val();
-                const numeroDoc = $('#numero_documento').val().trim();
-                const fechaVenc = $('#fecha_vencimiento').val();
-
-                if (!tipoDoc || !numeroDoc || !fechaVenc) {
-                    alert('Por favor completa todos los campos obligatorios (*)');
-                    return false;
-                }
-
-                this.submit();
-            });
-
-            // Auto completar días de alerta según el tipo seleccionado
-            $('#id_tipo_documento').change(function () {
-                const selected = $(this).find('option:selected');
-                const diasAlerta = selected.data('dias-alerta');
-                if (diasAlerta) {
-                    $('#dias_alerta').val(diasAlerta);
-                }
-            });
-
-            // Convertir a mayúsculas
-            $('#identificacion_busqueda').on('input', function () {
-                $(this).val($(this).val().toUpperCase());
-            });
-
-            // Detectar si venimos con parámetro para abrir modal
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('nuevo') === '1') {
-                setTimeout(function () {
-                    $('#btnAbrirModalDocumento').click();
-                }, 300);
             }
         });
 
-        // Función para buscar persona por identificación
-        function buscarPersonaPorIdentificacion() {
-            const identificacion = $('#identificacion_busqueda').val().trim();
+        function verDocumento(id) {
+            window.location.href = '/documentos-persona/detalle/' + id;
+        }
 
-            if (!identificacion) {
-                alert('Por favor ingresa una identificación');
-                return;
-            }
-
-            const btnBuscar = $('#btnBuscarPersona');
-            btnBuscar.html('<span class="spinner-border spinner-border-sm"></span> Buscando...');
-            btnBuscar.prop('disabled', true);
-
-            $.ajax({
-                url: '/documentos-personas/api/persona/identificacion/' + encodeURIComponent(identificacion),
-                method: 'GET',
-                dataType: 'json',
-                success: function (response) {
-                    btnBuscar.html('<i class="bi bi-search"></i> Buscar');
-                    btnBuscar.prop('disabled', false);
-
-                    if (response.success && response.persona) {
-                        const p = response.persona;
-
-                        $('#infoId').text(p.id_persona);
-                        $('#infoNombre').text(p.nombres + ' ' + p.apellidos);
-                        $('#infoIdentificacion').text(p.identificacion);
-                        $('#infoCorreo').text(p.correo || 'No registrado');
-                        $('#infoTelefono').text(p.telefono || 'No registrado');
-                        $('#infoEstado').html(p.activo ?
-                            '<span class="badge bg-success">Activo</span>' :
-                            '<span class="badge bg-danger">Inactivo</span>');
-
-                        $('#personaInfo').show();
-                        $('#personaNoEncontrada').hide();
-                        $('#id_persona_final').val(p.id_persona);
-                    } else {
-                        $('#personaInfo').hide();
-                        $('#personaNoEncontrada').show();
-                        $('#id_persona_final').val('');
-                    }
-                },
-                error: function () {
-                    btnBuscar.html('<i class="bi bi-search"></i> Buscar');
-                    btnBuscar.prop('disabled', false);
-                    $('#personaInfo').hide();
-                    $('#personaNoEncontrada').show();
-                    $('#id_persona_final').val('');
-                    alert('Error al buscar persona');
+        function eliminarDocumento(id) {
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "Esta acción no se puede revertir",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/documentos-persona/eliminar/' + id,
+                        method: 'DELETE',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Eliminado',
+                                    text: response.message,
+                                    timer: 1500
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: response.error || 'Error al eliminar'
+                                });
+                            }
+                        },
+                        error: function () {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'No se pudo eliminar el documento'
+                            });
+                        }
+                    });
                 }
             });
-        }
-        function limpiarBusqueda() {
-            $('#identificacion_busqueda').val('');
-            $('#personaInfo').hide();
-            $('#personaNoEncontrada').hide();
-            $('#id_persona_final').val('');
-        }
-
-        function previewFile(input) {
-            const preview = $('#filePreview');
-            if (input.files && input.files[0]) {
-                const file = input.files[0];
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        preview.html('<img src="' + e.target.result + '" class="file-preview" alt="Preview">');
-                    };
-                    reader.readAsDataURL(file);
-                } else {
-                    preview.html('<div class="alert alert-info p-2">' +
-                        '<i class="bi bi-file-earmark-pdf text-danger me-2"></i>' +
-                        'PDF: ' + file.name +
-                        '</div>');
-                }
-            } else {
-                preview.html('');
-            }
-        }
-
-        function verDetalleDocumento(id) {
-            alert('Ver detalle del documento: ' + id);
-            // Implementar lógica para ver detalle
         }
     </script>
 </body>

@@ -142,7 +142,6 @@ app.post('/grupos/crear', async (req, res) => {
         res.redirect('/grupos/crear');
     }
 });
-
 // --- 4. MANEJO DE ERRORES (SIEMPRE AL FINAL) ---
 app.use((req, res) => {
     res.status(404).render('Home', {
