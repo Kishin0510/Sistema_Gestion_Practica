@@ -8,6 +8,8 @@ const db = require('./db/conexion');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+
+
 // --- Middlewares Base ---
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -71,20 +73,20 @@ app.get('/', async (req, res) => {
 // Ruta para mostrar la página de login/registro
 app.get('/login', async (req, res) => {
     try {
-        
-        res.render('Login', { 
+
+        res.render('Login', {
             title: 'Iniciar Sesión | Registrarse',
             messages: req.flash ? req.flash() : {} // Si usas connect-flash
         });
     } catch (error) {
         console.error('Error al cargar la página de login:', error);
-        res.render('LoginRegister', { 
+        res.render('LoginRegister', {
             title: 'Iniciar Sesión | Registrarse',
             messages: { error: 'Error al cargar la página' }
         });
     }
 });
-// En tu archivo de rutas (ej. server.js o documentos.routes.js)
+
 app.get('/documentos-personas', async (req, res) => {
     // ... tu lógica existente
     res.render('DocumentosPersonas', {
@@ -94,7 +96,7 @@ app.get('/documentos-personas', async (req, res) => {
     });
 });
 
-// GET: Formulario Agregar Grupo
+// GET: Formulario Agregar Grupo para agregar a la bd
 app.get('/grupos/crear', async (req, res) => {
     try {
         const [clientes] = await db.query('SELECT id_cliente, nombre_cliente as nombre FROM clientes WHERE activo = 1');
@@ -112,7 +114,7 @@ app.get('/grupos/crear', async (req, res) => {
     }
 });
 
-// POST: Procesar el guardado de Grupo y Redirigir al Home
+// POST: Procesar el guardado de Grupo y Redirigir al Home de la aplicación una vez creado el grupo en la base de datos
 app.post('/grupos/crear', async (req, res) => {
     let { id_cliente, nombre_grupo, nombre_compania, nombre_contacto, email_contacto, direccion, ciudad, activo } = req.body;
 
@@ -142,7 +144,16 @@ app.post('/grupos/crear', async (req, res) => {
         res.redirect('/grupos/crear');
     }
 });
-// --- 4. MANEJO DE ERRORES (SIEMPRE AL FINAL) ---
+
+try {
+    const documentosPersonaRoutes = require('./routes/documentos_personas.routes');
+    app.use('/documentos-persona', documentosPersonaRoutes);
+    console.log('Rutas de Documentos de Personas cargadas en /documentos-persona');
+} catch (error) {
+    console.error(' Error al cargar rutas de Documentos de Personas:', error.message);
+}
+
+// RUTA MANEJRA ERRORES (SIEMPRE AL FINAL)
 app.use((req, res) => {
     res.status(404).render('Home', {
         title: 'Página no encontrada',
@@ -151,6 +162,14 @@ app.use((req, res) => {
     });
 });
 
+// RUTA MANEJRA ERRORES
+app.use((req, res) => {
+    res.status(404).render('Home', {
+        title: 'Página no encontrada',
+        error_msg: 'La ruta solicitada no existe.',
+        fecha: new Date()
+    });
+});
 
 
 // Iniciar servidor

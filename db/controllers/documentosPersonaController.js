@@ -6,34 +6,38 @@ const path = require('path');
 const logError = (tag, err) => console.error(`Error en ${tag}:`, err.message || err);
 
 const documentoPersonaController = {
-    
 
+    // ============ VISTA PRINCIPAL MEJORADA ============
     mostrarDocumentos: async (req, res) => {
         try {
             const idCliente = req.session?.usuario?.id_cliente || 1;
 
-            // 1. Obtener TODAS las personas activas (igual que en la vista de listado)
+            console.log('Cargando documentos para cliente:', idCliente);
+
+            // 1. Obtener personas activas - CON MÁS INFORMACIÓN
             const [personas] = await db.execute(`
                 SELECT 
-                    id_persona,
-                    run,
-                    dv,
-                    CONCAT(run, '-', dv) as cedula,
-                    nombres,
-                    apellido_paterno,
-                    apellido_materno,
-                    CONCAT(nombres, ' ', apellido_paterno) as nombre_completo,
-                    email,
-                    telefono,
-                    cargo,
-                    activo,
-                    CASE WHEN activo = 1 THEN 'activo' ELSE 'inactivo' END as estado
-                FROM personas 
-                WHERE id_cliente = ? AND activo = 1
-                ORDER BY apellido_paterno ASC, nombres ASC
+                    p.id_persona,
+                    p.run,
+                    p.dv,
+                    CONCAT(p.run, '-', p.dv) as dni,
+                    p.nombres,
+                    p.apellido_paterno,
+                    p.apellido_materno,
+                    CONCAT(p.nombres, ' ', p.apellido_paterno) as nombre_completo,
+                    p.email,
+                    p.telefono,
+                    p.cargo,
+                    p.activo,
+                    c.nombre_cliente,
+                    c.rut_cliente
+                FROM personas p
+                LEFT JOIN clientes c ON p.id_cliente = c.id_cliente
+                WHERE p.id_cliente = ? AND p.activo = 1
+                ORDER BY p.apellido_paterno ASC, p.nombres ASC
             `, [idCliente]);
 
-            console.log(`Personas encontradas: ${personas.length}`); // Debug
+            console.log(`Personas encontradas: ${personas.length}`);
 
             // 2. Obtener tipos de documentos activos
             const [tiposDocumentos] = await db.execute(`
@@ -56,8 +60,8 @@ const documentoPersonaController = {
                     dp.id_persona,
                     dp.id_tipo_documento,
                     dp.numero_documento,
-                    dp.fecha_emision,
-                    dp.fecha_vencimiento,
+                    DATE_FORMAT(dp.fecha_emision, '%Y-%m-%d') as fecha_emision,
+                    DATE_FORMAT(dp.fecha_vencimiento, '%Y-%m-%d') as fecha_vencimiento,
                     dp.nombre_archivo,
                     dp.ruta_archivo,
                     dp.observaciones,
@@ -80,6 +84,8 @@ const documentoPersonaController = {
                 WHERE p.id_cliente = ? AND p.activo = 1
                 ORDER BY dp.fecha_vencimiento ASC, dp.fecha_subida DESC
             `, [idCliente]);
+
+            console.log(`Documentos encontrados: ${documentos.length}`);
 
             // 4. Calcular estado para cada documento
             const hoy = new Date();
@@ -122,10 +128,10 @@ const documentoPersonaController = {
             const documentosVencidos = documentosConEstado.filter(d => d.dias_restantes <= 0).length;
 
             // 7. Renderizar vista con TODOS los datos
-            res.render('documentosPersonas', {
-                title: 'Gestión Documental - Personas',
+            res.render('DocumentosPersonas', {
+                title: 'Gestion Documental - Personas',
                 layout: 'layouts/main',
-                personas: personas, // ¡Aquí están las personas del listado!
+                personas: personas,
                 tiposDocumentos: tiposDocumentos,
                 documentos: documentosConEstado,
                 documentosProximos: documentosProximos,
@@ -142,10 +148,10 @@ const documentoPersonaController = {
             logError('MOSTRAR DOCUMENTOS', err);
             console.error('Error detallado:', err);
 
-            res.render('documentosPersonas', {
-                title: 'Gestión Documental - Personas',
+            res.render('DocumentosPersonas', {
+                title: 'Gestion Documental - Personas',
                 layout: 'layouts/main',
-                personas: [], // Array vacío en caso de error
+                personas: [],
                 tiposDocumentos: [],
                 documentos: [],
                 documentosProximos: [],
@@ -159,7 +165,7 @@ const documentoPersonaController = {
         }
     },
 
-    
+    // ============ AGREGAR DOCUMENTO ============
     agregarDocumento: async (req, res) => {
         let conn;
         try {
@@ -176,19 +182,23 @@ const documentoPersonaController = {
                 enviar_alerta
             } = req.body;
 
-            // Validaciones básicas
+            console.log('Datos recibidos:', req.body);
+            console.log('Archivo:', req.file);
+
+            // Validaciones basicas
             if (!id_persona || !tipo_documento_nombre || !numero_documento || !fecha_vencimiento) {
                 throw new Error('Faltan campos obligatorios');
             }
 
             // Verificar que la persona existe
             const [persona] = await conn.execute(
-                'SELECT id_persona, id_cliente, CONCAT(nombres, " ", apellido_paterno) as nombre_completo FROM personas WHERE id_persona = ? AND activo = 1',
+                `SELECT id_persona, id_cliente, CONCAT(nombres, ' ', apellido_paterno) as nombre_completo 
+                 FROM personas WHERE id_persona = ? AND activo = 1`,
                 [id_persona]
             );
 
             if (persona.length === 0) {
-                throw new Error('La persona seleccionada no existe o está inactiva');
+                throw new Error('La persona seleccionada no existe o esta inactiva');
             }
 
             const id_cliente = persona[0].id_cliente;
@@ -198,7 +208,9 @@ const documentoPersonaController = {
 
             // Buscar si ya existe el tipo de documento por nombre
             const [tipoExistente] = await conn.execute(
-                'SELECT id_tipo_documento FROM tipo_documentos_persona WHERE nombre_documento = ? AND id_cliente = ? AND activo = 1',
+                `SELECT id_tipo_documento 
+                 FROM tipo_documentos_persona 
+                 WHERE nombre_documento = ? AND id_cliente = ? AND activo = 1`,
                 [tipo_documento_nombre.trim(), id_cliente]
             );
 
@@ -213,7 +225,7 @@ const documentoPersonaController = {
                     [
                         id_cliente,
                         tipo_documento_nombre.trim(),
-                        'Creado automáticamente al registrar documento',
+                        'Creado automaticamente al registrar documento',
                         30,
                         false
                     ]
@@ -286,13 +298,13 @@ const documentoPersonaController = {
                     id_persona,
                     result.insertId,
                     'documento_por_vencer',
-                    `Documento ${tipo_documento_nombre} N°${numero_documento} de ${persona[0].nombre_completo} vence en ${diffDays} días`
+                    `Documento ${tipo_documento_nombre} N°${numero_documento} de ${persona[0].nombre_completo} vence en ${diffDays} dias`
                 ]);
             }
 
             await conn.commit();
 
-            res.redirect(`/documentos-persona?success=Documento registrado exitosamente`);
+            res.redirect('/documentos-persona?success=Documento registrado exitosamente');
 
         } catch (err) {
             if (conn) await conn.rollback();
@@ -303,7 +315,7 @@ const documentoPersonaController = {
         }
     },
 
-    
+    // ============ API: OBTENER PERSONAS ============
     apiPersonas: async (req, res) => {
         try {
             const idCliente = req.session?.usuario?.id_cliente || 1;
@@ -337,12 +349,110 @@ const documentoPersonaController = {
             logError('API PERSONAS', err);
             res.status(500).json({
                 success: false,
-                error: 'Error al cargar personas'
+                error: 'Error al cargar personas: ' + err.message
             });
         }
     },
 
-    
+    // ============ API: OBTENER DOCUMENTOS ============
+    apiDocumentos: async (req, res) => {
+        try {
+            const idCliente = req.session?.usuario?.id_cliente || 1;
+
+            const [documentos] = await db.execute(`
+                SELECT 
+                    dp.id_documento,
+                    dp.id_persona,
+                    dp.id_tipo_documento,
+                    dp.numero_documento,
+                    dp.fecha_emision,
+                    dp.fecha_vencimiento,
+                    dp.nombre_archivo,
+                    dp.ruta_archivo,
+                    dp.observaciones,
+                    dp.fecha_subida,
+                    dp.estado,
+                    CONCAT(p.nombres, ' ', p.apellido_paterno) as persona_nombre_completo,
+                    CONCAT(p.run, '-', p.dv) as persona_dni,
+                    p.run as persona_run,
+                    p.dv as persona_dv,
+                    p.cargo,
+                    p.email as persona_email,
+                    p.telefono as persona_telefono,
+                    td.nombre_documento as tipo_documento_nombre,
+                    u.nombre_completo as usuario_subida_nombre,
+                    DATEDIFF(dp.fecha_vencimiento, CURDATE()) as dias_restantes
+                FROM documentos_persona dp
+                INNER JOIN personas p ON dp.id_persona = p.id_persona
+                LEFT JOIN tipo_documentos_persona td ON dp.id_tipo_documento = td.id_tipo_documento
+                LEFT JOIN usuarios u ON dp.usuario_subida = u.id_usuario
+                WHERE p.id_cliente = ? AND p.activo = 1
+                ORDER BY dp.fecha_vencimiento ASC, dp.fecha_subida DESC
+            `, [idCliente]);
+
+            res.json({
+                success: true,
+                documentos: documentos
+            });
+
+        } catch (err) {
+            logError('API DOCUMENTOS', err);
+            res.status(500).json({
+                success: false,
+                error: 'Error al cargar documentos: ' + err.message
+            });
+        }
+    },
+
+    // ============ API: OBTENER ESTADISTICAS ============
+    apiEstadisticas: async (req, res) => {
+        try {
+            const idCliente = req.session?.usuario?.id_cliente || 1;
+
+            const [documentos] = await db.execute(`
+                SELECT 
+                    fecha_vencimiento
+                FROM documentos_persona dp
+                INNER JOIN personas p ON dp.id_persona = p.id_persona
+                WHERE p.id_cliente = ? AND p.activo = 1
+            `, [idCliente]);
+
+            const hoy = new Date();
+            let documentosVigentes = 0;
+            let documentosPorVencer = 0;
+            let documentosVencidos = 0;
+
+            documentos.forEach(doc => {
+                const vencimiento = new Date(doc.fecha_vencimiento);
+                const diffDays = Math.ceil((vencimiento - hoy) / (1000 * 60 * 60 * 24));
+
+                if (diffDays > 30) {
+                    documentosVigentes++;
+                } else if (diffDays > 0) {
+                    documentosPorVencer++;
+                } else {
+                    documentosVencidos++;
+                }
+            });
+
+            res.json({
+                success: true,
+                totalDocumentos: documentos.length,
+                documentosVigentes: documentosVigentes,
+                documentosPorVencer: documentosPorVencer,
+                documentosVencidos: documentosVencidos
+            });
+
+        } catch (err) {
+            logError('API ESTADISTICAS', err);
+            res.status(500).json({
+                success: false,
+                error: 'Error al cargar estadisticas: ' + err.message
+            });
+        }
+    },
+
+    // ============ BUSCAR PERSONA POR RUN ============
     buscarPersonaPorRun: async (req, res) => {
         try {
             const { run } = req.params;
@@ -382,12 +492,12 @@ const documentoPersonaController = {
             logError('BUSCAR PERSONA POR RUN', err);
             res.status(500).json({
                 success: false,
-                error: 'Error al buscar persona'
+                error: 'Error al buscar persona: ' + err.message
             });
         }
     },
 
-   
+    // ============ ELIMINAR DOCUMENTO ============
     eliminarDocumento: async (req, res) => {
         let conn;
         try {
@@ -396,6 +506,7 @@ const documentoPersonaController = {
             conn = await db.pool.promise().getConnection();
             await conn.beginTransaction();
 
+            // Obtener informacion del documento
             const [documento] = await conn.execute(
                 'SELECT ruta_archivo FROM documentos_persona WHERE id_documento = ?',
                 [id]
@@ -405,11 +516,12 @@ const documentoPersonaController = {
                 throw new Error('Documento no encontrado');
             }
 
-            // Eliminar archivo físico
+            // Eliminar archivo fisico si existe
             if (documento[0].ruta_archivo) {
                 const filePath = path.join(__dirname, '../public', documento[0].ruta_archivo);
                 if (fs.existsSync(filePath)) {
                     fs.unlinkSync(filePath);
+                    console.log('Archivo eliminado:', filePath);
                 }
             }
 
@@ -417,7 +529,11 @@ const documentoPersonaController = {
             await conn.execute('DELETE FROM alertas WHERE id_documento = ?', [id]);
 
             // Eliminar documento
-            await conn.execute('DELETE FROM documentos_persona WHERE id_documento = ?', [id]);
+            const [result] = await conn.execute('DELETE FROM documentos_persona WHERE id_documento = ?', [id]);
+
+            if (result.affectedRows === 0) {
+                throw new Error('No se pudo eliminar el documento');
+            }
 
             await conn.commit();
 
@@ -438,7 +554,7 @@ const documentoPersonaController = {
         }
     },
 
-   
+    // ============ VER DETALLE ============
     verDetalle: async (req, res) => {
         try {
             const { id } = req.params;
@@ -482,7 +598,7 @@ const documentoPersonaController = {
         }
     },
 
-    
+    // ============ DESCARGAR ARCHIVO ============
     descargarArchivo: async (req, res) => {
         try {
             const { id } = req.params;
