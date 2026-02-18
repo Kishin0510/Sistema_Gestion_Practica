@@ -41,7 +41,7 @@ const documentoVehiculoController = {
                 ORDER BY nombre_documento ASC
             `);
 
-            // 3. Obtener todos los documentos con información completa
+            
             const [documentos] = await db.execute(`
                 SELECT 
                     dv.id_documento_veh,
@@ -67,7 +67,7 @@ const documentoVehiculoController = {
                 ORDER BY dv.fecha_vencimiento ASC, dv.fecha_subida DESC
             `);
 
-            // Calcular estado de cada documento
+            
             const hoy = new Date();
             const documentosConEstado = documentos.map(doc => {
                 const vencimiento = new Date(doc.fecha_vencimiento);
@@ -158,7 +158,7 @@ const documentoVehiculoController = {
         }
     },
 
-    // AGREGAR NUEVO DOCUMENTO (MODIFICADO PARA MANEJAR FK CORRECTAMENTE)
+    
     agregarDocumento: async (req, res) => {
         let conn;
         try {
@@ -220,7 +220,7 @@ const documentoVehiculoController = {
                 );
                 id_tipo_documento_veh = nuevoTipo.insertId;
 
-                console.log(`✅ Nuevo tipo de documento creado: ${tipo_documento_nombre} (ID: ${id_tipo_documento_veh})`);
+                console.log(` Nuevo tipo de documento creado: ${tipo_documento_nombre} (ID: ${id_tipo_documento_veh})`);
             }
 
             // Procesar archivo si existe

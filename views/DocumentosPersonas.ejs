@@ -10,15 +10,34 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="../public/css/Index.css">
-</head>
+    <link rel="stylesheet" href="/css/Index.css">
+    <style>
+        .estado-badge {
+            font-size: 0.85rem;
+            padding: 0.4rem 0.8rem;
+        }
 
+        .card-counter {
+            transition: transform 0.2s;
+        }
+
+        .card-counter:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .table-actions .btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
 <body>
-    <!-- Navbar simple adaptado a Personas -->
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand" href="/">
-                <i class="fas fa-users me-2"></i>Gestión de Personas
+                <i class="fas fa-file-alt me-2"></i>Gestión Documental
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -26,10 +45,24 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/personas">Personas</a>
+                        <a class="nav-link" href="/personas">
+                            <i class="fas fa-users me-1"></i>Personas
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="/documentos-persona">Documentos</a>
+                        <a class="nav-link active" href="/documentos-persona">
+                            <i class="fas fa-file-alt me-1"></i>Documentos Personas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/vehiculos">
+                            <i class="fas fa-truck me-1"></i>Vehículos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/documentos-vehiculo">
+                            <i class="fas fa-file-pdf me-1"></i>Docs Vehículos
+                        </a>
                     </li>
                 </ul>
             </div>
@@ -37,17 +70,22 @@
     </nav>
 
     <div class="container mt-4">
-        <!-- Header -->
+        <!-- Header con título y botones -->
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><i class="fas fa-file-alt me-2"></i>Gestión Documental - Personas</h2>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevoDocumento">
-                <i class="fas fa-plus me-2"></i>Nuevo Documento
-            </button>
+            <h2><i class="fas fa-file-alt me-2 text-primary"></i>Gestión Documental - Personas</h2>
+            <div>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevoDocumento">
+                    <i class="fas fa-plus me-2"></i>Nuevo Documento
+                </button>
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalNuevoTipo">
+                    <i class="fas fa-tag me-2"></i>Nuevo Tipo
+                </button>
+            </div>
         </div>
 
         <!-- Mensajes Flash -->
         <% if (typeof success_msg !=='undefined' && success_msg) { %>
-            <div class="alert alert-success alert-dismissible fade show">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <i class="fas fa-check-circle me-2"></i>
                 <%= success_msg %>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -55,7 +93,7 @@
             <% } %>
 
                 <% if (typeof error_msg !=='undefined' && error_msg) { %>
-                    <div class="alert alert-danger alert-dismissible fade show">
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <i class="fas fa-exclamation-circle me-2"></i>
                         <%= error_msg %>
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -65,54 +103,76 @@
                         <!-- Tarjetas de resumen -->
                         <div class="row mb-4">
                             <div class="col-md-3">
-                                <div class="card text-white bg-primary">
+                                <div class="card text-white bg-primary card-counter">
                                     <div class="card-body">
-                                        <h5 class="card-title">Total</h5>
-                                        <h2>
-                                            <%= typeof totalDocumentos !=='undefined' ? totalDocumentos : 0 %>
-                                        </h2>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="card-title mb-1">Total Documentos</h6>
+                                                <h2 class="mb-0">
+                                                    <%= typeof totalDocumentos !=='undefined' ? totalDocumentos : 0 %>
+                                                </h2>
+                                            </div>
+                                            <i class="fas fa-file-alt fa-3x opacity-50"></i>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-3">
-                                <div class="card text-white bg-success">
+                                <div class="card text-white bg-success card-counter">
                                     <div class="card-body">
-                                        <h5 class="card-title">Vigentes</h5>
-                                        <h2>
-                                            <%= typeof documentosVigentes !=='undefined' ? documentosVigentes : 0 %>
-                                        </h2>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="card-title mb-1">Vigentes</h6>
+                                                <h2 class="mb-0">
+                                                    <%= typeof documentosVigentes !=='undefined' ? documentosVigentes :
+                                                        0 %>
+                                                </h2>
+                                            </div>
+                                            <i class="fas fa-check-circle fa-3x opacity-50"></i>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-3">
-                                <div class="card text-white bg-warning">
+                                <div class="card text-white bg-warning card-counter">
                                     <div class="card-body">
-                                        <h5 class="card-title">Por Vencer</h5>
-                                        <h2>
-                                            <%= typeof documentosPorVencer !=='undefined' ? documentosPorVencer : 0 %>
-                                        </h2>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="card-title mb-1">Por Vencer</h6>
+                                                <h2 class="mb-0">
+                                                    <%= typeof documentosPorVencer !=='undefined' ? documentosPorVencer
+                                                        : 0 %>
+                                                </h2>
+                                            </div>
+                                            <i class="fas fa-clock fa-3x opacity-50"></i>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-3">
-                                <div class="card text-white bg-danger">
+                                <div class="card text-white bg-danger card-counter">
                                     <div class="card-body">
-                                        <h5 class="card-title">Vencidos</h5>
-                                        <h2>
-                                            <%= typeof documentosVencidos !=='undefined' ? documentosVencidos : 0 %>
-                                        </h2>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="card-title mb-1">Vencidos</h6>
+                                                <h2 class="mb-0">
+                                                    <%= typeof documentosVencidos !=='undefined' ? documentosVencidos :
+                                                        0 %>
+                                                </h2>
+                                            </div>
+                                            <i class="fas fa-exclamation-triangle fa-3x opacity-50"></i>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Tabla de documentos -->
-                        <div class="card">
-                            <div class="card-header bg-primary text-white">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-primary text-white py-3">
                                 <h5 class="mb-0"><i class="fas fa-list me-2"></i>Documentos Registrados</h5>
                             </div>
                             <div class="card-body">
-                                <!-- LÍNEA 129 CORREGIDA - Verificación segura -->
                                 <% if (typeof documentos !=='undefined' && documentos && documentos.length> 0) { %>
                                     <div class="table-responsive">
                                         <table id="tablaDocumentos" class="table table-striped table-hover">
@@ -121,18 +181,20 @@
                                                     <th>ID</th>
                                                     <th>Persona</th>
                                                     <th>RUN</th>
-                                                    <th>Tipo</th>
-                                                    <th>Número</th>
+                                                    <th>Tipo Documento</th>
+                                                    <th>N° Documento</th>
                                                     <th>Vencimiento</th>
+                                                    <th>Días</th>
                                                     <th>Estado</th>
+                                                    <th>Archivo</th>
                                                     <th>Acciones</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <% for(var i=0; i < documentos.length; i++) { var doc=documentos[i]; var
-                                                    fechaVenc=new Date(doc.fecha_vencimiento); var hoy=new Date(); var
-                                                    diffTime=fechaVenc - hoy; var diffDays=Math.ceil(diffTime / (1000 *
-                                                    60 * 60 * 24)); var estadoClass='success' ; var
+                                                <% documentos.forEach(function(doc) { const fechaVenc=new
+                                                    Date(doc.fecha_vencimiento); const hoy=new Date(); const
+                                                    diffTime=fechaVenc - hoy; const diffDays=Math.ceil(diffTime / (1000
+                                                    * 60 * 60 * 24)); let estadoClass='success' ; let
                                                     estadoTexto='Vigente' ; if (diffDays <=0) { estadoClass='danger' ;
                                                     estadoTexto='Vencido' ; } else if (diffDays <=7) {
                                                     estadoClass='danger' ; estadoTexto='Urgente' ; } else if (diffDays
@@ -145,6 +207,11 @@
                                                             <strong>
                                                                 <%= doc.persona_nombre_completo || 'N/A' %>
                                                             </strong>
+                                                            <% if (doc.cargo) { %>
+                                                                <br><small class="text-muted">
+                                                                    <%= doc.cargo %>
+                                                                </small>
+                                                                <% } %>
                                                         </td>
                                                         <td>
                                                             <%= doc.persona_dni || 'N/A' %>
@@ -156,36 +223,47 @@
                                                             <%= doc.numero_documento || 'N/A' %>
                                                         </td>
                                                         <td>
-                                                            <%= fechaVenc.toLocaleDateString() %><br>
-                                                                <small>
-                                                                    <%= diffDays> 0 ? diffDays + ' días' : 'Vencido' %>
-                                                                </small>
+                                                            <%= new Date(doc.fecha_vencimiento).toLocaleDateString() %>
                                                         </td>
                                                         <td>
-                                                            <span class="badge bg-<%= estadoClass %>">
+                                                            <span
+                                                                class="badge bg-<%= diffDays > 0 ? 'info' : 'secondary' %>">
+                                                                <%= diffDays> 0 ? diffDays + ' días' : 'Vencido' %>
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge bg-<%= estadoClass %> estado-badge">
                                                                 <%= estadoTexto %>
                                                             </span>
                                                         </td>
                                                         <td>
-                                                            <button class="btn btn-sm btn-info ver-documento"
-                                                                onclick="verDocumento('<%= doc.id_documento %>')">
-                                                                <i class="fas fa-eye"></i>
-                                                            </button>
-
                                                             <% if (doc.ruta_archivo) { %>
                                                                 <a href="<%= doc.ruta_archivo %>"
-                                                                    class="btn btn-sm btn-success" target="_blank">
+                                                                    class="btn btn-sm btn-success" target="_blank"
+                                                                    title="Ver archivo">
                                                                     <i class="fas fa-file-pdf"></i>
                                                                 </a>
-                                                                <% } %>
-
-                                                                    <button class="btn btn-sm btn-danger"
-                                                                        onclick="eliminarDocumento('<%= doc.id_documento %>')">
-                                                                        <i class="fas fa-trash"></i>
-                                                                    </button>
+                                                                <a href="/documentos-persona/descargar/<%= doc.id_documento %>"
+                                                                    class="btn btn-sm btn-info" title="Descargar">
+                                                                    <i class="fas fa-download"></i>
+                                                                </a>
+                                                                <% } else { %>
+                                                                    <span class="badge bg-secondary">Sin archivo</span>
+                                                                    <% } %>
+                                                        </td>
+                                                        <td class="table-actions">
+                                                            <a href="/documentos-persona/detalle/<%= doc.id_documento %>"
+                                                                class="btn btn-sm btn-primary" title="Ver detalle">
+                                                                <i class="fas fa-eye"></i>
+                                                            </a>
+                                                            <button class="btn btn-sm btn-danger"
+                                                                onclick="eliminarDocumento('<%= doc.id_documento %>')"
+                                                                title="Eliminar">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
                                                         </td>
                                                     </tr>
-                                                    <% } %>
+                                                    <% }); %>
                                             </tbody>
                                         </table>
                                     </div>
@@ -193,7 +271,7 @@
                                         <div class="text-center py-5">
                                             <i class="fas fa-file-alt fa-4x text-muted mb-3"></i>
                                             <h4 class="text-muted">No hay documentos registrados</h4>
-                                            <p>Comienza agregando tu primer documento de persona</p>
+                                            <p class="text-muted">Comienza agregando tu primer documento de persona</p>
                                             <button class="btn btn-primary" data-bs-toggle="modal"
                                                 data-bs-target="#modalNuevoDocumento">
                                                 <i class="fas fa-plus me-2"></i>Agregar Documento
@@ -202,14 +280,67 @@
                                         <% } %>
                             </div>
                         </div>
+
+                        <!-- Documentos próximos a vencer (si existen) -->
+                        <% if (typeof documentosProximos !=='undefined' && documentosProximos &&
+                            documentosProximos.length> 0) { %>
+                            <div class="card mt-4 border-warning">
+                                <div class="card-header bg-warning text-dark">
+                                    <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Documentos por
+                                        Vencer (próximos 30 días)</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Persona</th>
+                                                    <th>Tipo</th>
+                                                    <th>Vencimiento</th>
+                                                    <th>Días</th>
+                                                    <th>Acción</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <% documentosProximos.forEach(function(doc) { %>
+                                                    <tr>
+                                                        <td>
+                                                            <%= doc.persona_nombre_completo %>
+                                                        </td>
+                                                        <td>
+                                                            <%= doc.tipo_documento_nombre %>
+                                                        </td>
+                                                        <td>
+                                                            <%= new Date(doc.fecha_vencimiento).toLocaleDateString() %>
+                                                        </td>
+                                                        <td><span class="badge bg-warning">
+                                                                <%= doc.dias_restantes %> días
+                                                            </span></td>
+                                                        <td>
+                                                            <a href="/documentos-persona/detalle/<%= doc.id_documento %>"
+                                                                class="btn btn-sm btn-primary">
+                                                                <i class="fas fa-eye"></i> Ver
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                    <% }); %>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <% } %>
     </div>
 
     <!-- Modal Nuevo Documento -->
-    <div class="modal fade" id="modalNuevoDocumento" tabindex="-1">
+    <div class="modal fade" id="modalNuevoDocumento" tabindex="-1" aria-labelledby="modalNuevoDocumentoLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title"><i class="fas fa-plus-circle me-2"></i>Nuevo Documento de Persona</h5>
+                    <h5 class="modal-title" id="modalNuevoDocumentoLabel">
+                        <i class="fas fa-plus-circle me-2"></i>Nuevo Documento de Persona
+                    </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <form action="/documentos-persona/registrar" method="POST" enctype="multipart/form-data">
@@ -218,15 +349,25 @@
                         <div class="mb-3">
                             <label class="form-label fw-bold">Persona <span class="text-danger">*</span></label>
                             <select class="form-select" name="id_persona" required>
-                                <option value="">Seleccione una persona...</option>
+                                <option value="">-- Seleccione una persona --</option>
                                 <% if (typeof personas !=='undefined' && personas && personas.length> 0) { %>
-                                    <% for(var j=0; j < personas.length; j++) { var p=personas[j]; %>
+                                    <% personas.forEach(function(p) { %>
                                         <option value="<%= p.id_persona %>">
                                             <%= p.apellido_paterno %>, <%= p.nombres %> - RUN: <%= p.run %>-<%= p.dv %>
+                                                            <% if (p.cargo) { %> [<%= p.cargo %>] <% } %>
                                         </option>
-                                        <% } %>
-                                            <% } %>
+                                        <% }); %>
+                                            <% } else { %>
+                                                <option value="" disabled>No hay personas registradas</option>
+                                                <% } %>
                             </select>
+                            <% if (typeof personas==='undefined' || !personas || personas.length===0) { %>
+                                <div class="alert alert-warning mt-2">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    No hay personas registradas activas.
+                                    <a href="/personas/nuevo" class="alert-link">Registrar una persona</a>
+                                </div>
+                                <% } %>
                         </div>
 
                         <!-- TIPO DE DOCUMENTO -->
@@ -234,17 +375,18 @@
                             <label class="form-label fw-bold">Tipo de Documento <span
                                     class="text-danger">*</span></label>
                             <select class="form-select" name="id_tipo_documento" required>
-                                <option value="">Seleccione un tipo...</option>
+                                <option value="">-- Seleccione un tipo --</option>
                                 <% if (typeof tiposDocumentos !=='undefined' && tiposDocumentos &&
                                     tiposDocumentos.length> 0) { %>
-                                    <% for(var k=0; k < tiposDocumentos.length; k++) { var t=tiposDocumentos[k]; %>
+                                    <% tiposDocumentos.forEach(function(t) { %>
                                         <option value="<%= t.id_tipo_documento %>">
                                             <%= t.nombre_documento %>
-                                                <% if (t.descripcion) { %> - <%= t.descripcion %>
-                                                        <% } %>
+                                                <% if (t.obligatorio) { %> (Obligatorio) <% } %>
                                         </option>
-                                        <% } %>
-                                            <% } %>
+                                        <% }); %>
+                                            <% } else { %>
+                                                <option value="" disabled>No hay tipos de documentos</option>
+                                                <% } %>
                             </select>
                         </div>
 
@@ -265,7 +407,8 @@
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold">Fecha de Vencimiento <span
                                         class="text-danger">*</span></label>
-                                <input type="date" class="form-control" name="fecha_vencimiento" required>
+                                <input type="date" class="form-control" name="fecha_vencimiento" required
+                                    min="<%= new Date().toISOString().split('T')[0] %>">
                             </div>
                         </div>
 
@@ -280,7 +423,8 @@
                         <!-- OBSERVACIONES -->
                         <div class="mb-3">
                             <label class="form-label">Observaciones</label>
-                            <textarea class="form-control" name="observaciones" rows="2"></textarea>
+                            <textarea class="form-control" name="observaciones" rows="2"
+                                placeholder="Comentarios adicionales..."></textarea>
                         </div>
 
                         <!-- CHECKBOX ALERTA -->
@@ -288,13 +432,57 @@
                             <input class="form-check-input" type="checkbox" name="enviar_alerta" id="enviarAlerta"
                                 checked>
                             <label class="form-check-label" for="enviarAlerta">
-                                Enviar alerta por correo
+                                Enviar alerta por correo cuando esté próximo a vencer
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i>Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Guardar Documento
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Nuevo Tipo de Documento -->
+    <div class="modal fade" id="modalNuevoTipo" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="fas fa-tag me-2"></i>Nuevo Tipo de Documento</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="/documentos-persona/tipos/nuevo" method="POST">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nombre <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="nombre_tipo" required
+                                placeholder="Ej: Certificado de Antecedentes">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Descripción</label>
+                            <textarea class="form-control" name="descripcion" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Días de alerta</label>
+                            <input type="number" class="form-control" name="dias_alerta" value="30" min="1" max="365">
+                            <div class="form-text">Días antes del vencimiento para alertar</div>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="obligatorio" id="obligatorio">
+                            <label class="form-check-label" for="obligatorio">
+                                Documento obligatorio
                             </label>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Guardar</button>
+                        <button type="submit" class="btn btn-success">Crear Tipo</button>
                     </div>
                 </form>
             </div>
@@ -310,19 +498,23 @@
 
     <script>
         $(document).ready(function () {
+            // Inicializar DataTable
             if ($('#tablaDocumentos').length) {
                 $('#tablaDocumentos').DataTable({
                     language: {
                         url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
                     },
-                    order: [[5, 'asc']]
+                    order: [[5, 'asc']], // Ordenar por fecha de vencimiento
+                    pageLength: 25
                 });
             }
-        });
 
-        function verDocumento(id) {
-            window.location.href = '/documentos-persona/detalle/' + id;
-        }
+            // Abrir modal automáticamente si hay parámetro nuevo
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('nuevo')) {
+                $('#modalNuevoDocumento').modal('show');
+            }
+        });
 
         function eliminarDocumento(id) {
             Swal.fire({
@@ -360,11 +552,11 @@
                                 });
                             }
                         },
-                        error: function () {
+                        error: function (xhr) {
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Error',
-                                text: 'No se pudo eliminar el documento'
+                                text: xhr.responseJSON?.error || 'No se pudo eliminar el documento'
                             });
                         }
                     });
