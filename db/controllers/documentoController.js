@@ -6,10 +6,11 @@ const path = require('path');
 const logError = (tag, err) => console.error(` ${tag}`, err.message || err);
 
 const documentoVehiculoController = {
-    // Mostrar vista principal con todos los documentos
+    
+
     mostrarDocumentos: async (req, res) => {
         try {
-            // 1. Obtener todos los vehículos activos
+            
             const [vehiculos] = await db.execute(`
                 SELECT 
                     v.id_vehiculo,
@@ -249,7 +250,7 @@ const documentoVehiculoController = {
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, 'vigente')
             `, [
                 id_vehiculo,
-                id_tipo_documento_veh, // AHORA SIEMPRE ES UN ID VÁLIDO
+                id_tipo_documento_veh, 
                 numero_documento.trim(),
                 fecha_emision || null,
                 fecha_vencimiento,
@@ -499,5 +500,4 @@ const documentoVehiculoController = {
         }
     }
 };
-
 module.exports = documentoVehiculoController;
