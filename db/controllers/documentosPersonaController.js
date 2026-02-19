@@ -1,81 +1,140 @@
 require('dotenv').config();
 const db = require('../conexion');
-const fs = require('fs');
-const path = require('path');
 
-const logError = (tag, err) =>
-    console.error(`Error en ${tag}:`, err.message || err);
+const logError = (tag, err) => console.error(` ${tag}`, err.message || err);
 
-const documentoPersonaController = {
+const documentosPersonaController = {
 
     // ===============================
-    // VISTA PRINCIPAL
+    // CARGAR VISTA PRINCIPAL
     // ===============================
-    mostrarDocumentos: async (req, res) => {
+    async index(req, res) {
         try {
-            const idCliente = req.session?.usuario?.id_cliente || 1;
+            const idCliente = req.session?.idCliente || 1;
 
-            const [personas] = await db.execute(`
-                SELECT 
-                    id_persona,
-                    CONCAT(run,'-',dv) as dni,
-                    CONCAT(nombres,' ',apellido_paterno) as nombre_completo,
-                    cargo,
-                    email,
-                    telefono
-                FROM personas
-                WHERE id_cliente = ? AND activo = 1
-                ORDER BY apellido_paterno ASC
-            `, [idCliente]);
+            console.log('Cliente cargado:', idCliente);
 
-            const [tipos] = await db.execute(`
-                SELECT id_tipo_documento, nombre_documento
-                FROM tipo_documentos_persona
-                WHERE id_cliente = ? AND activo = 1
-                ORDER BY nombre_documento ASC
-            `, [idCliente]);
+            const [
+                totalDocsRes,
+                vigentesRes,
+                porVencerRes,
+                vencidosRes,
+                documentosRes,
+                personasRes
+            ] = await Promise.all([
+                db.query(`
+                    SELECT COUNT(*) AS total
+                    FROM documentos_persona dp
+                    INNER JOIN personas p ON dp.id_persona = p.id_persona
+                    WHERE p.id_cliente = ?
+                `, [idCliente]),
 
-            const [documentos] = await db.execute(`
-                SELECT 
-                    dp.*,
-                    CONCAT(p.nombres,' ',p.apellido_paterno) as persona_nombre,
-                    CONCAT(p.run,'-',p.dv) as persona_dni,
-                    td.nombre_documento,
-                    DATEDIFF(dp.fecha_vencimiento, CURDATE()) as dias_restantes
-                FROM documentos_persona dp
-                INNER JOIN personas p ON dp.id_persona = p.id_persona
-                LEFT JOIN tipo_documentos_persona td ON dp.id_tipo_documento = td.id_tipo_documento
-                WHERE p.id_cliente = ?
-                ORDER BY dp.fecha_vencimiento ASC
-            `, [idCliente]);
+                db.query(`
+                    SELECT COUNT(*) AS total
+                    FROM documentos_persona dp
+                    INNER JOIN personas p ON dp.id_persona = p.id_persona
+                    WHERE p.id_cliente = ?
+                    AND dp.fecha_vencimiento > CURDATE()
+                `, [idCliente]),
 
-            res.render('DocumentosPersonas', {
+                db.query(`
+                    SELECT COUNT(*) AS total
+                    FROM documentos_persona dp
+                    INNER JOIN personas p ON dp.id_persona = p.id_persona
+                    WHERE p.id_cliente = ?
+                    AND dp.fecha_vencimiento BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+                `, [idCliente]),
+
+                db.query(`
+                    SELECT COUNT(*) AS total
+                    FROM documentos_persona dp
+                    INNER JOIN personas p ON dp.id_persona = p.id_persona
+                    WHERE p.id_cliente = ?
+                    AND dp.fecha_vencimiento < CURDATE()
+                `, [idCliente]),
+
+                db.query(`
+                    SELECT 
+                        dp.id_documento_persona,
+                        dp.numero_documento,
+                        dp.fecha_emision,
+                        dp.fecha_vencimiento,
+                        dp.nombre_archivo,
+                        dp.observaciones,
+
+                        CONCAT(p.apellido_paterno,' ',p.apellido_materno,', ',p.nombres) AS persona_nombre_completo,
+                        CONCAT(p.run,'-',p.dv) AS persona_dni,
+                        p.cargo,
+
+                        tdp.nombre_documento AS tipo_documento_nombre
+                    FROM documentos_persona dp
+                    INNER JOIN personas p ON dp.id_persona = p.id_persona
+                    LEFT JOIN tipo_documentos_persona tdp 
+                        ON dp.id_tipo_documento = tdp.id_tipo_documento
+                    WHERE p.id_cliente = ?
+                    ORDER BY dp.fecha_vencimiento ASC
+                `, [idCliente]),
+
+                db.query(`
+                    SELECT 
+                        id_persona,
+                        CONCAT(apellido_paterno,' ',apellido_materno,', ',nombres) AS nombre_completo,
+                        CONCAT(run,'-',dv) AS run_completo,
+                        cargo
+                    FROM personas
+                    WHERE id_cliente = ?
+                    AND activo = 1
+                    ORDER BY apellido_paterno, nombres
+                `, [idCliente])
+            ]);
+
+            // Normalizar datos
+            const documentos = documentosRes?.[0] || [];
+            const personas = personasRes?.[0] || [];
+
+            const totalDocumentos = totalDocsRes?.[0]?.[0]?.total || 0;
+            const documentosVigentes = vigentesRes?.[0]?.[0]?.total || 0;
+            const documentosPorVencer = porVencerRes?.[0]?.[0]?.total || 0;
+            const documentosVencidos = vencidosRes?.[0]?.[0]?.total || 0;
+
+            res.render('documentos-persona/index', {
                 title: 'Gestión Documental - Personas',
-                layout: 'layouts/main',
-                personas,
-                tiposDocumentos: tipos,
+
                 documentos,
-                success_msg: req.query.success || null,
-                error_msg: req.query.error || null
+                personas,
+
+                totalDocumentos,
+                documentosVigentes,
+                documentosPorVencer,
+                documentosVencidos,
+
+                fecha: new Date(),
+                success_msg: req.flash?.('success') || null,
+                error_msg: req.flash?.('error') || null
             });
 
-        } catch (err) {
-            logError('MOSTRAR DOCUMENTOS PERSONA', err);
-            res.redirect('/documentos-persona?error=Error al cargar datos');
+        } catch (error) {
+            logError('INDEX DOCUMENTOS PERSONA', error);
+
+            res.render('documentos-persona/index', {
+                title: 'Gestión Documental - Personas',
+                documentos: [],
+                personas: [],
+                totalDocumentos: 0,
+                documentosVigentes: 0,
+                documentosPorVencer: 0,
+                documentosVencidos: 0,
+                fecha: new Date(),
+                error_msg: 'Error al cargar la página'
+            });
         }
     },
 
     // ===============================
     // REGISTRAR DOCUMENTO
     // ===============================
-    agregarDocumento: async (req, res) => {
-
-        let conn;
-
+    async registrar(req, res) {
         try {
-            conn = await db.pool.promise().getConnection();
-            await conn.beginTransaction();
-
             const {
                 id_persona,
                 tipo_documento_nombre,
@@ -85,150 +144,118 @@ const documentoPersonaController = {
                 observaciones
             } = req.body;
 
-            if (!id_persona || !tipo_documento_nombre || !fecha_vencimiento) {
-                throw new Error('Faltan campos obligatorios');
+            const idUsuario = req.session?.idUsuario || 1;
+            const idCliente = req.session?.idCliente || 1;
+
+            if (!id_persona || !tipo_documento_nombre || !numero_documento || !fecha_vencimiento) {
+                req.flash('error', 'Todos los campos obligatorios deben completarse');
+                return res.redirect('/documentos-persona');
             }
 
-            const [persona] = await conn.execute(
-                'SELECT id_cliente FROM personas WHERE id_persona = ? AND activo = 1',
-                [id_persona]
-            );
+            // Verificar persona
+            const [[persona]] = await db.query(`
+                SELECT id_persona
+                FROM personas
+                WHERE id_persona = ?
+                AND id_cliente = ?
+            `, [id_persona, idCliente]);
 
-            if (!persona.length) {
-                throw new Error('Persona no encontrada');
+            if (!persona) {
+                req.flash('error', 'La persona no pertenece al cliente');
+                return res.redirect('/documentos-persona');
             }
 
-            const id_cliente = persona[0].id_cliente;
+            // Buscar tipo documento
+            let idTipoDocumento;
 
-            // Buscar o crear tipo
-            let id_tipo_documento;
-
-            const [tipo] = await conn.execute(`
-                SELECT id_tipo_documento 
+            const [[tipoExistente]] = await db.query(`
+                SELECT id_tipo_documento
                 FROM tipo_documentos_persona
-                WHERE nombre_documento = ? AND id_cliente = ? AND activo = 1
-            `, [tipo_documento_nombre.trim(), id_cliente]);
+                WHERE id_cliente = ?
+                AND nombre_documento = ?
+            `, [idCliente, tipo_documento_nombre]);
 
-            if (tipo.length) {
-                id_tipo_documento = tipo[0].id_tipo_documento;
+            if (tipoExistente) {
+                idTipoDocumento = tipoExistente.id_tipo_documento;
             } else {
-                const [nuevo] = await conn.execute(`
+                const [nuevoTipo] = await db.query(`
                     INSERT INTO tipo_documentos_persona
-                    (id_cliente, nombre_documento, activo)
-                    VALUES (?, ?, 1)
-                `, [id_cliente, tipo_documento_nombre.trim()]);
-                id_tipo_documento = nuevo.insertId;
+                    (id_cliente, nombre_documento, dias_alerta, activo)
+                    VALUES (?, ?, 30, 1)
+                `, [idCliente, tipo_documento_nombre]);
+
+                idTipoDocumento = nuevoTipo.insertId;
             }
 
-            let nombre_archivo = null;
-            let ruta_archivo = null;
+            let nombreArchivo = null;
+            let rutaArchivo = null;
 
             if (req.file) {
-                nombre_archivo = req.file.filename;
-                ruta_archivo = `/uploads/documentos_persona/${req.file.filename}`;
+                nombreArchivo = req.file.originalname;
+                rutaArchivo = req.file.buffer;
             }
 
-            await conn.execute(`
-                INSERT INTO documentos_persona (
-                    id_persona,
-                    id_tipo_documento,
-                    numero_documento,
-                    fecha_emision,
-                    fecha_vencimiento,
-                    nombre_archivo,
-                    ruta_archivo,
-                    observaciones,
-                    usuario_subida,
-                    fecha_subida,
-                    estado
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'vigente')
+            await db.query(`
+                INSERT INTO documentos_persona
+                (id_persona,id_tipo_documento,nombre_archivo,ruta_archivo,
+                 numero_documento,fecha_emision,fecha_vencimiento,
+                 observaciones,usuario_subida)
+                VALUES (?,?,?,?,?,?,?,?,?)
             `, [
                 id_persona,
-                id_tipo_documento,
-                numero_documento || null,
+                idTipoDocumento,
+                nombreArchivo,
+                rutaArchivo,
+                numero_documento,
                 fecha_emision || null,
                 fecha_vencimiento,
-                nombre_archivo,
-                ruta_archivo,
                 observaciones || null,
-                req.session?.usuario?.id_usuario || null
+                idUsuario
             ]);
 
-            await conn.commit();
+            req.flash('success', 'Documento registrado correctamente');
+            res.redirect('/documentos-persona');
 
-            res.redirect('/documentos-persona?success=Documento registrado');
-
-        } catch (err) {
-            if (conn) await conn.rollback();
-            logError('AGREGAR DOCUMENTO PERSONA', err);
-            res.redirect('/documentos-persona?error=' + encodeURIComponent(err.message));
-        } finally {
-            if (conn) conn.release();
+        } catch (error) {
+            logError('REGISTRAR DOCUMENTO PERSONA', error);
+            req.flash('error', 'Error al registrar documento');
+            res.redirect('/documentos-persona');
         }
     },
 
     // ===============================
-    // ELIMINAR
+    // API PERSONAS
     // ===============================
-    eliminarDocumento: async (req, res) => {
+    async getPersonas(req, res) {
         try {
-            const { id } = req.params;
+            const idCliente = req.session?.idCliente || 1;
 
-            const [doc] = await db.execute(
-                'SELECT ruta_archivo FROM documentos_persona WHERE id_documento = ?',
-                [id]
-            );
+            const [personas] = await db.query(`
+                SELECT 
+                    id_persona,
+                    CONCAT(apellido_paterno,' ',apellido_materno,', ',nombres) AS nombre_completo,
+                    CONCAT(run,'-',dv) AS run_completo,
+                    cargo
+                FROM personas
+                WHERE id_cliente = ?
+                AND activo = 1
+                ORDER BY apellido_paterno, nombres
+            `, [idCliente]);
 
-            if (!doc.length) {
-                return res.json({ success: false });
-            }
+            res.json({
+                success: true,
+                total: personas.length,
+                personas: personas || []
+            });
 
-            if (doc[0].ruta_archivo) {
-                const filePath = path.join(__dirname, '../../public', doc[0].ruta_archivo);
-                if (fs.existsSync(filePath)) {
-                    fs.unlinkSync(filePath);
-                }
-            }
-
-            await db.execute('DELETE FROM documentos_persona WHERE id_documento = ?', [id]);
-
-            res.json({ success: true });
-
-        } catch (err) {
-            logError('ELIMINAR DOCUMENTO PERSONA', err);
-            res.status(500).json({ success: false });
-        }
-    },
-
-    // ===============================
-    // DESCARGAR
-    // ===============================
-    descargarArchivo: async (req, res) => {
-        try {
-            const { id } = req.params;
-
-            const [doc] = await db.execute(
-                'SELECT nombre_archivo, ruta_archivo FROM documentos_persona WHERE id_documento = ?',
-                [id]
-            );
-
-            if (!doc.length || !doc[0].ruta_archivo) {
-                return res.redirect('/documentos-persona?error=Archivo no encontrado');
-            }
-
-            const filePath = path.join(__dirname, '../../public', doc[0].ruta_archivo);
-
-            if (!fs.existsSync(filePath)) {
-                return res.redirect('/documentos-persona?error=Archivo no existe');
-            }
-
-            res.download(filePath, doc[0].nombre_archivo);
-
-        } catch (err) {
-            logError('DESCARGAR DOCUMENTO PERSONA', err);
-            res.redirect('/documentos-persona?error=Error al descargar');
+        } catch (error) {
+            logError('API PERSONAS', error);
+            res.status(500).json({
+                success: false,
+                error: error.message
+            });
         }
     }
 };
 
-module.exports = documentoPersonaController;
+module.exports = documentosPersonaController;
