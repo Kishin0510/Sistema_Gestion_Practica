@@ -5,9 +5,7 @@ const logError = (tag, err) => console.error(` ${tag}`, err.message || err);
 
 const documentosPersonaController = {
 
-    // ===============================
-    // CARGAR VISTA PRINCIPAL
-    // ===============================
+    
     async index(req, res) {
         try {
             const idCliente = req.session?.idCliente || 1;

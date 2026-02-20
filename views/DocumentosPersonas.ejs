@@ -48,8 +48,21 @@
         .navbar-custom {
             background: #0d6efd;
         }
+
+        /* Estilos adicionales para el modal mejorado */
+        #infoPersonaSeleccionada {
+            border-left: 3px solid #0d6efd;
+            font-size: 0.9rem;
+        }
+
+        .preview-file {
+            max-width: 100px;
+            max-height: 100px;
+            object-fit: cover;
+        }
     </style>
 </head>
+
 <body>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
@@ -92,7 +105,7 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2><i class="fas fa-file-alt me-2 text-primary"></i>Gestión Documental - Personas</h2>
             <div>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevoDocumento">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevoDocumentoPersona">
                     <i class="fas fa-plus me-2"></i>Nuevo Documento
                 </button>
                 <a href="/personas" class="btn btn-success">
@@ -208,10 +221,10 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <% documentos.forEach(function(doc) { const fechaVenc=new
-                                                    Date(doc.fecha_vencimiento); const hoy=new Date(); const
-                                                    diffTime=fechaVenc - hoy; const diffDays=Math.ceil(diffTime / (1000
-                                                    * 60 * 60 * 24)); let estadoClass='success' ; let
+                                                <% documentos.forEach(function(doc) { var fechaVenc=new
+                                                    Date(doc.fecha_vencimiento); var hoy=new Date(); var
+                                                    diffTime=fechaVenc - hoy; var diffDays=Math.ceil(diffTime / (1000 *
+                                                    60 * 60 * 24)); var estadoClass='success' ; var
                                                     estadoTexto='Vigente' ; if (diffDays <=0) { estadoClass='danger' ;
                                                     estadoTexto='Vencido' ; } else if (diffDays <=7) {
                                                     estadoClass='danger' ; estadoTexto='Urgente' ; } else if (diffDays
@@ -219,7 +232,7 @@
                                                     <tr
                                                         class="<%= diffDays <= 0 ? 'documento-vencido' : (diffDays <= 7 ? 'documento-urgente' : '') %>">
                                                         <td>
-                                                            <%= doc.id_documento %>
+                                                            <%= doc.id_documento_persona %>
                                                         </td>
                                                         <td>
                                                             <strong>
@@ -254,8 +267,8 @@
                                                             </span>
                                                         </td>
                                                         <td>
-                                                            <% if (doc.ruta_archivo) { %>
-                                                                <a href="<%= doc.ruta_archivo %>"
+                                                            <% if (doc.nombre_archivo) { %>
+                                                                <a href="/documentos-persona/ver/<%= doc.id_documento_persona %>"
                                                                     class="btn btn-sm btn-success" target="_blank"
                                                                     title="Ver archivo">
                                                                     <i class="fas fa-file-pdf"></i>
@@ -265,10 +278,16 @@
                                                                     <% } %>
                                                         </td>
                                                         <td class="table-actions">
-                                                            <a href="/documentos-persona/detalle/<%= doc.id_documento %>"
-                                                                class="btn btn-sm btn-info" title="Ver detalle">
+                                                            <button class="btn btn-sm btn-info btn-ver-detalle"
+                                                                data-id="<%= doc.id_documento_persona %>"
+                                                                title="Ver detalle">
                                                                 <i class="fas fa-eye"></i>
-                                                            </a>
+                                                            </button>
+                                                            <button class="btn btn-sm btn-danger btn-eliminar"
+                                                                data-id="<%= doc.id_documento_persona %>"
+                                                                title="Eliminar">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
                                                         </td>
                                                     </tr>
                                                     <% }); %>
@@ -281,7 +300,7 @@
                                             <h4 class="text-muted">No hay documentos registrados</h4>
                                             <p>Comienza agregando tu primer documento de persona</p>
                                             <button class="btn btn-primary" data-bs-toggle="modal"
-                                                data-bs-target="#modalNuevoDocumento">
+                                                data-bs-target="#modalNuevoDocumentoPersona">
                                                 <i class="fas fa-plus me-2"></i>Agregar Documento
                                             </button>
                                         </div>
@@ -289,84 +308,150 @@
                             </div>
                         </div>
     </div>
-    <!-- Modal Nuevo Documento -->
-    <div class="modal fade" id="modalNuevoDocumento" tabindex="-1">
+
+    <!-- Modal Nuevo Documento de Persona (MEJORADO) -->
+    <div class="modal fade" id="modalNuevoDocumentoPersona" tabindex="-1"
+        aria-labelledby="modalNuevoDocumentoPersonaLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title"><i class="fas fa-plus-circle me-2"></i>Nuevo Documento de Persona</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="modalNuevoDocumentoPersonaLabel">
+                        <i class="fas fa-plus-circle me-2"></i>Nuevo Documento de Persona
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Cerrar"></button>
                 </div>
-                <form action="/documentos-persona/registrar" method="POST" enctype="multipart/form-data">
+
+                <form action="/documentos-persona/registrar" method="POST" enctype="multipart/form-data"
+                    id="formDocumentoPersona">
                     <div class="modal-body">
-                        <!-- SELECCIÓN DE PERSONA -->
+                        <!-- SELECCIÓN DE PERSONA MEJORADA -->
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Persona <span class="text-danger">*</span></label>
-                            <select class="form-select" name="id_persona" required>
-                                <option value="">Seleccione una persona...</option>
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-user me-1"></i>Persona <span class="text-danger">*</span>
+                            </label>
+
+                            <select class="form-select" name="id_persona" id="id_persona" required>
+                                <option value="">Seleccione o busque una persona...</option>
                                 <% if (typeof personas !=='undefined' && personas && personas.length> 0) { %>
-                                    <% personas.forEach(function(p) { %>
-                                        <option value="<%= p.id_persona %>">
-                                            <%= p.apellido_paterno %>, <%= p.nombres %> - <%= p.run %>-<%= p.dv %>
-                                                            <% if (p.cargo) { %> [<%= p.cargo %>] <% } %>
+                                    <% personas.forEach(function(persona) { %>
+                                        <option value="<%= persona.id_persona %>"
+                                            data-run="<%= persona.run_completo || (persona.run + '-' + persona.dv) %>"
+                                            data-cargo="<%= persona.cargo || '' %>">
+                                            <%= persona.nombre_completo || (persona.apellido_paterno + ', ' +
+                                                persona.nombres) %>
+                                                <% if (persona.run_completo) { %>[<%= persona.run_completo %>]<% } else
+                                                            { %>[<%= persona.run %>-<%= persona.dv %>]<% } %>
+                                                                        <% if (persona.cargo) { %> - <%= persona.cargo
+                                                                                %>
+                                                                                <% } %>
                                         </option>
                                         <% }); %>
                                             <% } else { %>
-                                                <option value="" disabled>No hay personas registradas</option>
+                                                <option value="" disabled>No hay personas activas disponibles</option>
                                                 <% } %>
                             </select>
+
+                            <!-- Información adicional de la persona seleccionada -->
+                            <div id="infoPersonaSeleccionada" class="mt-2 p-2 bg-light rounded d-none">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    <span id="runPersona"></span>
+                                    <span id="cargoPersona"></span>
+                                </small>
+                            </div>
+
+                            <!-- Mensaje si no hay personas -->
                             <% if (typeof personas==='undefined' || !personas || personas.length===0) { %>
                                 <div class="alert alert-warning mt-2">
                                     <i class="fas fa-exclamation-triangle me-2"></i>
-                                    No hay personas registradas.
+                                    No hay personas registradas para este cliente.
                                     <a href="/personas" class="alert-link">Ir a gestionar personas</a>
                                 </div>
                                 <% } %>
                         </div>
 
-                        <!-- TIPO DE DOCUMENTO -->
+                        <!-- TIPO DE DOCUMENTO (con sugerencias) -->
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Tipo de Documento <span
-                                    class="text-danger">*</span></label>
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-file-alt me-1"></i>Tipo de Documento <span class="text-danger">*</span>
+                            </label>
                             <input type="text" class="form-control" name="tipo_documento_nombre"
+                                id="tipo_documento_nombre"
                                 placeholder="Ej: Certificado de Antecedentes, Título Profesional, etc."
-                                value="Documento Personal" required>
-                            <div class="form-text">Se creará automáticamente si no existe</div>
+                                value="Documento Personal" list="sugerenciasTipoDocumento" required>
+                            <datalist id="sugerenciasTipoDocumento">
+                                <option value="Certificado de Antecedentes">
+                                <option value="Título Profesional">
+                                <option value="Certificado de Estudios">
+                                <option value="Cédula de Identidad">
+                                <option value="Pasaporte">
+                                <option value="Licencia de Conducir">
+                                <option value="Certificado Médico">
+                                <option value="Contrato de Trabajo">
+                                <option value="Currículum Vitae">
+                                <option value="Certificado de Vacunas">
+                            </datalist>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle"></i> Se creará automáticamente si no existe
+                            </div>
                         </div>
 
                         <!-- NÚMERO DE DOCUMENTO -->
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Número de Documento <span
-                                    class="text-danger">*</span></label>
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-hashtag me-1"></i>Número de Documento <span
+                                    class="text-danger">*</span>
+                            </label>
                             <input type="text" class="form-control" name="numero_documento"
                                 placeholder="Ej: 12345678-9, CERT-2025-001" required>
                         </div>
 
-                        <!-- FECHAS -->
+                        <!-- FECHAS EN DOS COLUMNAS -->
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Fecha de Emisión</label>
-                                <input type="date" class="form-control" name="fecha_emision">
+                                <label class="form-label">
+                                    <i class="fas fa-calendar-plus me-1"></i>Fecha de Emisión
+                                </label>
+                                <input type="date" class="form-control" name="fecha_emision" id="fecha_emision">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Fecha de Vencimiento <span
-                                        class="text-danger">*</span></label>
-                                <input type="date" class="form-control" name="fecha_vencimiento" required>
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-calendar-times me-1"></i>Fecha de Vencimiento <span
+                                        class="text-danger">*</span>
+                                </label>
+                                <input type="date" class="form-control" name="fecha_vencimiento" id="fecha_vencimiento"
+                                    required>
                             </div>
                         </div>
 
                         <!-- ARCHIVO -->
                         <div class="mb-3">
-                            <label class="form-label">Archivo (opcional)</label>
-                            <input type="file" class="form-control" name="archivo_documento"
+                            <label class="form-label">
+                                <i class="fas fa-file-upload me-1"></i>Archivo (opcional)
+                            </label>
+                            <input type="file" class="form-control" name="archivo_documento" id="archivo_documento"
                                 accept=".pdf,.jpg,.jpeg,.png">
-                            <div class="form-text">PDF, JPG, PNG (Máx. 10MB)</div>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle"></i> PDF, JPG, PNG (Máx. 10MB)
+                            </div>
+                            <!-- Preview del archivo seleccionado -->
+                            <div id="previewArchivo" class="mt-2 d-none">
+                                <div class="alert alert-info p-2">
+                                    <i class="fas fa-file me-2"></i>
+                                    <span id="nombreArchivo"></span>
+                                    <button type="button" class="btn-close float-end" id="quitarArchivo"></button>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- OBSERVACIONES -->
                         <div class="mb-3">
-                            <label class="form-label">Observaciones</label>
-                            <textarea class="form-control" name="observaciones" rows="2"></textarea>
+                            <label class="form-label">
+                                <i class="fas fa-comment me-1"></i>Observaciones
+                            </label>
+                            <textarea class="form-control" name="observaciones" rows="2"
+                                placeholder="Comentarios adicionales sobre el documento..."></textarea>
                         </div>
 
                         <!-- CHECKBOX ALERTA -->
@@ -374,18 +459,24 @@
                             <input class="form-check-input" type="checkbox" name="enviar_alerta" id="enviarAlerta"
                                 checked>
                             <label class="form-check-label" for="enviarAlerta">
-                                Enviar alerta por correo
+                                <i class="fas fa-bell me-1"></i>Enviar alerta por correo
                             </label>
                         </div>
                     </div>
+
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Guardar Documento</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i>Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="btnGuardarDocumento">
+                            <i class="fas fa-save me-1"></i>Guardar Documento
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
@@ -405,8 +496,139 @@
                     pageLength: 25
                 });
             }
+
+            // Funcionalidades del modal mejorado
+            const selectPersona = document.getElementById('id_persona');
+            const infoPersona = document.getElementById('infoPersonaSeleccionada');
+            const runSpan = document.getElementById('runPersona');
+            const cargoSpan = document.getElementById('cargoPersona');
+            const fechaEmision = document.getElementById('fecha_emision');
+            const fechaVencimiento = document.getElementById('fecha_vencimiento');
+            const archivoInput = document.getElementById('archivo_documento');
+            const previewArchivo = document.getElementById('previewArchivo');
+            const nombreArchivo = document.getElementById('nombreArchivo');
+            const quitarArchivo = document.getElementById('quitarArchivo');
+            const form = document.getElementById('formDocumentoPersona');
+
+            // Mostrar información de la persona seleccionada
+            if (selectPersona) {
+                selectPersona.addEventListener('change', function () {
+                    const selected = this.options[this.selectedIndex];
+
+                    if (selected && selected.value) {
+                        const run = selected.dataset.run || '';
+                        const cargo = selected.dataset.cargo || '';
+
+                        runSpan.textContent = run ? `RUN: ${run}` : '';
+                        cargoSpan.textContent = cargo ? ` | Cargo: ${cargo}` : '';
+
+                        infoPersona.classList.remove('d-none');
+                    } else {
+                        infoPersona.classList.add('d-none');
+                    }
+                });
+            }
+
+            // Validar que fecha vencimiento sea posterior a emisión
+            function validarFechas() {
+                if (fechaEmision && fechaEmision.value && fechaVencimiento && fechaVencimiento.value) {
+                    if (new Date(fechaVencimiento.value) < new Date(fechaEmision.value)) {
+                        fechaVencimiento.setCustomValidity('La fecha de vencimiento debe ser posterior a la fecha de emisión');
+                        return false;
+                    } else {
+                        fechaVencimiento.setCustomValidity('');
+                        return true;
+                    }
+                }
+                return true;
+            }
+
+            if (fechaEmision && fechaVencimiento) {
+                fechaEmision.addEventListener('change', validarFechas);
+                fechaVencimiento.addEventListener('change', validarFechas);
+            }
+
+            // Preview del archivo
+            if (archivoInput && previewArchivo && nombreArchivo && quitarArchivo) {
+                archivoInput.addEventListener('change', function (e) {
+                    if (this.files && this.files[0]) {
+                        const file = this.files[0];
+
+                        // Validar tamaño (10MB)
+                        if (file.size > 10 * 1024 * 1024) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Archivo muy grande',
+                                text: 'El archivo no puede superar los 10MB'
+                            });
+                            this.value = '';
+                            return;
+                        }
+
+                        nombreArchivo.textContent = `${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+                        previewArchivo.classList.remove('d-none');
+                    } else {
+                        previewArchivo.classList.add('d-none');
+                    }
+                });
+
+                quitarArchivo.addEventListener('click', function () {
+                    archivoInput.value = '';
+                    previewArchivo.classList.add('d-none');
+                });
+            }
+
+            // Validación del formulario antes de enviar
+            if (form) {
+                form.addEventListener('submit', function (e) {
+                    const personaId = selectPersona ? selectPersona.value : '';
+                    const tipoDocumento = document.getElementById('tipo_documento_nombre') ? document.getElementById('tipo_documento_nombre').value : '';
+                    const numeroDoc = document.querySelector('input[name="numero_documento"]') ? document.querySelector('input[name="numero_documento"]').value : '';
+                    const fechaVenc = fechaVencimiento ? fechaVencimiento.value : '';
+
+                    let errores = [];
+
+                    if (!personaId) errores.push('Debe seleccionar una persona');
+                    if (!tipoDocumento || !tipoDocumento.trim()) errores.push('Debe especificar el tipo de documento');
+                    if (!numeroDoc || !numeroDoc.trim()) errores.push('Debe ingresar el número de documento');
+                    if (!fechaVenc) errores.push('Debe ingresar la fecha de vencimiento');
+
+                    if (!validarFechas()) {
+                        errores.push('La fecha de vencimiento debe ser posterior a la fecha de emisión');
+                    }
+
+                    if (errores.length > 0) {
+                        e.preventDefault();
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Campos incompletos',
+                            html: 'Por favor corrija los siguientes errores:<br>- ' + errores.join('<br>- ')
+                        });
+                    }
+                });
+            }
+
+            // Limpiar formulario al cerrar modal
+            const modal = document.getElementById('modalNuevoDocumentoPersona');
+            if (modal) {
+                modal.addEventListener('hidden.bs.modal', function () {
+                    if (form) form.reset();
+                    if (infoPersona) infoPersona.classList.add('d-none');
+                    if (previewArchivo) previewArchivo.classList.add('d-none');
+
+                    // Limpiar validaciones
+                    if (fechaVencimiento) fechaVencimiento.setCustomValidity('');
+                });
+            }
         });
 
+        // FUNCIÓN PARA VER DETALLE - AGREGADA
+        function verDetalle(id) {
+            // Redirigir a la página de detalle (ajusta la URL según tu ruta)
+            window.location.href = '/documentos-persona/detalle/' + id;
+        }
+
+        // FUNCIÓN PARA ELIMINAR DOCUMENTO - CORREGIDA
         function eliminarDocumento(id) {
             Swal.fire({
                 title: '¿Estás seguro?',
@@ -419,18 +641,21 @@
                 cancelButtonText: 'Cancelar'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    $.ajax({
-                        url: '/documentos-persona/eliminar/' + id,
+                    // Usar fetch en lugar de $.ajax para evitar dependencias
+                    fetch('/documentos-persona/eliminar/' + id, {
                         method: 'DELETE',
                         headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        success: function (response) {
-                            if (response.success) {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
                                 Swal.fire({
                                     icon: 'success',
                                     title: 'Eliminado',
-                                    text: response.message,
+                                    text: data.message,
                                     timer: 1500
                                 }).then(() => {
                                     location.reload();
@@ -439,21 +664,22 @@
                                 Swal.fire({
                                     icon: 'error',
                                     title: 'Error',
-                                    text: response.error || 'Error al eliminar'
+                                    text: data.error || 'Error al eliminar'
                                 });
                             }
-                        },
-                        error: function (xhr) {
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Error',
-                                text: xhr.responseJSON?.error || 'No se pudo eliminar el documento'
+                                text: 'No se pudo eliminar el documento'
                             });
-                        }
-                    });
+                        });
                 }
             });
         }
     </script>
 </body>
+
 </html>
