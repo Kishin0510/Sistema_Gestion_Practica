@@ -171,6 +171,10 @@ app.use((req, res) => {
     });
 });
 
+// Importar rutas
+const documentosPersonaRoutes = require('./routes/documentos_personas.routes');
+// Usar rutas
+app.use('/documentos-persona', documentosPersonaRoutes);
 
 // Iniciar servidor
 app.listen(PORT, () => {

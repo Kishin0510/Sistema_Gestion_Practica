@@ -186,9 +186,7 @@
                                                         </small>
                                                     </td>
                                                     <td>
-                                                        <span class="badge"
-                                                           
-                                                            <%= vehiculo.color %>
+                                                        <span class="badge" <%=vehiculo.color %>
                                                         </span>
                                                     </td>
                                                     <td>
@@ -231,17 +229,19 @@
             </div>
         </div>
     </main>
-
-    <!-- Footer -->
-    <footer class="footer-custom text-center mt-5">
+    <footer class="text-center text-white mt-5 py-4" style="background-color: #1e3a8a;">
         <div class="container">
-            <p class="mb-0">
-                &copy; <%= new Date().getFullYear() %> Sistema de Gestión Vehicular
+            <p class="mb-1">
+                &copy; 2026 Sistema de Gestión Vehicular
             </p>
-            <small>Control • Seguridad • Reportes</small>
+            <p class="small mb-1">
+                <i class="bi bi-shield-check me-1"></i>Control • Seguridad • Reportes
+            </p>
+            <small class="text-white-50">
+                <i class="bi bi-people-fill me-1"></i> Módulo de Grupos v2.0.0
+            </small>
         </div>
     </footer>
-
     <!-- Modal para detalles -->
     <div class="modal fade" id="detallesModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
@@ -261,19 +261,18 @@
             </div>
         </div>
     </div>
-
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
     <script>
         $(document).ready(function () {
-            // Auto-ocultar alertas después de 5 segundos
+
             setTimeout(function () {
                 $('.alert').fadeOut('slow');
             }, 5000);
 
-            // Confirmación para eliminar
+
             $('.btn-outline-danger').on('click', function (e) {
                 if (!confirm('¿Está seguro de eliminar este vehículo? Esta acción no se puede deshacer.')) {
                     e.preventDefault();

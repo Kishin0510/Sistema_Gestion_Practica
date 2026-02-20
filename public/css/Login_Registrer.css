@@ -92,3 +92,17 @@
 .login-footer-space {
     height: 40px;
 }
+
+.footer-custom {
+    background-color: #1e3a8a;
+    /* mismo azul oscuro */
+    border-top: 3px solid #3b82f6;
+}
+
+.footer-custom h5 {
+    font-weight: 600;
+}
+
+.footer-custom p {
+    margin-bottom: 5px;
+}

@@ -151,7 +151,6 @@
             </div>
         </div>
     </main>
-
     <div class="login-footer-space"></div>
 
     <!-- Bootstrap JS -->
@@ -203,19 +202,7 @@
                     // Si todo está bien, mostrar mensaje de procesando
                     mostrarMensaje('Procesando registro...', 'info');
                 });
-
-                // Función para mostrar mensajes
-                function mostrarMensaje(mensaje, tipo = 'info') {
-                    const mensajeDiv = document.getElementById('mensajeRegistro');
-                    mensajeDiv.innerHTML = `
-                        <div class="alert alert-${tipo} alert-dismissible fade show mt-3" role="alert">
-                            ${mensaje}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    `;
-                }
             }
-
             // Cambiar automáticamente a pestaña de registro si hay error de registro
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('tab') === 'register') {
