@@ -5,7 +5,6 @@ const path = require('path');
 const fs = require('fs');
 const documentoVehiculoController = require('../db/controllers/documentoController');
 
-
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         const dir = 'public/uploads/documentos/';
@@ -28,7 +27,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
     storage: storage,
-    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+    limits: { fileSize: 10 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
         const allowedTypes = [
             'application/pdf',
@@ -50,11 +49,19 @@ router.get('/', documentoVehiculoController.mostrarDocumentos);
 router.get('/api/vehiculos', documentoVehiculoController.apiVehiculos);
 router.get('/api/tipos', documentoVehiculoController.apiTiposDocumentos);
 router.get('/api/vehiculo/patente/:patente', documentoVehiculoController.buscarVehiculoPorPatente);
+router.get('/api/documento/:id', documentoVehiculoController.obtenerDocumentoPorId);
 router.post('/vehiculo/registrar',
     upload.single('archivo_documento'),
     documentoVehiculoController.agregarDocumento
 );
+
+router.post('/actualizar/:id',
+    upload.single('archivo_documento'),
+    documentoVehiculoController.actualizarDocumento
+);
+
 router.delete('/eliminar/:id', documentoVehiculoController.eliminarDocumento);
+
 router.use((err, req, res, next) => {
     console.error('Error en multer:', err);
 

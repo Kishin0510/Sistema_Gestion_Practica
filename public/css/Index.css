@@ -1,13 +1,13 @@
-/* ============================= */
-/* Variables */
+
+/* colores */
 :root {
     --primary: #1e3a8a;
     --primary-dark: #172554;
     --text-light: #ffffff;
 }
 
-/* ============================= */
-/* Navbar */
+
+/* Navbar de la pagina */
 .navbar {
     background-color: var(--primary) !important;
 }

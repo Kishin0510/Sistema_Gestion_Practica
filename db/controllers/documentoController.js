@@ -6,11 +6,10 @@ const path = require('path');
 const logError = (tag, err) => console.error(` ${tag}`, err.message || err);
 
 const documentoVehiculoController = {
-    
 
     mostrarDocumentos: async (req, res) => {
         try {
-            
+
             const [vehiculos] = await db.execute(`
                 SELECT 
                     v.id_vehiculo,
@@ -28,7 +27,6 @@ const documentoVehiculoController = {
                 ORDER BY v.patente ASC
             `);
 
-            // 2. Obtener tipos de documentos activos
             const [tiposDocumentos] = await db.execute(`
                 SELECT 
                     id_tipo_documento_veh,
@@ -42,7 +40,6 @@ const documentoVehiculoController = {
                 ORDER BY nombre_documento ASC
             `);
 
-            
             const [documentos] = await db.execute(`
                 SELECT 
                     dv.id_documento_veh,
@@ -68,7 +65,6 @@ const documentoVehiculoController = {
                 ORDER BY dv.fecha_vencimiento ASC, dv.fecha_subida DESC
             `);
 
-            
             const hoy = new Date();
             const documentosConEstado = documentos.map(doc => {
                 const vencimiento = new Date(doc.fecha_vencimiento);
@@ -108,12 +104,10 @@ const documentoVehiculoController = {
                 };
             });
 
-            // Separar documentos próximos a vencer (30 días o menos)
             const documentosProximos = documentosConEstado.filter(doc =>
                 doc.dias_restantes > 0 && doc.dias_restantes <= 30
             ).sort((a, b) => a.dias_restantes - b.dias_restantes);
 
-            // Estadísticas
             const totalDocumentos = documentos.length;
             const documentosVigentes = documentosConEstado.filter(d => d.dias_restantes > 30).length;
             const documentosPorVencer = documentosConEstado.filter(d => d.dias_restantes > 0 && d.dias_restantes <= 30).length;
@@ -133,7 +127,6 @@ const documentoVehiculoController = {
                 fecha: new Date(),
                 success_msg: req.query.success || null,
                 error_msg: req.query.error || null,
-                // Para debugging
                 debug: process.env.NODE_ENV === 'development'
             });
 
@@ -159,7 +152,6 @@ const documentoVehiculoController = {
         }
     },
 
-    
     agregarDocumento: async (req, res) => {
         let conn;
         try {
@@ -176,12 +168,10 @@ const documentoVehiculoController = {
                 enviar_alerta
             } = req.body;
 
-            // Validaciones básicas
             if (!id_vehiculo || !tipo_documento_nombre || !numero_documento || !fecha_vencimiento) {
                 throw new Error('Faltan campos obligatorios');
             }
 
-            // Verificar que el vehículo existe
             const [vehiculo] = await conn.execute(
                 'SELECT id_vehiculo, id_cliente FROM vehiculos WHERE id_vehiculo = ? AND activo = 1',
                 [id_vehiculo]
@@ -193,20 +183,16 @@ const documentoVehiculoController = {
 
             const id_cliente = vehiculo[0].id_cliente;
 
-            // PROCESAR TIPO DE DOCUMENTO
             let id_tipo_documento_veh = null;
 
-            // 1. Buscar si ya existe el tipo de documento por nombre
             const [tipoExistente] = await conn.execute(
                 'SELECT id_tipo_documento_veh FROM tipos_documento_veh WHERE nombre_documento = ? AND activo = 1',
                 [tipo_documento_nombre.trim()]
             );
 
             if (tipoExistente.length > 0) {
-                // Usar el tipo existente
                 id_tipo_documento_veh = tipoExistente[0].id_tipo_documento_veh;
             } else {
-                // 2. Crear nuevo tipo de documento
                 const [nuevoTipo] = await conn.execute(
                     `INSERT INTO tipos_documento_veh 
                      (id_cliente, nombre_documento, descripcion, dias_alerta, obligatorio, activo) 
@@ -215,8 +201,8 @@ const documentoVehiculoController = {
                         id_cliente,
                         tipo_documento_nombre.trim(),
                         'Creado automáticamente al registrar documento',
-                        30, // días de alerta por defecto
-                        false // no obligatorio por defecto
+                        30,
+                        false
                     ]
                 );
                 id_tipo_documento_veh = nuevoTipo.insertId;
@@ -224,7 +210,6 @@ const documentoVehiculoController = {
                 console.log(` Nuevo tipo de documento creado: ${tipo_documento_nombre} (ID: ${id_tipo_documento_veh})`);
             }
 
-            // Procesar archivo si existe
             let nombre_archivo = null;
             let ruta_archivo = null;
 
@@ -233,7 +218,6 @@ const documentoVehiculoController = {
                 ruta_archivo = `/uploads/documentos/${req.file.filename}`;
             }
 
-            // Insertar documento (AHORA CON ID VÁLIDO)
             const [result] = await conn.execute(`
                 INSERT INTO documentos_vehiculo (
                     id_vehiculo,
@@ -250,7 +234,7 @@ const documentoVehiculoController = {
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, 'vigente')
             `, [
                 id_vehiculo,
-                id_tipo_documento_veh, 
+                id_tipo_documento_veh,
                 numero_documento.trim(),
                 fecha_emision || null,
                 fecha_vencimiento,
@@ -260,7 +244,6 @@ const documentoVehiculoController = {
                 req.session?.usuario?.id_usuario || null
             ]);
 
-            // Si se marcó enviar alerta, crear registro en tabla alertas
             if (enviar_alerta === 'on' || enviar_alerta === 'true') {
                 const diasParaVencer = Math.ceil((new Date(fecha_vencimiento) - new Date()) / (1000 * 60 * 60 * 24));
 
@@ -307,7 +290,249 @@ const documentoVehiculoController = {
         }
     },
 
-    // Buscar vehículo por patente (API)
+    obtenerDocumentoPorId: async (req, res) => {
+        try {
+            const { id } = req.params;
+
+            const [documento] = await db.execute(`
+                SELECT 
+                    dv.id_documento_veh,
+                    dv.id_vehiculo,
+                    dv.id_tipo_documento_veh,
+                    dv.numero_documento,
+                    dv.fecha_emision,
+                    dv.fecha_vencimiento,
+                    dv.nombre_archivo,
+                    dv.ruta_archivo,
+                    dv.observaciones,
+                    dv.fecha_subida,
+                    dv.estado,
+                    v.patente,
+                    v.marca,
+                    v.modelo,
+                    COALESCE(td.nombre_documento, 'Sin tipo') as tipo_documento_nombre,
+                    td.id_tipo_documento_veh as tipo_documento_id
+                FROM documentos_vehiculo dv
+                LEFT JOIN vehiculos v ON dv.id_vehiculo = v.id_vehiculo
+                LEFT JOIN tipos_documento_veh td ON dv.id_tipo_documento_veh = td.id_tipo_documento_veh
+                WHERE dv.id_documento_veh = ?
+            `, [id]);
+
+            if (documento.length === 0) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Documento no encontrado'
+                });
+            }
+
+            const doc = documento[0];
+
+            // Formatear fechas para el input date (YYYY-MM-DD)
+            if (doc.fecha_emision) {
+                const fecha = new Date(doc.fecha_emision);
+                doc.fecha_emision = fecha.toISOString().split('T')[0];
+            }
+            if (doc.fecha_vencimiento) {
+                const fecha = new Date(doc.fecha_vencimiento);
+                doc.fecha_vencimiento = fecha.toISOString().split('T')[0];
+            }
+
+            res.json({
+                success: true,
+                documento: doc
+            });
+
+        } catch (err) {
+            logError('OBTENER DOCUMENTO POR ID', err);
+            res.status(500).json({
+                success: false,
+                error: 'Error al obtener el documento'
+            });
+        }
+    },
+
+    actualizarDocumento: async (req, res) => {
+        let conn;
+        try {
+            const { id } = req.params;
+            conn = await db.pool.promise().getConnection();
+            await conn.beginTransaction();
+
+            const {
+                id_vehiculo,
+                tipo_documento_nombre,
+                numero_documento,
+                fecha_emision,
+                fecha_vencimiento,
+                observaciones,
+                enviar_alerta
+            } = req.body;
+
+            // Validaciones básicas
+            if (!id_vehiculo || !tipo_documento_nombre || !numero_documento || !fecha_vencimiento) {
+                throw new Error('Faltan campos obligatorios');
+            }
+
+            // Obtener el documento actual
+            const [documentoActual] = await conn.execute(
+                'SELECT id_vehiculo, ruta_archivo, nombre_archivo FROM documentos_vehiculo WHERE id_documento_veh = ?',
+                [id]
+            );
+
+            if (documentoActual.length === 0) {
+                throw new Error('Documento no encontrado');
+            }
+
+            // Verificar que el vehículo existe
+            const [vehiculo] = await conn.execute(
+                'SELECT id_vehiculo, id_cliente FROM vehiculos WHERE id_vehiculo = ? AND activo = 1',
+                [id_vehiculo]
+            );
+
+            if (vehiculo.length === 0) {
+                throw new Error('El vehículo seleccionado no existe o está inactivo');
+            }
+
+            const id_cliente = vehiculo[0].id_cliente;
+
+            // PROCESAR TIPO DE DOCUMENTO
+            let id_tipo_documento_veh = null;
+
+            // Buscar si ya existe el tipo de documento por nombre
+            const [tipoExistente] = await conn.execute(
+                'SELECT id_tipo_documento_veh FROM tipos_documento_veh WHERE nombre_documento = ? AND activo = 1',
+                [tipo_documento_nombre.trim()]
+            );
+
+            if (tipoExistente.length > 0) {
+                id_tipo_documento_veh = tipoExistente[0].id_tipo_documento_veh;
+            } else {
+                // Crear nuevo tipo de documento
+                const [nuevoTipo] = await conn.execute(
+                    `INSERT INTO tipos_documento_veh 
+                     (id_cliente, nombre_documento, descripcion, dias_alerta, obligatorio, activo) 
+                     VALUES (?, ?, ?, ?, ?, 1)`,
+                    [
+                        id_cliente,
+                        tipo_documento_nombre.trim(),
+                        'Creado automáticamente al actualizar documento',
+                        30,
+                        false
+                    ]
+                );
+                id_tipo_documento_veh = nuevoTipo.insertId;
+            }
+
+            // Manejo de archivos - CORREGIDO
+            let nombre_archivo = documentoActual[0].nombre_archivo;
+            let ruta_archivo = documentoActual[0].ruta_archivo;
+
+            // Si se subió un archivo nuevo
+            if (req.file) {
+                // Eliminar archivo anterior si existe
+                if (documentoActual[0].ruta_archivo) {
+                    try {
+                        // Construir la ruta completa del archivo anterior
+                        const oldFilePath = path.join(__dirname, '../public', documentoActual[0].ruta_archivo);
+
+                        // Verificar si el archivo existe antes de intentar eliminarlo
+                        if (fs.existsSync(oldFilePath)) {
+                            fs.unlinkSync(oldFilePath);
+                            console.log(`Archivo anterior eliminado: ${oldFilePath}`);
+                        }
+                    } catch (fileErr) {
+                        // Solo loguear el error pero continuar con la actualización
+                        console.error('Error al eliminar archivo anterior:', fileErr.message);
+                    }
+                }
+
+                // Asignar nuevo archivo
+                nombre_archivo = req.file.filename;
+                ruta_archivo = `/uploads/documentos/${req.file.filename}`;
+            }
+
+            // Actualizar documento
+            await conn.execute(`
+                UPDATE documentos_vehiculo SET
+                    id_vehiculo = ?,
+                    id_tipo_documento_veh = ?,
+                    numero_documento = ?,
+                    fecha_emision = ?,
+                    fecha_vencimiento = ?,
+                    nombre_archivo = ?,
+                    ruta_archivo = ?,
+                    observaciones = ?,
+                    estado = CASE 
+                        WHEN fecha_vencimiento < CURDATE() THEN 'vencido'
+                        WHEN fecha_vencimiento <= DATE_ADD(CURDATE(), INTERVAL 30 DAY) THEN 'por_vencer'
+                        ELSE 'vigente'
+                    END
+                WHERE id_documento_veh = ?
+            `, [
+                id_vehiculo,
+                id_tipo_documento_veh,
+                numero_documento.trim(),
+                fecha_emision || null,
+                fecha_vencimiento,
+                nombre_archivo,
+                ruta_archivo,
+                observaciones || null,
+                id
+            ]);
+
+            // Manejar alertas
+            if (enviar_alerta === 'on' || enviar_alerta === 'true') {
+                const diasParaVencer = Math.ceil((new Date(fecha_vencimiento) - new Date()) / (1000 * 60 * 60 * 24));
+
+                if (diasParaVencer <= 30 && diasParaVencer > 0) {
+                    // Verificar si ya existe alerta para este documento
+                    const [alertaExistente] = await conn.execute(
+                        'SELECT id_alerta FROM alertas WHERE id_documento = ?',
+                        [id]
+                    );
+
+                    if (alertaExistente.length === 0) {
+                        await conn.execute(`
+                            INSERT INTO alertas (
+                                tipo_entidad,
+                                id_entidad,
+                                id_documento,
+                                tipo_alerta,
+                                mensaje,
+                                fecha_generacion
+                            ) VALUES (?, ?, ?, ?, ?, NOW())
+                        `, [
+                            'vehiculo',
+                            id_vehiculo,
+                            id,
+                            'documento_por_vencer',
+                            `Documento ${tipo_documento_nombre} N°${numero_documento} vence en ${diasParaVencer} días`
+                        ]);
+                    }
+                }
+            }
+
+            await conn.commit();
+
+            res.redirect(`/documentos?success=Documento actualizado exitosamente`);
+
+        } catch (err) {
+            if (conn) await conn.rollback();
+            logError('ACTUALIZAR DOCUMENTO', err);
+
+            let errorMsg = 'Error al actualizar el documento';
+            if (err.code === 'ER_DUP_ENTRY') {
+                errorMsg = 'El número de documento ya existe para este tipo';
+            } else if (err.message) {
+                errorMsg = err.message;
+            }
+
+            res.redirect(`/documentos?error=${encodeURIComponent(errorMsg)}`);
+        } finally {
+            if (conn) conn.release();
+        }
+    },
+
     buscarVehiculoPorPatente: async (req, res) => {
         try {
             const { patente } = req.params;
@@ -350,7 +575,6 @@ const documentoVehiculoController = {
         }
     },
 
-    // Obtener todos los vehículos (API)
     apiVehiculos: async (req, res) => {
         try {
             const [vehiculos] = await db.execute(`
@@ -383,7 +607,6 @@ const documentoVehiculoController = {
         }
     },
 
-    // Obtener tipos de documento (API)
     apiTiposDocumentos: async (req, res) => {
         try {
             const [tipos] = await db.execute(`
@@ -410,7 +633,6 @@ const documentoVehiculoController = {
         }
     },
 
-    // Eliminar documento
     eliminarDocumento: async (req, res) => {
         let conn;
         try {
@@ -419,7 +641,6 @@ const documentoVehiculoController = {
             conn = await db.pool.promise().getConnection();
             await conn.beginTransaction();
 
-            // Obtener información del documento
             const [documento] = await conn.execute(
                 'SELECT id_vehiculo, ruta_archivo FROM documentos_vehiculo WHERE id_documento_veh = ?',
                 [id]
@@ -429,7 +650,6 @@ const documentoVehiculoController = {
                 throw new Error('Documento no encontrado');
             }
 
-            // Eliminar archivo físico si existe
             if (documento[0].ruta_archivo) {
                 const filePath = path.join(__dirname, '../public', documento[0].ruta_archivo);
                 if (fs.existsSync(filePath)) {
@@ -437,13 +657,11 @@ const documentoVehiculoController = {
                 }
             }
 
-            // Eliminar alertas relacionadas
             await conn.execute(
                 'DELETE FROM alertas WHERE id_documento = ?',
                 [id]
             );
 
-            // Eliminar documento
             await conn.execute(
                 'DELETE FROM documentos_vehiculo WHERE id_documento_veh = ?',
                 [id]
@@ -468,7 +686,6 @@ const documentoVehiculoController = {
         }
     },
 
-    // Actualizar estado de documentos (tarea programada)
     actualizarEstadosDocumentos: async () => {
         let conn;
         try {
@@ -476,14 +693,12 @@ const documentoVehiculoController = {
 
             const hoy = new Date().toISOString().split('T')[0];
 
-            // Actualizar documentos vencidos
             await conn.execute(`
                 UPDATE documentos_vehiculo 
                 SET estado = 'vencido' 
                 WHERE fecha_vencimiento < ? AND estado != 'vencido'
             `, [hoy]);
 
-            // Actualizar documentos por vencer
             await conn.execute(`
                 UPDATE documentos_vehiculo 
                 SET estado = 'por_vencer' 
