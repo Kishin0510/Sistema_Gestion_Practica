@@ -4,7 +4,7 @@ const vehiculosController = {
     // Listar todos los vehículos
     listarVehiculos: async (req, res) => {
         try {
-            console.log('🔄 Cargando listado de vehículos...');
+            console.log(' Cargando listado de vehículos...');
 
             // Consulta corregida sin apellido_cliente
             const query = `
@@ -24,7 +24,7 @@ const vehiculosController = {
 
             const [vehiculos] = await db.query(query);
             
-            console.log(`✅ ${vehiculos.length} vehículo(s) cargado(s)`);
+            console.log(` ${vehiculos.length} vehículo(s) cargado(s)`);
 
             res.render('listarVehiculos', {
                 title: 'Listado de Vehículos',
@@ -34,7 +34,7 @@ const vehiculosController = {
             });
 
         } catch (error) {
-            console.error('❌ Error al listar vehículos:', error);
+            console.error(' Error al listar vehículos:', error);
             res.render('listarVehiculos', {
                 title: 'Listado de Vehículos',
                 vehiculos: [],
@@ -46,7 +46,7 @@ const vehiculosController = {
     // Mostrar formulario para agregar vehículo
     mostrarFormularioAgregar: async (req, res) => {
         try {
-            console.log('🔄 Cargando formulario de vehículo...');
+            console.log(' Cargando formulario de vehículo...');
 
             // Obtener clientes activos con más información
             let clientes = [];
@@ -55,9 +55,9 @@ const vehiculosController = {
                     'SELECT id_cliente, nombre_cliente, rut_cliente FROM clientes WHERE activo = 1 ORDER BY nombre_cliente'
                 );
                 clientes = rowsClientes || [];
-                console.log(`✅ ${clientes.length} cliente(s) cargado(s)`);
+                console.log(` ${clientes.length} cliente(s) cargado(s)`);
             } catch (err) {
-                console.log('⚠️ No se pudieron obtener clientes:', err.message);
+                console.log(' No se pudieron obtener clientes:', err.message);
             }
 
             // Obtener tipos de vehículo
@@ -65,9 +65,9 @@ const vehiculosController = {
             try {
                 const [rowsTipos] = await db.query('SELECT id_tipo_vehiculo, nombre_tipo FROM tipos_vehiculo ORDER BY nombre_tipo');
                 tiposVehiculo = rowsTipos || [];
-                console.log(`✅ ${tiposVehiculo.length} tipo(s) de vehículo cargado(s)`);
+                console.log(` ${tiposVehiculo.length} tipo(s) de vehículo cargado(s)`);
             } catch (err) {
-                console.log('⚠️ No se pudieron obtener tipos de vehículo:', err.message);
+                console.log(' No se pudieron obtener tipos de vehículo:', err.message);
             }
 
             // Datos del formulario si hay error
@@ -88,7 +88,7 @@ const vehiculosController = {
             });
 
         } catch (error) {
-            console.error('❌ Error al cargar formulario:', error);
+            console.error(' Error al cargar formulario:', error);
             res.render('agregarVehiculo', {
                 title: 'Agregar Vehículo',
                 clientes: [],
@@ -101,7 +101,7 @@ const vehiculosController = {
     // Procesar formulario de vehículo
     agregarVehiculo: async (req, res) => {
         try {
-            console.log('📝 Procesando nuevo vehículo...');
+            console.log(' Procesando nuevo vehículo...');
 
             const {
                 id_cliente,
@@ -172,7 +172,7 @@ const vehiculosController = {
             }
 
             // Insertar vehículo
-            console.log('➕ Insertando vehículo...');
+            console.log(' Insertando vehículo...');
 
             const [result] = await db.query(
                 `INSERT INTO vehiculos (
@@ -203,11 +203,11 @@ const vehiculosController = {
                 ]
             );
 
-            console.log('✅ Vehículo creado ID:', result.insertId);
+            console.log(' Vehículo creado ID:', result.insertId);
             return res.redirect(`/vehiculos?success=Vehículo agregado exitosamente (ID: ${result.insertId})`);
 
         } catch (error) {
-            console.error('❌ Error al agregar vehículo:', error);
+            console.error(' Error al agregar vehículo:', error);
 
             // Mantener datos si hay error
             const datosJSON = encodeURIComponent(JSON.stringify(req.body));
@@ -228,19 +228,19 @@ const vehiculosController = {
     eliminarVehiculo: async (req, res) => {
         try {
             const { id } = req.params;
-            console.log(`🗑️  Eliminando vehículo ID: ${id}`);
+            console.log(`  Eliminando vehículo ID: ${id}`);
 
             const [result] = await db.query('DELETE FROM vehiculos WHERE id_vehiculo = ?', [id]);
 
             if (result.affectedRows > 0) {
-                console.log(`✅ Vehículo ${id} eliminado`);
+                console.log(` Vehículo ${id} eliminado`);
                 return res.redirect('/vehiculos?success=Vehículo eliminado exitosamente');
             } else {
                 return res.redirect('/vehiculos?error=Vehículo no encontrado');
             }
 
         } catch (error) {
-            console.error('❌ Error al eliminar vehículo:', error);
+            console.error(' Error al eliminar vehículo:', error);
             
             if (error.code === 'ER_ROW_IS_REFERENCED_2') {
                 return res.redirect('/vehiculos?error=No se puede eliminar el vehículo porque tiene documentos asociados');
@@ -287,7 +287,7 @@ const vehiculosController = {
             });
 
         } catch (error) {
-            console.error('❌ Error al cargar formulario de edición:', error);
+            console.error(' Error al cargar formulario de edición:', error);
             res.redirect('/vehiculos?error=Error al cargar formulario de edición');
         }
     },
@@ -296,7 +296,7 @@ const vehiculosController = {
     actualizarVehiculo: async (req, res) => {
         try {
             const { id } = req.params;
-            console.log(`📝 Actualizando vehículo ID: ${id}`);
+            console.log(` Actualizando vehículo ID: ${id}`);
 
             const {
                 id_cliente,
@@ -382,12 +382,11 @@ const vehiculosController = {
                     id
                 ]
             );
-
-            console.log(`✅ Vehículo ${id} actualizado`);
+            console.log(` Vehículo ${id} actualizado`);
             return res.redirect('/vehiculos?success=Vehículo actualizado exitosamente');
 
         } catch (error) {
-            console.error('❌ Error al actualizar vehículo:', error);
+            console.error(' Error al actualizar vehículo:', error);
             return res.redirect(`/vehiculos/editar/${req.params.id}?error=Error al actualizar vehículo`);
         }
     },
@@ -396,7 +395,7 @@ const vehiculosController = {
     obtenerDetallesVehiculo: async (req, res) => {
         try {
             const { id } = req.params;
-            console.log(`🔍 Obteniendo detalles vehículo ID: ${id}`);
+            console.log(` Obteniendo detalles vehículo ID: ${id}`);
             
             const query = `
                 SELECT 
@@ -422,7 +421,7 @@ const vehiculosController = {
             res.json(vehiculos[0]);
             
         } catch (error) {
-            console.error('❌ Error al obtener detalles del vehículo:', error);
+            console.error(' Error al obtener detalles del vehículo:', error);
             res.status(500).json({ error: 'Error del servidor' });
         }
     }

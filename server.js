@@ -59,7 +59,7 @@ cargarRutas('Personas', '/personas', './routes/personas.routes');
 cargarRutas('Vehículos', '/vehiculos', './routes/vehiculos.routes');
 cargarRutas('Documentos', '/documentos', './routes/documentos.routes');
 
-// --- 3. RUTAS DE VISTA DIRECTAS ---
+// RUTAS DIRECTAS A LAS VENTANAS 
 
 // Home
 app.get('/', async (req, res) => {

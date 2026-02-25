@@ -17,28 +17,34 @@
         .table-hover tbody tr:hover {
             background-color: rgba(13, 110, 253, 0.05);
         }
+
         .card-header {
             background: linear-gradient(135deg, #198754 0%, #20c997 100%);
             color: white;
         }
+
         .vehiculo-row {
             cursor: pointer;
             transition: all 0.2s;
         }
+
         .vehiculo-row:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
+
         .navbar-custom {
             background-color: #0d6efd;
             box-shadow: 0 2px 4px rgba(0, 0, 0, .1);
         }
+
         .footer-custom {
             background-color: #343a40;
             color: white;
             padding: 1rem 0;
             margin-top: 2rem;
         }
+
         .patente-badge {
             background-color: #198754;
             color: white;
@@ -46,8 +52,22 @@
             font-weight: bold;
             letter-spacing: 1px;
         }
+
+        /* Estilo para el botón de Excel */
+        .btn-excel {
+            background-color: #1e7e34;
+            border-color: #1c6b2b;
+            color: white;
+        }
+
+        .btn-excel:hover {
+            background-color: #15612a;
+            border-color: #0f4a20;
+            color: white;
+        }
     </style>
 </head>
+
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
         <div class="container">
@@ -79,9 +99,6 @@
                             </h2>
                             <small class="opacity-75">Gestión completa de vehículos registrados</small>
                         </div>
-                        <a href="/vehiculos/agregar" class="btn btn-light">
-                            <i class="bi bi-plus-circle me-1"></i>Agregar Nuevo
-                        </a>
                     </div>
                     <!-- Mensajes de éxito/error -->
                     <% if (typeof success !=='undefined' && success) { %>
@@ -201,11 +218,16 @@
                                             </strong> vehículo(s)
                                         </span>
                                     </div>
-                                    <div>
+                                    <div class="d-flex gap-2">
+                                        <!-- NUEVO BOTÓN DE EXCEL TAMBIÉN AQUÍ -->
+                                        <a href="/vehiculos/exportar-excel" class="btn btn-excel"
+                                            id="exportarExcelFooter">
+                                            <i class="bi bi-file-excel me-1"></i>Descargar Lista Excel
+                                        </a>
                                         <a href="/vehiculos/agregar" class="btn btn-success">
                                             <i class="bi bi-plus-circle me-1"></i>Agregar Nuevo
                                         </a>
-                                        <a href="/" class="btn btn-outline-secondary ms-2">
+                                        <a href="/" class="btn btn-outline-secondary">
                                             <i class="bi bi-house me-1"></i>Volver al Inicio
                                         </a>
                                     </div>
@@ -257,11 +279,26 @@
                 $('.alert').fadeOut('slow');
             }, 5000);
 
-
             $('.btn-outline-danger').on('click', function (e) {
                 if (!confirm('¿Está seguro de eliminar este vehículo? Esta acción no se puede deshacer.')) {
                     e.preventDefault();
                 }
+            });
+
+            // Feedback visual para el botón de Excel
+            $('#exportarExcel, #exportarExcelFooter').on('click', function (e) {
+                const $btn = $(this);
+                const textoOriginal = $btn.html();
+
+                // Cambiar botón a estado de carga
+                $btn.html('<span class="spinner-border spinner-border-sm me-2"></span>Generando Excel...');
+                $btn.prop('disabled', true);
+
+                // Restaurar después de 2 segundos (asumiendo que la descarga comenzó)
+                setTimeout(function () {
+                    $btn.html(textoOriginal);
+                    $btn.prop('disabled', false);
+                }, 2000);
             });
         });
 
@@ -394,5 +431,4 @@
         }
     </script>
 </body>
-
 </html>
