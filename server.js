@@ -8,8 +8,6 @@ const db = require('./db/conexion');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-
-
 // --- Middlewares Base ---
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -43,7 +41,6 @@ app.use((req, res, next) => {
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-
 const cargarRutas = (nombre, ruta, pathArchivo) => {
     try {
         const router = require(pathArchivo);
@@ -70,13 +67,13 @@ app.get('/', async (req, res) => {
         res.render('Home', { title: 'Inicio', fecha: new Date() });
     }
 });
+
 // Ruta para mostrar la página de login/registro
 app.get('/login', async (req, res) => {
     try {
-
         res.render('Login', {
             title: 'Iniciar Sesión | Registrarse',
-            messages: req.flash ? req.flash() : {} // Si usas connect-flash
+            messages: req.flash ? req.flash() : {}
         });
     } catch (error) {
         console.error('Error al cargar la página de login:', error);
@@ -88,15 +85,13 @@ app.get('/login', async (req, res) => {
 });
 
 app.get('/documentos-personas', async (req, res) => {
-    // ... tu lógica existente
     res.render('DocumentosPersonas', {
         title: 'Gestión Documental - Personas',
-        currentRoute: '/documentos-personas', // ← Agrega esto
-        // ... tus otras variables
+        currentRoute: '/documentos-personas',
     });
 });
 
-// GET: Formulario Agregar Grupo para agregar a la bd
+// GET: Formulario Agregar Grupo
 app.get('/grupos/crear', async (req, res) => {
     try {
         const [clientes] = await db.query('SELECT id_cliente, nombre_cliente as nombre FROM clientes WHERE activo = 1');
@@ -114,12 +109,11 @@ app.get('/grupos/crear', async (req, res) => {
     }
 });
 
-// POST: Procesar el guardado de Grupo y Redirigir al Home de la aplicación una vez creado el grupo en la base de datos
+// POST: Procesar el guardado de Grupo
 app.post('/grupos/crear', async (req, res) => {
     let { id_cliente, nombre_grupo, nombre_compania, nombre_contacto, email_contacto, direccion, ciudad, activo } = req.body;
 
     try {
-        // Lógica de Cliente Automático
         if (!id_cliente || id_cliente === "0") {
             const [nuevoCliente] = await db.query(
                 'INSERT INTO clientes (nombre_cliente, activo) VALUES (?, 1)',
@@ -145,36 +139,18 @@ app.post('/grupos/crear', async (req, res) => {
     }
 });
 
-try {
-    const documentosPersonaRoutes = require('./routes/documentos_personas.routes');
-    app.use('/documentos-persona', documentosPersonaRoutes);
-    console.log('Rutas de Documentos de Personas cargadas en /documentos-persona');
-} catch (error) {
-    console.error(' Error al cargar rutas de Documentos de Personas:', error.message);
-}
-
-// RUTA MANEJRA ERRORES (SIEMPRE AL FINAL)
-app.use((req, res) => {
-    res.status(404).render('Home', {
-        title: 'Página no encontrada',
-        error_msg: 'La ruta solicitada no existe.',
-        fecha: new Date()
-    });
-});
-
-// RUTA MANEJRA ERRORES
-app.use((req, res) => {
-    res.status(404).render('Home', {
-        title: 'Página no encontrada',
-        error_msg: 'La ruta solicitada no existe.',
-        fecha: new Date()
-    });
-});
-
-// Importar rutas
+// Importar rutas (UNA SOLA VEZ)
 const documentosPersonaRoutes = require('./routes/documentos_personas.routes');
-// Usar rutas
 app.use('/documentos-persona', documentosPersonaRoutes);
+
+// RUTA MANEJAR ERRORES (SOLO UNA)
+app.use((req, res) => {
+    res.status(404).render('Home', {
+        title: 'Página no encontrada',
+        error_msg: 'La ruta solicitada no existe.',
+        fecha: new Date()
+    });
+});
 
 // Iniciar servidor
 app.listen(PORT, () => {
