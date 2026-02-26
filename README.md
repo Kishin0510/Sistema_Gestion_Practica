@@ -10,6 +10,7 @@ Registro de Entidades
 Entidad	Identificador Único	Beneficio
 Personas	RUN	Evita duplicidad de registros
 Vehículos	Patente	Asegura trazabilidad completa
+
 📄 Gestión Documental
 Para cada persona o vehículo se pueden asociar documentos configurables, tales como:
 
@@ -24,6 +25,7 @@ graph LR
     B --> D[Control Centralizado]
     C --> D
     D --> E[Alertas y Notificaciones]
+    
 Cada documento contempla:
 
 📅 Fecha de emisión
