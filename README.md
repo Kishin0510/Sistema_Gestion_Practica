@@ -1,4 +1,4 @@
-📋 Plataforma de Gestión Documental y Alertas
+📋 Plataforma de Gestión Documental y Alertas Administración de Personas y Vehículos
 
 📌 Descripción General
 El sistema es una plataforma de gestión documental y alertas orientada a la administración de personas y vehículos, diseñada para entornos empresariales como:
@@ -50,3 +50,5 @@ Centralizar la información documental de personas y vehículos, proporcionando 
 "Una solución integral para la gestión documental en industrias críticas, garantizando cumplimiento normativo y eficiencia operativa"
 
 Versión 1.0 | Plataforma de Gestión Documental y Alertas
+
+</div>
