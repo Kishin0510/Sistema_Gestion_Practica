@@ -1,54 +1,73 @@
-📁🚛 Plataforma de Gestión Documental y Alertas
+Plataforma de Gestión Documental y Alertas
 Administración de Personas y Vehículos
-🧭 Descripción General
 
-El sistema es una plataforma de gestión documental y alertas orientada a la administración de personas y vehículos, diseñada para entornos empresariales como:
+Descripción General
 
-⛏ Minería
+La plataforma constituye un sistema integral de gestión documental y alertas, especializado en la administración de personas y vehículos para entornos empresariales de alto rendimiento, con presencia en los siguientes sectores:
 
-🚚 Transporte
+Minería
 
-🏭 Servicios industriales
+Transporte
 
-Permite registrar:
+Servicios industriales
 
-👤 Personas, identificadas de forma única por RUN
+Modelo de Identificación Única
+El sistema implementa un esquema de identificación unívoca para garantizar la integridad referencial:
 
-🚗 Vehículos, identificados de forma única por patente
+Entidad	Identificador	Propósito
+Personas	RUN	Registro único e irrepetible de individuos
+Vehículos	Patente	Trazabilidad completa del parque automotor
+Este enfoque elimina la duplicidad de información y asegura la trazabilidad histórica de cada entidad registrada.
 
-Esto evita la duplicidad de información y asegura la trazabilidad de cada entidad.
+Gestión Documental
+La plataforma permite la asociación de documentos configurables para cada persona o vehículo, incluyendo:
 
-📄 Gestión Documental
+Licencias profesionales
 
-Para cada persona o vehículo se pueden asociar documentos configurables, tales como:
+Certificaciones técnicas
 
-Licencias
+Permisos operativos
 
-Certificaciones
+Exámenes médicos ocupacionales
 
-Permisos
+Documentación interna corporativa
 
-Exámenes
+Estructura Documental
 
-Documentos internos del cliente
+<img width="2025" height="1603" alt="deepseek_mermaid_20260226_64bcba" src="https://github.com/user-attachments/assets/a745dfa7-4798-4ad3-8f29-a98da9ac64f6" />
 
-Cada documento contempla:
 
-📅 Fecha de emisión
+Cada documento incorpora los siguientes atributos temporales:
 
-⏳ Fecha de vencimiento
+Fecha de emisión: registro del momento de generación o recepción
 
-permitiendo un control centralizado del estado documental.
+Fecha de vencimiento: control de vigencia y caducidad
 
-📐 Diagrama de Casos de Uso
-<p align="center"> <img src="https://github.com/user-attachments/assets/f829b06c-e50e-4938-a372-da774fe2e237" width="600"/> </p>
-🧩 Diagrama de Clases
-<p align="center"> <img src="https://github.com/user-attachments/assets/140cfc16-f3af-48f1-a2d5-56e477228933" width="1000"/> </p>
-✨ Objetivo del Sistema
+Esta estructura permite un control centralizado del estado documental y la generación proactiva de alertas.
 
-Centralizar la información documental de personas y vehículos, proporcionando una herramienta clara y estructurada que permita:
+Diagrama de Casos de Uso
+<div align="center"> <img src="https://github.com/user-attachments/assets/f829b06c-e50e-4938-a372-da774fe2e237" width="600" style="border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"/> <p><em>Figura 1: Especificación de casos de uso del sistema</em></p> </div>
+Diagrama de Clases
+<div align="center"> <img src="https://github.com/user-attachments/assets/140cfc16-f3af-48f1-a2d5-56e477228933" width="1000" style="border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"/> <p><em>Figura 2: Modelo de clases UML</em></p> </div>
+Objetivos Estratégicos
+El sistema persigue los siguientes objetivos fundamentales:
 
-✔ Mantener registros únicos
-✔ Asociar documentación de forma flexible
-✔ Controlar fechas críticas
-✔ Facilitar la administración operativa
+Objetivo	Descripción	Beneficio
+Unicidad de registro	Mantener repositorios no redundantes	Integridad de datos
+Flexibilidad documental	Adaptación a diferentes tipologías documentales	Escalabilidad funcional
+Gestión temporal	Control de vencimientos y caducidades	Mitigación de riesgos
+Eficiencia operativa	Optimización de procesos administrativos	Reducción de costos
+Valor Agregado
+La plataforma proporciona una solución tecnológica robusta para la gestión documental en industrias reguladas, garantizando:
+
+Cumplimiento normativo
+
+Trazabilidad completa
+
+Alertas tempranas
+
+Eficiencia administrativa
+
+<div align="center">
+Plataforma de Gestión Documental y Alertas
+Versión 2.0 | Especificación Técnica
