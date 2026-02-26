@@ -23,13 +23,12 @@ app.use(session({
 
 app.use(flash());
 
-// --- 1. CONFIGURACIÓN DE VARIABLES GLOBALES (CRUCIAL) ---
-// Debe ir antes de cualquier ruta
+
 app.use((req, res, next) => {
     res.locals.success_msg = req.flash('success');
     res.locals.error_msg = req.flash('error');
 
-    // Persistencia de formulario y alertas
+    
     res.locals.formData = req.flash('formData')[0] || {};
     res.locals.error = req.flash('error');
     res.locals.success = req.flash('success');
@@ -51,14 +50,13 @@ const cargarRutas = (nombre, ruta, pathArchivo) => {
     }
 };
 
-// Carga las rutas de personas (aquí se define /personas)
+
 cargarRutas('Personas', '/personas', './routes/personas.routes');
 cargarRutas('Vehículos', '/vehiculos', './routes/vehiculos.routes');
 cargarRutas('Documentos', '/documentos', './routes/documentos.routes');
 
-// RUTAS DIRECTAS A LAS VENTANAS 
 
-// Home
+// RUTA QUE TE LLEVA AL HOME.EJS DONDE INICIA EL SISTEMA
 app.get('/', async (req, res) => {
     try {
         const [rows] = await db.query('SELECT NOW() AS fecha');
@@ -68,7 +66,7 @@ app.get('/', async (req, res) => {
     }
 });
 
-// Ruta para mostrar la página de login/registro
+
 app.get('/login', async (req, res) => {
     try {
         res.render('Login', {
@@ -91,7 +89,7 @@ app.get('/documentos-personas', async (req, res) => {
     });
 });
 
-// GET: Formulario Agregar Grupo
+
 app.get('/grupos/crear', async (req, res) => {
     try {
         const [clientes] = await db.query('SELECT id_cliente, nombre_cliente as nombre FROM clientes WHERE activo = 1');
@@ -109,7 +107,7 @@ app.get('/grupos/crear', async (req, res) => {
     }
 });
 
-// POST: Procesar el guardado de Grupo
+
 app.post('/grupos/crear', async (req, res) => {
     let { id_cliente, nombre_grupo, nombre_compania, nombre_contacto, email_contacto, direccion, ciudad, activo } = req.body;
 
@@ -139,11 +137,11 @@ app.post('/grupos/crear', async (req, res) => {
     }
 });
 
-// Importar rutas (UNA SOLA VEZ)
+
 const documentosPersonaRoutes = require('./routes/documentos_personas.routes');
 app.use('/documentos-persona', documentosPersonaRoutes);
 
-// RUTA MANEJAR ERRORES (SOLO UNA)
+
 app.use((req, res) => {
     res.status(404).render('Home', {
         title: 'Página no encontrada',
@@ -152,7 +150,7 @@ app.use((req, res) => {
     });
 });
 
-// Iniciar servidor
+
 app.listen(PORT, () => {
     console.log('='.repeat(50));
     console.log(` Servidor: http://localhost:${PORT}`);

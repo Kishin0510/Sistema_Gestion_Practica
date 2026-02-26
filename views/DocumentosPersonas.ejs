@@ -84,7 +84,6 @@
             </div>
         </nav>
     </header>
-
     <main class="container mt-4 mb-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2><i class="fas fa-file-alt me-2 text-primary"></i>Gestión Documental - Personas</h2>
@@ -152,7 +151,6 @@
                 </div>
             </div>
         </div>
-
         <div class="card shadow-sm">
             <div class="card-header bg-primary text-white py-3">
                 <h5 class="mb-0"><i class="fas fa-list me-2"></i>Documentos Registrados</h5>
@@ -218,7 +216,6 @@
             </div>
         </div>
     </main>
-
     <div class="modal fade" id="modalNuevoDocumentoPersona" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -247,7 +244,6 @@
                                 <small id="cargoPersona" class="text-muted"></small>
                             </div>
                         </div>
-
                         <div class="mb-3">
                             <label class="form-label fw-bold required-field">Tipo de Documento</label>
                             <input type="text" class="form-control" name="tipo_documento_nombre" list="sugerenciasTipo"
@@ -259,7 +255,6 @@
                                 <option value="Certificado de Antecedentes">
                             </datalist>
                         </div>
-
                         <div class="mb-3">
                             <label class="form-label fw-bold required-field">Número de Documento</label>
                             <input type="text" class="form-control" name="numero_documento" required>
@@ -272,10 +267,9 @@
                                     class="form-label fw-bold required-field">Vencimiento</label><input type="date"
                                     class="form-control" name="fecha_vencimiento" required></div>
                         </div>
-
                         <div class="mb-3">
                             <label class="form-label">Archivo</label>
-                            <input type="file" class="form-control" name="archivo_documento" id="archivo_documento"
+                            <input type="file" class="form-control" name="archivo" id="archivo_documento"
                                 accept=".pdf,.jpg,.jpeg,.png">
                             <div id="previewArchivo" class="mt-2 d-none">
                                 <div class="alert alert-info p-2 d-flex justify-content-between align-items-center">
@@ -284,7 +278,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <div class="mb-3">
                             <label class="form-label">Observaciones</label>
                             <textarea class="form-control" name="observaciones" rows="2"></textarea>
@@ -304,20 +297,17 @@
             </div>
         </div>
     </div>
-
     <footer class="mt-auto text-center text-white py-4" style="background-color: #1e3a8a;">
         <div class="container">
             <p class="mb-1">&copy; 2026 Sistema de Gestión Vehicular</p>
             <p class="small mb-1">Control • Seguridad • Reportes</p>
         </div>
     </footer>
-
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <script>
         $(document).ready(function () {
             if ($('#tablaDocumentos').length) {
