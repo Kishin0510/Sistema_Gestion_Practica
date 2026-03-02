@@ -4,7 +4,7 @@ const personasController = {
     // Listar todas las personas
     listarPersonas: async (req, res) => {
         try {
-            console.log('🔄 Cargando listado de personas...');
+            console.log(' Cargando listado de personas...');
 
             // Primero, verifiquemos la estructura de la tabla
             const [estructura] = await db.query('DESCRIBE personas');
@@ -24,7 +24,7 @@ const personasController = {
 
             const [personas] = await db.query(query);
             
-            console.log(`✅ ${personas.length} persona(s) cargada(s)`);
+            console.log(` ${personas.length} persona(s) cargada(s)`);
 
             res.render('listarPersonas', {
                 title: 'Listado de Personas',
@@ -34,7 +34,7 @@ const personasController = {
             });
 
         } catch (error) {
-            console.error('❌ Error al listar personas:', error);
+            console.error(' Error al listar personas:', error);
             
             // Intentar con una consulta más simple
             try {
@@ -52,7 +52,7 @@ const personasController = {
                     error: req.query.error
                 });
             } catch (err2) {
-                console.error('❌ Error en consulta de respaldo:', err2);
+                console.error(' Error en consulta de respaldo:', err2);
                 res.render('listarPersonas', {
                     title: 'Listado de Personas',
                     personas: [],
@@ -65,7 +65,7 @@ const personasController = {
     // Mostrar formulario para agregar persona
     mostrarFormularioAgregar: async (req, res) => {
         try {
-            console.log('🔄 Cargando formulario de agregar persona...');
+            console.log(' Cargando formulario de agregar persona...');
 
             // Obtener clientes activos
             let clientes = [];
@@ -74,9 +74,9 @@ const personasController = {
                     'SELECT id_cliente, nombre_cliente, rut_cliente FROM clientes WHERE activo = 1 ORDER BY nombre_cliente'
                 );
                 clientes = rowsClientes || [];
-                console.log(`✅ ${clientes.length} cliente(s) cargado(s)`);
+                console.log(` ${clientes.length} cliente(s) cargado(s)`);
             } catch (err) {
-                console.log('⚠️ No se pudieron obtener clientes:', err.message);
+                console.log(' No se pudieron obtener clientes:', err.message);
             }
 
             // Datos del formulario si hay error
@@ -100,7 +100,7 @@ const personasController = {
             });
 
         } catch (error) {
-            console.error('❌ Error al cargar formulario:', error);
+            console.error(' Error al cargar formulario:', error);
             res.render('agregarPersona', {
                 title: 'Agregar Persona',
                 clientes: [],
@@ -113,7 +113,7 @@ const personasController = {
     // Procesar formulario de persona
     agregarPersona: async (req, res) => {
         try {
-            console.log('📝 Procesando nueva persona...');
+            console.log(' Procesando nueva persona...');
 
             const {
                 id_cliente,
@@ -169,7 +169,7 @@ const personasController = {
 
             // Si no hay cliente seleccionado o es 0, crear uno
             if (!clienteId || clienteId === '0') {
-                console.log('➕ Creando cliente automáticamente...');
+                console.log(' Creando cliente automáticamente...');
                 
                 const nombreCompleto = `${nombres} ${apellido_paterno} ${apellido_materno || ''}`.trim();
                 const rutCompleto = `${run}-${dv.toUpperCase()}`;
@@ -188,9 +188,9 @@ const personasController = {
                     
                     clienteId = clienteResult.insertId;
                     clienteCreado = true;
-                    console.log(`✅ Cliente creado ID: ${clienteId}`);
+                    console.log(` Cliente creado ID: ${clienteId}`);
                 } catch (clienteErr) {
-                    console.error('❌ Error creando cliente:', clienteErr);
+                    console.error(' Error creando cliente:', clienteErr);
                     const datosJSON = encodeURIComponent(JSON.stringify(req.body));
                     return res.redirect(`/personas/agregar?error=No se pudo crear cliente automático&datos=${datosJSON}`);
                 }
@@ -219,7 +219,7 @@ const personasController = {
             }
 
             // Insertar persona
-            console.log('➕ Insertando persona...');
+            console.log(' Insertando persona...');
 
             const [result] = await db.query(
                 `INSERT INTO personas (
@@ -250,7 +250,7 @@ const personasController = {
                 ]
             );
 
-            console.log('✅ Persona creada ID:', result.insertId);
+            console.log(' Persona creada ID:', result.insertId);
             
             let mensajeExito = `Persona agregada exitosamente (ID: ${result.insertId})`;
             if (clienteCreado) {
@@ -260,13 +260,13 @@ const personasController = {
             return res.redirect(`/personas?success=${encodeURIComponent(mensajeExito)}`);
 
         } catch (error) {
-            console.error('❌ Error al agregar persona:', error);
+            console.error(' Error al agregar persona:', error);
 
             // Mantener datos si hay error
             const datosJSON = encodeURIComponent(JSON.stringify(req.body));
 
             if (error.code === 'ER_BAD_FIELD_ERROR') {
-                console.error('❌ Error de campo en base de datos:', error.sqlMessage);
+                console.error(' Error de campo en base de datos:', error.sqlMessage);
                 return res.redirect(`/personas/agregar?error=Error en estructura de base de datos&datos=${datosJSON}`);
             }
 
@@ -286,7 +286,7 @@ const personasController = {
     mostrarFormularioEditar: async (req, res) => {
         try {
             const { id } = req.params;
-            console.log(`✏️  Cargando formulario edición persona ID: ${id}`);
+            console.log(`  Cargando formulario edición persona ID: ${id}`);
 
             // Obtener persona - usar id_persona
             const [personas] = await db.query(
@@ -313,7 +313,7 @@ const personasController = {
             });
 
         } catch (error) {
-            console.error('❌ Error al cargar formulario de edición:', error);
+            console.error(' Error al cargar formulario de edición:', error);
             res.redirect('/personas?error=Error al cargar formulario de edición');
         }
     },
@@ -322,7 +322,7 @@ const personasController = {
     actualizarPersona: async (req, res) => {
         try {
             const { id } = req.params;
-            console.log(`📝 Actualizando persona ID: ${id}`);
+            console.log(` Actualizando persona ID: ${id}`);
 
             const {
                 id_cliente,
@@ -406,11 +406,11 @@ const personasController = {
                 ]
             );
 
-            console.log(`✅ Persona ${id} actualizada`);
+            console.log(` Persona ${id} actualizada`);
             return res.redirect('/personas?success=Persona actualizada exitosamente');
 
         } catch (error) {
-            console.error('❌ Error al actualizar persona:', error);
+            console.error(' Error al actualizar persona:', error);
             return res.redirect(`/personas/editar/${req.params.id}?error=Error al actualizar persona`);
         }
     },
@@ -419,19 +419,19 @@ const personasController = {
     eliminarPersona: async (req, res) => {
         try {
             const { id } = req.params;
-            console.log(`🗑️  Eliminando persona ID: ${id}`);
+            console.log(`  Eliminando persona ID: ${id}`);
 
             const [result] = await db.query('DELETE FROM personas WHERE id_persona = ?', [id]);
 
             if (result.affectedRows > 0) {
-                console.log(`✅ Persona ${id} eliminada`);
+                console.log(` Persona ${id} eliminada`);
                 return res.redirect('/personas?success=Persona eliminada exitosamente');
             } else {
                 return res.redirect('/personas?error=Persona no encontrada');
             }
 
         } catch (error) {
-            console.error('❌ Error al eliminar persona:', error);
+            console.error(' Error al eliminar persona:', error);
             
             if (error.code === 'ER_ROW_IS_REFERENCED_2') {
                 return res.redirect('/personas?error=No se puede eliminar la persona porque tiene vehículos asociados');

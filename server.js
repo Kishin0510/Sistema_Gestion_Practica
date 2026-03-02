@@ -29,7 +29,7 @@ app.use((req, res, next) => {
     res.locals.success_msg = req.flash('success');
     res.locals.error_msg = req.flash('error');
 
-    
+
     res.locals.formData = req.flash('formData')[0] || {};
     res.locals.error = req.flash('error');
     res.locals.success = req.flash('success');
@@ -138,6 +138,49 @@ app.post('/grupos/crear', async (req, res) => {
     }
 });
 
+// RUTA PARA LISTAR TODOS LOS GRUPOS CREADOS CON FORMATO TARJETA, TABLA
+app.get('/grupos', async (req, res) => {
+    try {
+        // Obtener todos los grupos con información del cliente
+        const [grupos] = await db.query(`
+            SELECT 
+                g.*,
+                c.nombre_cliente 
+            FROM grupos g
+            LEFT JOIN clientes c ON g.id_cliente = c.id_cliente
+            ORDER BY g.fecha_creacion DESC
+        `);
+
+        // Crear un objeto con nombres de clientes para referencia rápida en la vista
+        const cliente_nombre = {};
+        grupos.forEach(grupo => {
+            if (grupo.nombre_cliente) {
+                cliente_nombre[grupo.id_cliente] = grupo.nombre_cliente;
+            }
+        });
+
+        // CAMBIO IMPORTANTE: Cambiar 'grupos/listaGrupos' por 'listaGrupos'
+        res.render('listaGrupos', {
+            title: 'Mis Grupos',
+            grupos: grupos,
+            cliente_nombre: cliente_nombre,
+            success_msg: req.flash('success'),
+            error_msg: req.flash('error')
+        });
+
+    } catch (error) {
+        console.error('Error al obtener grupos:', error);
+        req.flash('error', 'Error al cargar los grupos');
+        // CAMBIO IMPORTANTE: También aquí
+        res.render('listaGrupos', {
+            title: 'Mis Grupos',
+            grupos: [],
+            cliente_nombre: {},
+            success_msg: req.flash('success'),
+            error_msg: 'Error al cargar los grupos'
+        });
+    }
+});
 
 const documentosPersonaRoutes = require('./routes/documentos_personas.routes');
 app.use('/documentos-persona', documentosPersonaRoutes);

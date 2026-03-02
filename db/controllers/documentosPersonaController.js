@@ -86,9 +86,7 @@ const documentosPersonaController = {
         }
     },
 
-    // ===============================
-    // REGISTRAR DOCUMENTO CON ARCHIVO
-    // ===============================
+    
     async registrar(req, res) {
         let conn;
         try {

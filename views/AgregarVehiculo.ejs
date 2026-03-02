@@ -135,8 +135,6 @@
                         </h4>
                     </div>
                     <div class="card-body">
-
-                        <!-- Mensajes -->
                         <% if (success) { %>
                             <div class="alert alert-success alert-dismissible fade show" role="alert">
                                 <i class="bi bi-check-circle me-2"></i>
@@ -152,7 +150,6 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                                     </div>
                                     <% } %>
-
                                         <% if (tiposVehiculo && tiposVehiculo.length===0) { %>
                                             <div class="alert alert-warning alert-dismissible fade show">
                                                 <i class="bi bi-exclamation-triangle me-2"></i>
@@ -162,8 +159,6 @@
                                                     data-bs-dismiss="alert"></button>
                                             </div>
                                             <% } %>
-
-                                                <!-- Formulario -->
                                                 <form method="POST" action="/vehiculos/agregar"
                                                     id="formAgregarVehiculo">
                                                     <div class="row">
@@ -203,8 +198,6 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-
-                                                        <!-- Sección: Datos Principales del Vehículo -->
                                                         <div class="form-section">
                                                             <h5 class="section-title">
                                                                 <i class="bi bi-card-checklist me-2"></i>Datos
@@ -341,7 +334,6 @@
                                                                                 + 1 %></small>
                                                                     </div>
                                                                 </div>
-
                                                                 <!-- Número de Chasis -->
                                                                 <div class="col-md-6 mb-3">
                                                                     <label for="numero_chasis" class="form-label">Número
