@@ -9,10 +9,11 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 
-// --- Middlewares Base ---
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+
 
 // Configuración de sesión
 app.use(session({
@@ -57,7 +58,7 @@ cargarRutas('Vehículos', '/vehiculos', './routes/vehiculos.routes');
 cargarRutas('Documentos', '/documentos', './routes/documentos.routes');
 
 
-// RUTA QUE TE LLEVA AL HOME.EJS DONDE INICIA EL SISTEMA
+
 app.get('/', async (req, res) => {
     try {
         const [rows] = await db.query('SELECT NOW() AS fecha');
@@ -138,10 +139,10 @@ app.post('/grupos/crear', async (req, res) => {
     }
 });
 
-// RUTA PARA LISTAR TODOS LOS GRUPOS CREADOS CON FORMATO TARJETA, TABLA
+
 app.get('/grupos', async (req, res) => {
     try {
-        // Obtener todos los grupos con información del cliente
+        
         const [grupos] = await db.query(`
             SELECT 
                 g.*,
@@ -151,7 +152,7 @@ app.get('/grupos', async (req, res) => {
             ORDER BY g.fecha_creacion DESC
         `);
 
-        // Crear un objeto con nombres de clientes para referencia rápida en la vista
+        
         const cliente_nombre = {};
         grupos.forEach(grupo => {
             if (grupo.nombre_cliente) {
@@ -159,7 +160,7 @@ app.get('/grupos', async (req, res) => {
             }
         });
 
-        // CAMBIO IMPORTANTE: Cambiar 'grupos/listaGrupos' por 'listaGrupos'
+        
         res.render('listaGrupos', {
             title: 'Mis Grupos',
             grupos: grupos,
@@ -193,7 +194,6 @@ app.use((req, res) => {
         fecha: new Date()
     });
 });
-
 
 app.listen(PORT, () => {
     console.log('='.repeat(50));

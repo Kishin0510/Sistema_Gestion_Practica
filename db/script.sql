@@ -45,6 +45,22 @@ CREATE TABLE personas (
     UNIQUE KEY idx_run_cliente (id_cliente, run, dv)
 );
 
+CREATE TABLE logs_registro_cambios (
+    id_log BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_persona INT NOT NULL,
+    id_cliente INT NOT NULL,
+    operacion ENUM('INSERT', 'UPDATE', 'DELETE', 'LOGIN') NOT NULL,
+    tabla_afectada VARCHAR(50) NOT NULL,
+    id_registro_afectado INT NOT NULL,
+    actividad TEXT NOT NULL,
+    datos_anteriores JSON DEFAULT NULL,
+    datos_nuevos JSON DEFAULT NULL,
+    fecha_hora DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3),
+    ip_origen VARCHAR(45),
+    FOREIGN KEY (id_persona) REFERENCES personas(id_persona),
+    FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente)
+);
+
 CREATE TABLE grupos (
   id_grupo INT AUTO_INCREMENT PRIMARY KEY,
   id_cliente INT NOT NULL,
