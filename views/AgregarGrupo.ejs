@@ -9,118 +9,478 @@
     </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="/public/css/Index.css">
     <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-dark: #172554;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            background-color: #f8fafc;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .wrapper {
+            flex: 1 0 auto;
+        }
+
         .required-field::after {
             content: " *";
             color: red;
         }
 
         .bg-primary-custom {
-            background-color: #0d6efd !important;
+            background-color: var(--primary) !important;
         }
 
         .btn-primary-custom {
-            background-color: #0d6efd;
+            background-color: var(--primary);
             color: white;
             border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-primary-custom:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(23, 37, 84, 0.2);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
+        }
+
+        footer {
+            background-color: var(--primary-dark) !important;
+            flex-shrink: 0;
+            text-align: center;
+            color: white;
+            padding: 1.5rem 0;
+            width: 100%;
+            margin-top: 2rem;
+        }
+
+        /* Estilos para pestañas */
+        .nav-tabs {
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 20px;
+        }
+
+        .nav-tabs .nav-link {
+            color: #64748b;
+            font-weight: 500;
+            border: none;
+            padding: 12px 24px;
+            margin-right: 5px;
+            border-radius: 8px 8px 0 0;
+            transition: all 0.2s;
+        }
+
+        .nav-tabs .nav-link:hover {
+            background-color: #f1f5f9;
+            color: var(--primary);
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--primary);
+            background-color: white;
+            border-bottom: 3px solid var(--primary);
+            font-weight: 600;
+        }
+
+        .nav-tabs .nav-link i {
+            margin-right: 8px;
+        }
+
+        .tab-content {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-top: none;
+            padding: 25px;
+            border-radius: 0 0 12px 12px;
+            min-height: 400px;
+        }
+
+        /* Estilos para la tabla de vehículos */
+        .table-vehiculos {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
+
+        .table-vehiculos th {
+            background-color: #f8fafc;
+            color: #475569;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            padding: 12px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .table-vehiculos td {
+            background-color: white;
+            padding: 16px 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+            vertical-align: middle;
+        }
+
+        .vehiculo-row {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .vehiculo-row:hover td {
+            background-color: #f8fafc;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(30, 58, 138, 0.1);
+        }
+
+        .vehiculo-row.seleccionado td {
+            background-color: #f0f4ff;
+            border-left: 4px solid var(--primary);
+        }
+
+        .patente-badge {
+            background-color: var(--primary);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-family: monospace;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-block;
+        }
+
+        .documento-tag {
+            background: #f1f5f9;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            margin-right: 4px;
+            display: inline-block;
+        }
+
+        .estado-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .estado-vigente {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .estado-por-vencer {
+            background-color: #fed7aa;
+            color: #92400e;
+        }
+
+        .estado-vencido {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .search-box {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 50px;
+            padding: 8px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-box i {
+            color: var(--primary);
+            margin-right: 10px;
+        }
+
+        .search-box input {
+            border: none;
+            outline: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        .seleccion-counter {
+            background-color: var(--primary);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .badge-count {
+            background-color: var(--primary-dark);
+            color: white;
+            font-size: 0.8rem;
+            padding: 3px 8px;
+            border-radius: 20px;
+            margin-left: 8px;
         }
     </style>
 </head>
 
-<body class="bg-light">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary-custom shadow-sm">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="/"><i class="bi bi-car-front-fill me-2"></i>Gestión Vehicular</a>
-        </div>
-    </nav>
+<body>
+    <div class="wrapper">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary-custom shadow-sm">
+            <div class="container">
+                <a class="navbar-brand fw-bold" href="/">
+                    <i class="bi bi-car-front-fill me-2"></i>Gestión Vehicular
+                </a>
+                <div class="navbar-nav ms-auto">
+                    <a href="/grupos" class="btn btn-outline-light btn-sm">
+                        <i class="bi bi-arrow-left me-1"></i>Volver a Grupos
+                    </a>
+                </div>
+            </div>
+        </nav>
 
-    <div class="container mt-4">
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
-                <div class="card shadow border-0">
-                    <div class="card-header py-3 bg-primary-custom text-white">
-                        <h4 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Registrar Nuevo Grupo</h4>
-                    </div>
-                    <div class="card-body p-4">
+        <div class="container mt-4">
+            <div class="row justify-content-center">
+                <div class="col-lg-11">
+                    <div class="card shadow border-0">
+                        <div class="card-header py-3 text-white">
+                            <h4 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Registrar Nuevo Grupo</h4>
+                        </div>
+                        <div class="card-body p-4">
 
-                        <% if (locals.success_msg && success_msg.length> 0) { %>
-                            <div class="alert alert-success">
-                                <%= success_msg %>
-                            </div>
-                            <% } %>
-                                <% if (locals.error_msg && error_msg.length> 0) { %>
-                                    <div class="alert alert-danger">
-                                        <%= error_msg %>
-                                    </div>
-                                    <% } %>
+                            <!-- Mensajes flash -->
+                            <% if (locals.success_msg && success_msg.length> 0) { %>
+                                <div class="alert alert-success alert-dismissible fade show">
+                                    <i class="bi bi-check-circle-fill me-2"></i>
+                                    <%= success_msg %>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                                <% } %>
 
-                                        <form method="POST" action="/grupos/crear">
-                                            <div class="row">
-                                                <div class="col-md-6 mb-3">
-                                                    <label class="form-label required-field fw-bold">Nombre del
-                                                        Grupo</label>
-                                                    <input type="text" class="form-control" name="nombre_grupo"
-                                                        value="<%= locals.formData?.nombre_grupo || '' %>" required>
+                                    <% if (locals.error_msg && error_msg.length> 0) { %>
+                                        <div class="alert alert-danger alert-dismissible fade show">
+                                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                            <%= error_msg %>
+                                                <button type="button" class="btn-close"
+                                                    data-bs-dismiss="alert"></button>
+                                        </div>
+                                        <% } %>
+
+                                            <!-- Pestañas -->
+                                            <ul class="nav nav-tabs" id="grupoTabs" role="tablist">
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link active" id="info-tab" data-bs-toggle="tab"
+                                                        data-bs-target="#info" type="button" role="tab">
+                                                        <i class="bi bi-info-circle"></i>Información Básica
+                                                    </button>
+                                                </li>
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link" id="vehiculos-tab" data-bs-toggle="tab"
+                                                        data-bs-target="#vehiculos" type="button" role="tab">
+                                                        <i class="bi bi-truck"></i>Seleccionar Vehículos
+                                                        <span class="badge-count"
+                                                            id="vehiculosSeleccionadosCount">0</span>
+                                                    </button>
+                                                </li>
+                                            </ul>
+
+                                            <!-- Contenido de pestañas -->
+                                            <div class="tab-content" id="grupoTabsContent">
+                                                <!-- Pestaña 1: Información Básica -->
+                                                <div class="tab-pane fade show active" id="info" role="tabpanel">
+                                                    <form method="POST" action="/grupos/crear" id="formGrupo">
+                                                        <div class="row">
+                                                            <div class="col-md-6 mb-3">
+                                                                <label class="form-label required-field fw-bold">Nombre
+                                                                    del Grupo</label>
+                                                                <input type="text" class="form-control"
+                                                                    name="nombre_grupo"
+                                                                    value="<%= locals.formData?.nombre_grupo || '' %>"
+                                                                    placeholder="Ej: Flota Minera Norte" required>
+                                                            </div>
+
+                                                            <div class="col-md-6 mb-3">
+                                                                <label class="form-label required-field fw-bold">Cliente
+                                                                    Responsable</label>
+                                                                <select class="form-select" name="id_cliente"
+                                                                    id="clienteSelect" required>
+                                                                    <option value="">Seleccionar cliente...</option>
+                                                                    <% if (locals.clientes && clientes.length> 0) { %>
+                                                                        <% clientes.forEach(c=> { %>
+                                                                            <option value="<%= c.id_cliente %>"
+                                                                                <%=(locals.formData?.id_cliente==c.id_cliente)
+                                                                                ? 'selected' : '' %>>
+                                                                                <%= c.nombre %>
+                                                                            </option>
+                                                                            <% }); %>
+                                                                                <% } else { %>
+                                                                                    <option value="1">Minera Escondida
+                                                                                    </option>
+                                                                                    <option value="2">CODELCO Norte
+                                                                                    </option>
+                                                                                    <option value="3">Anglo American
+                                                                                    </option>
+                                                                                    <% } %>
+                                                                </select>
+                                                            </div>
+
+                                                            <div class="col-md-12 mb-3">
+                                                                <label class="form-label fw-bold">Nombre de la
+                                                                    Compañía</label>
+                                                                <input type="text" class="form-control"
+                                                                    name="nombre_empresa"
+                                                                    value="<%= locals.formData?.nombre_empresa || '' %>"
+                                                                    placeholder="Razón social de la empresa">
+                                                            </div>
+
+                                                            <div class="col-md-6 mb-3">
+                                                                <label class="form-label fw-bold">Nombre del
+                                                                    Contacto</label>
+                                                                <input type="text" class="form-control"
+                                                                    name="nombre_contacto"
+                                                                    value="<%= locals.formData?.nombre_contacto || '' %>"
+                                                                    placeholder="Persona de contacto">
+                                                            </div>
+
+                                                            <div class="col-md-6 mb-3">
+                                                                <label class="form-label fw-bold">Email de
+                                                                    Contacto</label>
+                                                                <input type="email" class="form-control"
+                                                                    name="email_contacto"
+                                                                    value="<%= locals.formData?.email_contacto || '' %>"
+                                                                    placeholder="correo@ejemplo.com">
+                                                            </div>
+
+                                                            <div class="col-md-12 mb-3">
+                                                                <div
+                                                                    class="form-check form-switch p-3 border rounded bg-white">
+                                                                    <input class="form-check-input" type="checkbox"
+                                                                        name="activo" value="1"
+                                                                        <%=(locals.formData?.activo=='0' ) ? ''
+                                                                        : 'checked' %>>
+                                                                    <label class="form-check-label fw-bold">Grupo
+                                                                        Activo</label>
+                                                                    <small class="text-muted d-block mt-1">Los grupos
+                                                                        inactivos no aparecerán en listados
+                                                                        principales</small>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Contenedor para IDs de vehículos seleccionados -->
+                                                        <div id="vehiculosSeleccionadosContainer"></div>
+                                                    </form>
                                                 </div>
 
-                                                <div class="col-md-6 mb-3">
-                                                    <label class="form-label required-field fw-bold">Cliente
-                                                        Responsable</label>
-                                                    <select class="form-select" name="id_cliente" required>
-                                                        <option value="">Seleccionar...</option>
-                                                        <% if (locals.clientes) { %>
-                                                            <% clientes.forEach(c=> { %>
-                                                                <option value="<%= c.id_cliente %>"
-                                                                    <%=(locals.formData?.id_cliente==c.id_cliente)
-                                                                    ? 'selected' : '' %>>
-                                                                    <%= c.nombre %>
-                                                                </option>
-                                                                <% }); %>
-                                                                    <% } %>
-                                                    </select>
-                                                </div>
+                                                <!-- Pestaña 2: Selección de Vehículos (DATOS ESTÁTICOS) -->
+                                                <div class="tab-pane fade" id="vehiculos" role="tabpanel">
+                                                    <!-- Mensaje si no hay cliente seleccionado -->
+                                                    <div class="alert alert-info" id="sinClienteMsg"
+                                                        style="display: none;">
+                                                        <i class="bi bi-info-circle me-2"></i>
+                                                        Selecciona un cliente en "Información Básica" para ver sus
+                                                        vehículos.
+                                                    </div>
 
-                                                <div class="col-md-12 mb-3">
-                                                    <label class="form-label fw-bold">Nombre de la Compañía</label>
-                                                    <input type="text" class="form-control" name="nombre_compania"
-                                                        value="<%= locals.formData?.nombre_compania || '' %>">
-                                                </div>
+                                                    <!-- Barra de búsqueda -->
+                                                    <div class="search-box">
+                                                        <i class="bi bi-search"></i>
+                                                        <input type="text" id="buscarVehiculo"
+                                                            placeholder="Buscar por patente, marca o modelo...">
+                                                    </div>
 
-                                                <div class="col-md-6 mb-3">
-                                                    <label class="form-label fw-bold">Nombre del Contacto</label>
-                                                    <input type="text" class="form-control" name="nombre_contacto"
-                                                        value="<%= locals.formData?.nombre_contacto || '' %>">
-                                                </div>
+                                                    <!-- Contador y acciones -->
+                                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                                        <div class="seleccion-counter">
+                                                            <i class="bi bi-check-circle me-1"></i>
+                                                            <span id="contadorSeleccionados">0</span> vehículos
+                                                            seleccionados
+                                                        </div>
+                                                        <div>
+                                                            <button type="button" class="btn btn-sm btn-outline-primary"
+                                                                onclick="seleccionarTodos()">
+                                                                <i class="bi bi-check-all me-1"></i>Seleccionar Todos
+                                                            </button>
+                                                            <button type="button"
+                                                                class="btn btn-sm btn-outline-secondary"
+                                                                onclick="deseleccionarTodos()">
+                                                                <i class="bi bi-x me-1"></i>Limpiar
+                                                            </button>
+                                                        </div>
+                                                    </div>
 
-                                                <div class="col-md-6 mb-3">
-                                                    <label class="form-label fw-bold">Email de Contacto</label>
-                                                    <input type="email" class="form-control" name="email_contacto"
-                                                        value="<%= locals.formData?.email_contacto || '' %>">
-                                                </div>
-
-                                                <div class="col-md-12 mb-3">
-                                                    <div class="form-check form-switch p-2 border rounded bg-white">
-                                                        <input class="form-check-input ms-0 me-2" type="checkbox"
-                                                            name="activo" value="1" <%=(locals.formData?.activo=='0' )
-                                                            ? '' : 'checked' %>>
-                                                        <label class="form-check-label fw-bold">Grupo Activo</label>
+                                                    <!-- Tabla de vehículos (DATOS ESTÁTICOS) -->
+                                                    <div class="table-responsive">
+                                                        <table class="table-vehiculos">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th style="width: 40px;"></th>
+                                                                    <th>Patente</th>
+                                                                    <th>Marca/Modelo</th>
+                                                                    <th>Año</th>
+                                                                    <th>Tipo</th>
+                                                                    <th>Color</th>
+                                                                    <th>Documentos</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="vehiculosContainer">
+                                                                <!-- Vehículo 1 - Minera Escondida (cliente 1) -->
+                                                               
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
                                                     </div>
                                                 </div>
                                             </div>
+
+                                            <!-- Botones de acción -->
                                             <div class="d-flex justify-content-between mt-4">
                                                 <a href="/" class="btn btn-outline-secondary">Cancelar</a>
-                                                <button type="submit" class="btn btn-primary-custom px-4">Guardar
-                                                    Grupo</button>
+                                                <div>
+                                                    <button type="button" class="btn btn-outline-primary me-2"
+                                                        onclick="document.getElementById('vehiculos-tab').click()">
+                                                        <i class="bi bi-truck me-1"></i>Seleccionar Vehículos
+                                                    </button>
+                                                    <button type="submit" form="formGrupo"
+                                                        class="btn btn-primary-custom px-4">
+                                                        <i class="bi bi-check-circle me-1"></i>Guardar Grupo
+                                                    </button>
+                                                </div>
                                             </div>
-                                        </form>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- FOOTER CON COLOR #1e3a8a -->
-    <footer class="text-center text-white mt-5 py-4" style="background-color: #1e3a8a;">
+
+    <!-- Footer -->
+    <footer>
         <div class="container">
             <p class="mb-1">
                 &copy; 2026 Sistema de Gestión Vehicular
@@ -133,5 +493,167 @@
             </small>
         </div>
     </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Array para almacenar IDs de vehículos seleccionados
+        let vehiculosSeleccionados = [];
+
+        // Función para seleccionar/deseleccionar vehículo (versión para tabla)
+        function toggleVehiculoRow(row) {
+            const checkbox = row.querySelector('.vehiculo-checkbox');
+            checkbox.checked = !checkbox.checked;
+
+            if (checkbox.checked) {
+                row.classList.add('seleccionado');
+                if (!vehiculosSeleccionados.includes(checkbox.value)) {
+                    vehiculosSeleccionados.push(checkbox.value);
+                }
+            } else {
+                row.classList.remove('seleccionado');
+                const index = vehiculosSeleccionados.indexOf(checkbox.value);
+                if (index > -1) {
+                    vehiculosSeleccionados.splice(index, 1);
+                }
+            }
+
+            actualizarContador();
+            actualizarInputsOcultos();
+        }
+
+        // Actualizar contador de seleccionados
+        function actualizarContador() {
+            const checkboxes = document.querySelectorAll('.vehiculo-checkbox:checked');
+            const count = checkboxes.length;
+
+            document.getElementById('contadorSeleccionados').textContent = count;
+            document.getElementById('vehiculosSeleccionadosCount').textContent = count;
+        }
+
+        // Actualizar inputs ocultos en el formulario principal
+        function actualizarInputsOcultos() {
+            const container = document.getElementById('vehiculosSeleccionadosContainer');
+            container.innerHTML = '';
+
+            vehiculosSeleccionados.forEach(id => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'vehiculos_seleccionados';
+                input.value = id;
+                container.appendChild(input);
+            });
+        }
+
+        // Seleccionar todos los vehículos visibles
+        function seleccionarTodos() {
+            const rows = document.querySelectorAll('#vehiculosContainer .vehiculo-row');
+            rows.forEach(row => {
+                if (row.style.display !== 'none') {
+                    const checkbox = row.querySelector('.vehiculo-checkbox');
+                    if (!checkbox.checked) {
+                        checkbox.checked = true;
+                        row.classList.add('seleccionado');
+                        if (!vehiculosSeleccionados.includes(checkbox.value)) {
+                            vehiculosSeleccionados.push(checkbox.value);
+                        }
+                    }
+                }
+            });
+            actualizarContador();
+            actualizarInputsOcultos();
+        }
+
+        // Deseleccionar todos
+        function deseleccionarTodos() {
+            document.querySelectorAll('.vehiculo-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+                const row = checkbox.closest('.vehiculo-row');
+                if (row) row.classList.remove('seleccionado');
+            });
+            vehiculosSeleccionados = [];
+            actualizarContador();
+            actualizarInputsOcultos();
+        }
+
+        // Búsqueda en tiempo real
+        document.getElementById('buscarVehiculo')?.addEventListener('input', function (e) {
+            const busqueda = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('#vehiculosContainer .vehiculo-row');
+
+            rows.forEach(row => {
+                const patente = row.dataset.patente || '';
+                const marca = row.dataset.marca || '';
+                const modelo = row.dataset.modelo || '';
+
+                const texto = patente + ' ' + marca + ' ' + modelo;
+                row.style.display = texto.includes(busqueda) ? '' : 'none';
+            });
+        });
+
+        // Filtrar por cliente
+        document.getElementById('clienteSelect')?.addEventListener('change', function (e) {
+            const clienteId = e.target.value;
+            const rows = document.querySelectorAll('#vehiculosContainer .vehiculo-row');
+            const sinClienteMsg = document.getElementById('sinClienteMsg');
+
+            if (clienteId === '') {
+                sinClienteMsg.style.display = 'block';
+                rows.forEach(row => row.style.display = 'none');
+            } else {
+                sinClienteMsg.style.display = 'none';
+                rows.forEach(row => {
+                    row.style.display = row.dataset.cliente === clienteId ? '' : 'none';
+                });
+            }
+
+            // Deseleccionar vehículos no visibles
+            vehiculosSeleccionados = [];
+            document.querySelectorAll('.vehiculo-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+                checkbox.closest('.vehiculo-row')?.classList.remove('seleccionado');
+            });
+            actualizarContador();
+            actualizarInputsOcultos();
+        });
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function () {
+            const clienteSelect = document.getElementById('clienteSelect');
+            if (clienteSelect && clienteSelect.value === '') {
+                document.getElementById('sinClienteMsg').style.display = 'block';
+                document.querySelectorAll('#vehiculosContainer .vehiculo-row').forEach(row => {
+                    row.style.display = 'none';
+                });
+            }
+
+            // DATOS ESTÁTICOS - IDs de vehículos preseleccionados (ejemplo)
+            // Puedes cambiar estos valores según necesites
+            const idsSeleccionados = ['1', '3', '5']; // IDs de ejemplo
+
+            // Aplicar las selecciones
+            idsSeleccionados.forEach(id => {
+                const checkbox = document.querySelector(`.vehiculo-checkbox[value="${id}"]`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                    const row = checkbox.closest('.vehiculo-row');
+                    if (row) row.classList.add('seleccionado');
+
+                    if (typeof vehiculosSeleccionados !== 'undefined' && !vehiculosSeleccionados.includes(id)) {
+                        vehiculosSeleccionados.push(id);
+                    }
+                }
+            });
+
+            // Actualizar contadores si las funciones existen
+            if (typeof actualizarContador === 'function') {
+                actualizarContador();
+            }
+
+            if (typeof actualizarInputsOcultos === 'function') {
+                actualizarInputsOcultos();
+            }
+        });
+    </script>
 </body>
+
 </html>

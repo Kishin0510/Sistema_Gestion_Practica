@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const db = require('../config/database.js');
+const db = require('../conexion');
 
 const authController = {
     // Mostrar página de login (GET)

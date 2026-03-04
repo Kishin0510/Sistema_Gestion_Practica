@@ -56,7 +56,7 @@ const cargarRutas = (nombre, ruta, pathArchivo) => {
 cargarRutas('Personas', '/personas', './routes/personas.routes');
 cargarRutas('Vehículos', '/vehiculos', './routes/vehiculos.routes');
 cargarRutas('Documentos', '/documentos', './routes/documentos.routes');
-
+cargarRutas('Logs', '/registro-cambios', './routes/logs.routes');
 
 
 app.get('/', async (req, res) => {
