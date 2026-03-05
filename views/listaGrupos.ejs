@@ -20,6 +20,22 @@
             --secondary-dark: #0b5ed7;
         }
 
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .content-wrapper {
+            flex: 1 0 auto;
+        }
+
         .bg-primary-custom {
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -389,6 +405,8 @@
         }
 
         footer {
+            flex-shrink: 0;
+            width: 100%;
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
             border-top: 3px solid rgba(255, 255, 255, 0.1);
             padding: 2rem 0 !important;
@@ -552,358 +570,369 @@
         </div>
     </nav>
 
-    <!-- Contenido principal -->
-    <div class="container mt-4">
-        <!-- Mensajes de éxito/error -->
-        <% if (locals.success_msg && success_msg.length> 0) { %>
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="bi bi-check-circle-fill me-2"></i>
-                <%= success_msg %>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-            <% } %>
+    <div class="content-wrapper">
+        <!-- Contenido principal -->
+        <div class="container mt-4">
+            <!-- Mensajes de éxito/error -->
+            <% if (locals.success_msg && success_msg.length> 0) { %>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <%= success_msg %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <% } %>
 
-                <% if (locals.error_msg && error_msg.length> 0) { %>
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                        <%= error_msg %>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                    <% } %>
-
-                        <!-- Header con título y acciones -->
-                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
-                            <div>
-                                <h1 class="display-5 fw-bold text-primary-custom">
-                                    <i class="bi bi-people-fill me-2"></i>Mis Grupos
-                                </h1>
-                                <p class="text-muted">Gestiona todos los grupos registrados en el sistema</p>
-                            </div>
-                            <div class="mt-3 mt-md-0">
-                                <a href="/grupos/crear" class="btn btn-primary-custom btn-lg">
-                                    <i class="bi bi-plus-circle me-2"></i>Nuevo Grupo
-                                </a>
-                            </div>
+                    <% if (locals.error_msg && error_msg.length> 0) { %>
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <%= error_msg %>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
+                        <% } %>
 
-                        <!-- Sección de filtros y búsqueda -->
-                        <div class="filtro-section">
-                            <div class="row g-3">
-                                <div class="col-md-5">
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-white">
-                                            <i class="bi bi-search"></i>
-                                        </span>
-                                        <input type="text" class="form-control" id="buscarGrupo"
-                                            placeholder="Buscar por nombre, compañía o contacto...">
+                            <!-- Header con título y acciones -->
+                            <div
+                                class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+                                <div>
+                                    <h1 class="display-5 fw-bold text-primary-custom">
+                                        <i class="bi bi-people-fill me-2"></i>Mis Grupos
+                                    </h1>
+                                    <p class="text-muted">Gestiona todos los grupos registrados en el sistema</p>
+                                </div>
+                                <div class="mt-3 mt-md-0">
+                                    <a href="/grupos/crear" class="btn btn-primary-custom btn-lg">
+                                        <i class="bi bi-plus-circle me-2"></i>Nuevo Grupo
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Sección de filtros y búsqueda -->
+                            <div class="filtro-section">
+                                <div class="row g-3">
+                                    <div class="col-md-5">
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-white">
+                                                <i class="bi bi-search"></i>
+                                            </span>
+                                            <input type="text" class="form-control" id="buscarGrupo"
+                                                placeholder="Buscar por nombre, compañía o contacto...">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <select class="form-select" id="filtroEstado">
+                                            <option value="todos">Todos los estados</option>
+                                            <option value="activos">Activos</option>
+                                            <option value="inactivos">Inactivos</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <select class="form-select" id="ordenarPor">
+                                            <option value="reciente">Más reciente</option>
+                                            <option value="antiguo">Más antiguo</option>
+                                            <option value="nombre">Nombre A-Z</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button class="btn btn-outline-secondary w-100" onclick="limpiarFiltros()">
+                                            <i class="bi bi-x-circle me-2"></i>Limpiar
+                                        </button>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
-                                    <select class="form-select" id="filtroEstado">
-                                        <option value="todos">Todos los estados</option>
-                                        <option value="activos">Activos</option>
-                                        <option value="inactivos">Inactivos</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <select class="form-select" id="ordenarPor">
-                                        <option value="reciente">Más reciente</option>
-                                        <option value="antiguo">Más antiguo</option>
-                                        <option value="nombre">Nombre A-Z</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <button class="btn btn-outline-secondary w-100" onclick="limpiarFiltros()">
-                                        <i class="bi bi-x-circle me-2"></i>Limpiar
+                            </div>
+
+                            <!-- Vista de grupos (Cards o Tabla) -->
+                            <div class="mb-3">
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-outline-primary active" id="vistaCards"
+                                        onclick="cambiarVista('cards')">
+                                        <i class="bi bi-grid-3x3-gap-fill me-2"></i>Cards
+                                    </button>
+                                    <button type="button" class="btn btn-outline-primary" id="vistaTabla"
+                                        onclick="cambiarVista('tabla')">
+                                        <i class="bi bi-table me-2"></i>Tabla
                                     </button>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Vista de grupos (Cards o Tabla) -->
-                        <div class="mb-3">
-                            <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-outline-primary active" id="vistaCards"
-                                    onclick="cambiarVista('cards')">
-                                    <i class="bi bi-grid-3x3-gap-fill me-2"></i>Cards
-                                </button>
-                                <button type="button" class="btn btn-outline-primary" id="vistaTabla"
-                                    onclick="cambiarVista('tabla')">
-                                    <i class="bi bi-table me-2"></i>Tabla
-                                </button>
-                            </div>
-                        </div>
+                            <!-- Vista de Cards -->
+                            <div id="vistaCardsContainer">
+                                <% if (grupos && grupos.length> 0) { %>
+                                    <div class="row" id="gruposContainer">
+                                        <% grupos.forEach(grupo=> { %>
+                                            <div class="col-md-6 col-lg-4 mb-4 grupo-item"
+                                                data-nombre="<%= grupo.nombre_grupo.toLowerCase() %>"
+                                                data-compania="<%= (grupo.nombre_compania || '').toLowerCase() %>"
+                                                data-contacto="<%= (grupo.nombre_contacto || '').toLowerCase() %>"
+                                                data-estado="<%= grupo.activo ? 'activo' : 'inactivo' %>"
+                                                data-fecha="<%= new Date(grupo.fecha_creacion).getTime() %>"
+                                                data-id="<%= grupo.id_grupo %>">
 
-                        <!-- Vista de Cards -->
-                        <div id="vistaCardsContainer">
-                            <% if (grupos && grupos.length> 0) { %>
-                                <div class="row" id="gruposContainer">
-                                    <% grupos.forEach(grupo=> { %>
-                                        <div class="col-md-6 col-lg-4 mb-4 grupo-item"
-                                            data-nombre="<%= grupo.nombre_grupo.toLowerCase() %>"
-                                            data-compania="<%= (grupo.nombre_compania || '').toLowerCase() %>"
-                                            data-contacto="<%= (grupo.nombre_contacto || '').toLowerCase() %>"
-                                            data-estado="<%= grupo.activo ? 'activo' : 'inactivo' %>"
-                                            data-fecha="<%= new Date(grupo.fecha_creacion).getTime() %>"
-                                            data-id="<%= grupo.id_grupo %>">
-
-                                            <div class="card grupo-card shadow-sm h-100">
-                                                <!-- Header del grupo -->
-                                                <div
-                                                    class="card-header-grupo d-flex justify-content-between align-items-center">
-                                                    <h5 class="mb-0 fw-bold">
-                                                        <i class="bi bi-people me-2"></i>
-                                                        <%= grupo.nombre_grupo %>
-                                                    </h5>
-                                                    <span
-                                                        class="badge-estado <%= grupo.activo ? 'badge-activo' : 'badge-inactivo' %>">
-                                                        <i
-                                                            class="bi <%= grupo.activo ? 'bi-check-circle' : 'bi-x-circle' %> me-1"></i>
-                                                        <%= grupo.activo ? 'Activo' : 'Inactivo' %>
-                                                    </span>
-                                                </div>
-
-                                                <div class="card-body">
-                                                    <!-- Información del grupo -->
-                                                    <div class="info-item">
-                                                        <div class="info-label">
-                                                            <i class="bi bi-building me-2 text-primary"></i>Cliente ID:
-                                                        </div>
-                                                        <div class="info-value">
-                                                            <%= grupo.id_cliente %>
-                                                                <% if (cliente_nombre &&
-                                                                    cliente_nombre[grupo.id_cliente]) { %>
-                                                                    <span class="text-muted">(<%=
-                                                                            cliente_nombre[grupo.id_cliente] %>)</span>
-                                                                    <% } %>
-                                                        </div>
+                                                <div class="card grupo-card shadow-sm h-100">
+                                                    <!-- Header del grupo -->
+                                                    <div
+                                                        class="card-header-grupo d-flex justify-content-between align-items-center">
+                                                        <h5 class="mb-0 fw-bold">
+                                                            <i class="bi bi-people me-2"></i>
+                                                            <%= grupo.nombre_grupo %>
+                                                        </h5>
+                                                        <span
+                                                            class="badge-estado <%= grupo.activo ? 'badge-activo' : 'badge-inactivo' %>">
+                                                            <i
+                                                                class="bi <%= grupo.activo ? 'bi-check-circle' : 'bi-x-circle' %> me-1"></i>
+                                                            <%= grupo.activo ? 'Activo' : 'Inactivo' %>
+                                                        </span>
                                                     </div>
 
-                                                    <% if (grupo.nombre_compania) { %>
+                                                    <div class="card-body">
+                                                        <!-- Información del grupo -->
                                                         <div class="info-item">
                                                             <div class="info-label">
-                                                                <i
-                                                                    class="bi bi-briefcase me-2 text-primary"></i>Compañía:
+                                                                <i class="bi bi-building me-2 text-primary"></i>Cliente
+                                                                ID:
                                                             </div>
                                                             <div class="info-value">
-                                                                <%= grupo.nombre_compania %>
+                                                                <%= grupo.id_cliente %>
+                                                                    <% if (cliente_nombre &&
+                                                                        cliente_nombre[grupo.id_cliente]) { %>
+                                                                        <span class="text-muted">(<%=
+                                                                                cliente_nombre[grupo.id_cliente] %>
+                                                                                )</span>
+                                                                        <% } %>
                                                             </div>
                                                         </div>
-                                                        <% } %>
 
-                                                            <% if (grupo.nombre_contacto) { %>
-                                                                <div class="info-item">
-                                                                    <div class="info-label">
-                                                                        <i
-                                                                            class="bi bi-person me-2 text-primary"></i>Contacto:
-                                                                    </div>
-                                                                    <div class="info-value">
-                                                                        <%= grupo.nombre_contacto %>
-                                                                    </div>
+                                                        <% if (grupo.nombre_compania) { %>
+                                                            <div class="info-item">
+                                                                <div class="info-label">
+                                                                    <i
+                                                                        class="bi bi-briefcase me-2 text-primary"></i>Compañía:
                                                                 </div>
-                                                                <% } %>
+                                                                <div class="info-value">
+                                                                    <%= grupo.nombre_compania %>
+                                                                </div>
+                                                            </div>
+                                                            <% } %>
 
-                                                                    <% if (grupo.email_contacto) { %>
-                                                                        <div class="info-item">
-                                                                            <div class="info-label">
-                                                                                <i
-                                                                                    class="bi bi-envelope me-2 text-primary"></i>Email:
-                                                                            </div>
-                                                                            <div class="info-value">
-                                                                                <a href="mailto:<%= grupo.email_contacto %>"
-                                                                                    class="text-decoration-none">
-                                                                                    <%= grupo.email_contacto %>
-                                                                                </a>
-                                                                            </div>
+                                                                <% if (grupo.nombre_contacto) { %>
+                                                                    <div class="info-item">
+                                                                        <div class="info-label">
+                                                                            <i
+                                                                                class="bi bi-person me-2 text-primary"></i>Contacto:
                                                                         </div>
-                                                                        <% } %>
+                                                                        <div class="info-value">
+                                                                            <%= grupo.nombre_contacto %>
+                                                                        </div>
+                                                                    </div>
+                                                                    <% } %>
 
-                                                                            <% if (grupo.direccion) { %>
-                                                                                <div class="info-item">
-                                                                                    <div class="info-label">
-                                                                                        <i
-                                                                                            class="bi bi-geo-alt me-2 text-primary"></i>Dirección:
-                                                                                    </div>
-                                                                                    <div class="info-value">
-                                                                                        <%= grupo.direccion %>
-                                                                                    </div>
+                                                                        <% if (grupo.email_contacto) { %>
+                                                                            <div class="info-item">
+                                                                                <div class="info-label">
+                                                                                    <i
+                                                                                        class="bi bi-envelope me-2 text-primary"></i>Email:
                                                                                 </div>
-                                                                                <% } %>
+                                                                                <div class="info-value">
+                                                                                    <a href="mailto:<%= grupo.email_contacto %>"
+                                                                                        class="text-decoration-none">
+                                                                                        <%= grupo.email_contacto %>
+                                                                                    </a>
+                                                                                </div>
+                                                                            </div>
+                                                                            <% } %>
 
-                                                                                    <% if (grupo.ciudad) { %>
-                                                                                        <div class="info-item">
-                                                                                            <div class="info-label">
-                                                                                                <i
-                                                                                                    class="bi bi-building me-2 text-primary"></i>Ciudad:
-                                                                                            </div>
-                                                                                            <div class="info-value">
-                                                                                                <%= grupo.ciudad %>
-                                                                                            </div>
+                                                                                <% if (grupo.direccion) { %>
+                                                                                    <div class="info-item">
+                                                                                        <div class="info-label">
+                                                                                            <i
+                                                                                                class="bi bi-geo-alt me-2 text-primary"></i>Dirección:
                                                                                         </div>
-                                                                                        <% } %>
+                                                                                        <div class="info-value">
+                                                                                            <%= grupo.direccion %>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <% } %>
 
+                                                                                        <% if (grupo.ciudad) { %>
                                                                                             <div class="info-item">
                                                                                                 <div class="info-label">
                                                                                                     <i
-                                                                                                        class="bi bi-calendar me-2 text-primary"></i>Fecha
-                                                                                                    Creación:
+                                                                                                        class="bi bi-building me-2 text-primary"></i>Ciudad:
                                                                                                 </div>
                                                                                                 <div class="info-value">
-                                                                                                    <%= new
-                                                                                                        Date(grupo.fecha_creacion).toLocaleDateString('es-ES',
-                                                                                                        {
-                                                                                                        year: 'numeric'
-                                                                                                        , month: 'long'
-                                                                                                        , day: 'numeric'
-                                                                                                        ,
-                                                                                                        hour: '2-digit'
-                                                                                                        ,
-                                                                                                        minute: '2-digit'
-                                                                                                        }) %>
+                                                                                                    <%= grupo.ciudad %>
                                                                                                 </div>
                                                                                             </div>
-                                                </div>
+                                                                                            <% } %>
 
-                                                <div
-                                                    class="card-footer bg-white border-0 pb-3 d-flex justify-content-end gap-2">
-                                                    <a href="/grupos/editar/<%= grupo.id_grupo %>"
-                                                        class="btn btn-warning btn-sm action-btn">
-                                                        <i class="bi bi-pencil me-1"></i>Editar
-                                                    </a>
-                                                    <a href="/grupos/ver/<%= grupo.id_grupo %>"
-                                                        class="btn btn-info btn-sm action-btn text-white">
-                                                        <i class="bi bi-eye me-1"></i>Ver
-                                                    </a>
-                                                    <button class="btn btn-danger btn-sm action-btn"
-                                                        onclick="eliminarGrupo('<%= grupo.id_grupo %>', '<%= grupo.nombre_grupo %>')">
-                                                        <i class="bi bi-trash me-1"></i>
-                                                    </button>
+                                                                                                <div class="info-item">
+                                                                                                    <div
+                                                                                                        class="info-label">
+                                                                                                        <i
+                                                                                                            class="bi bi-calendar me-2 text-primary"></i>Fecha
+                                                                                                        Creación:
+                                                                                                    </div>
+                                                                                                    <div
+                                                                                                        class="info-value">
+                                                                                                        <%= new
+                                                                                                            Date(grupo.fecha_creacion).toLocaleDateString('es-ES',
+                                                                                                            {
+                                                                                                            year: 'numeric'
+                                                                                                            ,
+                                                                                                            month: 'long'
+                                                                                                            ,
+                                                                                                            day: 'numeric'
+                                                                                                            ,
+                                                                                                            hour: '2-digit'
+                                                                                                            ,
+                                                                                                            minute: '2-digit'
+                                                                                                            }) %>
+                                                                                                    </div>
+                                                                                                </div>
+                                                    </div>
+
+                                                    <div
+                                                        class="card-footer bg-white border-0 pb-3 d-flex justify-content-end gap-2">
+                                                        <a href="/grupos/editar/<%= grupo.id_grupo %>"
+                                                            class="btn btn-warning btn-sm action-btn">
+                                                            <i class="bi bi-pencil me-1"></i>Editar
+                                                        </a>
+                                                        <a href="/grupos/ver/<%= grupo.id_grupo %>"
+                                                            class="btn btn-info btn-sm action-btn text-white">
+                                                            <i class="bi bi-eye me-1"></i>Ver
+                                                        </a>
+                                                        <button class="btn btn-danger btn-sm action-btn"
+                                                            onclick="eliminarGrupo('<%= grupo.id_grupo %>', '<%= grupo.nombre_grupo %>')">
+                                                            <i class="bi bi-trash me-1"></i>
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <% }); %>
-                                </div>
+                                            <% }); %>
+                                    </div>
 
-                                <!-- Paginación -->
-                                <nav aria-label="Paginación de grupos" class="mt-4" id="paginacion">
-                                    <ul class="pagination justify-content-center">
-                                        <li class="page-item" id="prevPage">
-                                            <a class="page-link" href="#" onclick="cambiarPagina('prev')">Anterior</a>
-                                        </li>
-                                        <li class="page-item active" id="page1">
-                                            <a class="page-link" href="#" onclick="cambiarPagina(1)">1</a>
-                                        </li>
-                                        <li class="page-item" id="page2">
-                                            <a class="page-link" href="#" onclick="cambiarPagina(2)">2</a>
-                                        </li>
-                                        <li class="page-item" id="page3">
-                                            <a class="page-link" href="#" onclick="cambiarPagina(3)">3</a>
-                                        </li>
-                                        <li class="page-item" id="nextPage">
-                                            <a class="page-link" href="#" onclick="cambiarPagina('next')">Siguiente</a>
-                                        </li>
-                                    </ul>
-                                </nav>
-                                <% } else { %>
-                                    <!-- Estado vacío - No hay grupos -->
-                                    <div class="empty-state">
-                                        <i class="bi bi-people" style="font-size: 4rem; color: #0d6efd;"></i>
-                                        <h3 class="mt-3">No hay grupos registrados</h3>
-                                        <p class="text-muted mb-4">Comienza creando tu primer grupo para organizar
-                                            vehículos y personas</p>
-                                        <a href="/grupos/crear" class="btn btn-primary-custom btn-lg">
-                                            <i class="bi bi-plus-circle me-2"></i>Crear mi primer grupo
-                                        </a>
+                                    <!-- Paginación -->
+                                    <nav aria-label="Paginación de grupos" class="mt-4" id="paginacion">
+                                        <ul class="pagination justify-content-center">
+                                            <li class="page-item" id="prevPage">
+                                                <a class="page-link" href="#"
+                                                    onclick="cambiarPagina('prev')">Anterior</a>
+                                            </li>
+                                            <li class="page-item active" id="page1">
+                                                <a class="page-link" href="#" onclick="cambiarPagina(1)">1</a>
+                                            </li>
+                                            <li class="page-item" id="page2">
+                                                <a class="page-link" href="#" onclick="cambiarPagina(2)">2</a>
+                                            </li>
+                                            <li class="page-item" id="page3">
+                                                <a class="page-link" href="#" onclick="cambiarPagina(3)">3</a>
+                                            </li>
+                                            <li class="page-item" id="nextPage">
+                                                <a class="page-link" href="#"
+                                                    onclick="cambiarPagina('next')">Siguiente</a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                    <% } else { %>
+                                        <!-- Estado vacío - No hay grupos -->
+                                        <div class="empty-state">
+                                            <i class="bi bi-people" style="font-size: 4rem; color: #0d6efd;"></i>
+                                            <h3 class="mt-3">No hay grupos registrados</h3>
+                                            <p class="text-muted mb-4">Comienza creando tu primer grupo para organizar
+                                                vehículos y personas</p>
+                                            <a href="/grupos/crear" class="btn btn-primary-custom btn-lg">
+                                                <i class="bi bi-plus-circle me-2"></i>Crear mi primer grupo
+                                            </a>
+                                        </div>
+                                        <% } %>
+                            </div>
+
+                            <!-- Vista de Tabla (oculta por defecto) -->
+                            <div id="vistaTablaContainer" style="display: none;">
+                                <% if (grupos && grupos.length> 0) { %>
+                                    <div class="table-responsive">
+                                        <table class="table table-grupos">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Nombre del Grupo</th>
+                                                    <th>Compañía</th>
+                                                    <th>Contacto</th>
+                                                    <th>Email</th>
+                                                    <th>Ciudad</th>
+                                                    <th>Estado</th>
+                                                    <th>Fecha Creación</th>
+                                                    <th>Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <% grupos.forEach(grupo=> { %>
+                                                    <tr class="grupo-item-tabla"
+                                                        data-nombre="<%= grupo.nombre_grupo.toLowerCase() %>"
+                                                        data-compania="<%= (grupo.nombre_compania || '').toLowerCase() %>"
+                                                        data-contacto="<%= (grupo.nombre_contacto || '').toLowerCase() %>"
+                                                        data-estado="<%= grupo.activo ? 'activo' : 'inactivo' %>"
+                                                        data-fecha="<%= new Date(grupo.fecha_creacion).getTime() %>">
+
+                                                        <td><strong>#<%= grupo.id_grupo %></strong></td>
+                                                        <td>
+                                                            <%= grupo.nombre_grupo %>
+                                                        </td>
+                                                        <td>
+                                                            <%= grupo.nombre_compania || '-' %>
+                                                        </td>
+                                                        <td>
+                                                            <%= grupo.nombre_contacto || '-' %>
+                                                        </td>
+                                                        <td>
+                                                            <% if (grupo.email_contacto) { %>
+                                                                <a href="mailto:<%= grupo.email_contacto %>"
+                                                                    class="text-decoration-none">
+                                                                    <%= grupo.email_contacto %>
+                                                                </a>
+                                                                <% } else { %>
+                                                                    -
+                                                                    <% } %>
+                                                        </td>
+                                                        <td>
+                                                            <%= grupo.ciudad || '-' %>
+                                                        </td>
+                                                        <td>
+                                                            <span
+                                                                class="badge <%= grupo.activo ? 'bg-success' : 'bg-danger' %>">
+                                                                <%= grupo.activo ? 'Activo' : 'Inactivo' %>
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <%= new Date(grupo.fecha_creacion).toLocaleDateString() %>
+                                                        </td>
+                                                        <td>
+                                                            <div class="btn-group" role="group">
+                                                                <a href="/grupos/editar/<%= grupo.id_grupo %>"
+                                                                    class="btn btn-warning btn-sm" title="Editar">
+                                                                    <i class="bi bi-pencil"></i>
+                                                                </a>
+                                                                <a href="/grupos/ver/<%= grupo.id_grupo %>"
+                                                                    class="btn btn-info btn-sm text-white" title="Ver">
+                                                                    <i class="bi bi-eye"></i>
+                                                                </a>
+                                                                <button class="btn btn-danger btn-sm" title="Eliminar"
+                                                                    onclick="eliminarGrupo('<%= grupo.id_grupo %>', '<%= grupo.nombre_grupo %>')">
+                                                                    <i class="bi bi-trash"></i>
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <% }); %>
+                                            </tbody>
+                                        </table>
                                     </div>
                                     <% } %>
-                        </div>
-
-                        <!-- Vista de Tabla (oculta por defecto) -->
-                        <div id="vistaTablaContainer" style="display: none;">
-                            <% if (grupos && grupos.length> 0) { %>
-                                <div class="table-responsive">
-                                    <table class="table table-grupos">
-                                        <thead>
-                                            <tr>
-                                                <th>ID</th>
-                                                <th>Nombre del Grupo</th>
-                                                <th>Compañía</th>
-                                                <th>Contacto</th>
-                                                <th>Email</th>
-                                                <th>Ciudad</th>
-                                                <th>Estado</th>
-                                                <th>Fecha Creación</th>
-                                                <th>Acciones</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <% grupos.forEach(grupo=> { %>
-                                                <tr class="grupo-item-tabla"
-                                                    data-nombre="<%= grupo.nombre_grupo.toLowerCase() %>"
-                                                    data-compania="<%= (grupo.nombre_compania || '').toLowerCase() %>"
-                                                    data-contacto="<%= (grupo.nombre_contacto || '').toLowerCase() %>"
-                                                    data-estado="<%= grupo.activo ? 'activo' : 'inactivo' %>"
-                                                    data-fecha="<%= new Date(grupo.fecha_creacion).getTime() %>">
-
-                                                    <td><strong>#<%= grupo.id_grupo %></strong></td>
-                                                    <td>
-                                                        <%= grupo.nombre_grupo %>
-                                                    </td>
-                                                    <td>
-                                                        <%= grupo.nombre_compania || '-' %>
-                                                    </td>
-                                                    <td>
-                                                        <%= grupo.nombre_contacto || '-' %>
-                                                    </td>
-                                                    <td>
-                                                        <% if (grupo.email_contacto) { %>
-                                                            <a href="mailto:<%= grupo.email_contacto %>"
-                                                                class="text-decoration-none">
-                                                                <%= grupo.email_contacto %>
-                                                            </a>
-                                                            <% } else { %>
-                                                                -
-                                                                <% } %>
-                                                    </td>
-                                                    <td>
-                                                        <%= grupo.ciudad || '-' %>
-                                                    </td>
-                                                    <td>
-                                                        <span
-                                                            class="badge <%= grupo.activo ? 'bg-success' : 'bg-danger' %>">
-                                                            <%= grupo.activo ? 'Activo' : 'Inactivo' %>
-                                                        </span>
-                                                    </td>
-                                                    <td>
-                                                        <%= new Date(grupo.fecha_creacion).toLocaleDateString() %>
-                                                    </td>
-                                                    <td>
-                                                        <div class="btn-group" role="group">
-                                                            <a href="/grupos/editar/<%= grupo.id_grupo %>"
-                                                                class="btn btn-warning btn-sm" title="Editar">
-                                                                <i class="bi bi-pencil"></i>
-                                                            </a>
-                                                            <a href="/grupos/ver/<%= grupo.id_grupo %>"
-                                                                class="btn btn-info btn-sm text-white" title="Ver">
-                                                                <i class="bi bi-eye"></i>
-                                                            </a>
-                                                            <button class="btn btn-danger btn-sm" title="Eliminar"
-                                                                onclick="eliminarGrupo('<%= grupo.id_grupo %>', '<%= grupo.nombre_grupo %>')">
-                                                                <i class="bi bi-trash"></i>
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                                <% }); %>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <% } %>
-                        </div>
+                            </div>
+        </div>
     </div>
 
     <!-- Footer -->
-    <footer class="text-center text-white mt-5 py-4" style="background-color: #1e3a8a;">
+    <footer class="text-center text-white py-4">
         <div class="container">
             <p class="mb-1">
                 &copy; 2026 Sistema de Gestión Vehicular
