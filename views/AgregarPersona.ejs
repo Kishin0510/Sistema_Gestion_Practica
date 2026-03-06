@@ -441,7 +441,6 @@
             }
             const clienteSelect = document.getElementById('id_cliente');
             if (clienteSelect && clienteSelect.options.length === 2) clienteSelect.selectedIndex = 1;
-
             const fechaNacimientoInput = document.getElementById('fecha_nacimiento');
             if (fechaNacimientoInput && !fechaNacimientoInput.value) {
                 const hoy = new Date();
@@ -458,9 +457,7 @@
                     break;
                 }
             }
-
         });
     </script>
 </body>
-
 </html>
