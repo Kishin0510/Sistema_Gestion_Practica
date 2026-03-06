@@ -8,11 +8,8 @@
         <%= title || 'Agregar Persona' %>
     </title>
 
-    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <!-- CSS Personalizado -->
     <link rel="stylesheet" href="/css/Index.css">
     <style>
         /* Estilos para footer fijo abajo */
@@ -43,348 +40,294 @@
             flex-shrink: 0;
             width: 100%;
         }
+
+        /* Estilo de pestañas para encajar con el diseño */
+        .nav-tabs .nav-link {
+            color: #495057;
+            font-weight: 500;
+            border: none;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-tabs .nav-link.active {
+            color: #1e3a8a !important;
+            font-weight: bold;
+            background-color: transparent;
+            border-bottom: 2px solid #1e3a8a !important;
+        }
+        .required-field::after {
+            content: " *";
+            color: red;
+        }
     </style>
 </head>
 
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary-custom shadow-sm">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="/">
-                <i class="bi bi-car-front-fill me-2"></i>Gestión Vehicular
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarVehicular">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarVehicular">
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">Inicio</a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle active" href="#" id="navbarDropdownPersonas" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-people me-1"></i>Personas
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownPersonas">
-                            <li><a class="dropdown-item" href="/personas/agregar">
-                                    <i class="bi bi-person-plus me-2"></i>Agregar Persona
-                                </a></li>
-                            <li><a class="dropdown-item" href="/personas">
-                                    <i class="bi bi-list-ul me-2"></i>Listar Personas
-                                </a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/vehiculos">Vehículos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/documentos">Documentos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/reportes">Reportes</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/login">Login</a>
-                    </li>
-                </ul>
+    <div class="content-wrapper">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary-custom shadow-sm">
+            <div class="container">
+                <a class="navbar-brand fw-bold" href="/">
+                    <i class="bi bi-car-front-fill me-2"></i>Gestión Vehicular
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarVehicular">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarVehicular">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/">Inicio</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle active" href="#" id="navbarDropdownPersonas" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-people me-1"></i>Personas
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdownPersonas">
+                                <li><a class="dropdown-item" href="/personas/agregar">
+                                        <i class="bi bi-person-plus me-2"></i>Agregar Persona
+                                    </a></li>
+                                <li><a class="dropdown-item" href="/personas">
+                                        <i class="bi bi-list-ul me-2"></i>Listar Personas
+                                    </a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/vehiculos">Vehículos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/documentos">Documentos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/reportes">Reportes</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/login">Login</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-        </div>
-    </nav>
+        </nav>
 
-    <!-- Contenido Principal -->
-    <div class="container mt-4">
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
-                <div class="card shadow">
-                    <!-- SOLAMENTE CAMBIÉ EL COLOR DEL TÍTULO AQUÍ -->
-                    <div class="card-header py-3"
-                        style="background: linear-gradient(135deg, #1e3a8a 0%, #172554 100%);">
-                        <h4 class="mb-0 text-white">
-                            <i class="bi bi-person-plus me-2"></i>Agregar Nueva Persona
-                        </h4>
-                    </div>
-                    <div class="card-body">
-                        <!-- Mensajes -->
-                        <% if (success) { %>
-                            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                <i class="bi bi-check-circle me-2"></i>
-                                <%= success %>
+        <div class="container mt-4">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="card shadow">
+                        <div class="card-header py-3"
+                            style="background: linear-gradient(135deg, #1e3a8a 0%, #172554 100%);">
+                            <h4 class="mb-0 text-white">
+                                <i class="bi bi-person-plus me-2"></i>Agregar Nueva Persona
+                            </h4>
+                        </div>
+                        <div class="card-body">
+                            <% if (typeof success !== 'undefined' && success) { %>
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i class="bi bi-check-circle me-2"></i>
+                                    <%= success %>
                                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
+                                </div>
                             <% } %>
 
-                                <% if (error) { %>
-                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                        <i class="bi bi-exclamation-triangle me-2"></i>
-                                        <%= error %>
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                    </div>
-                                    <% } %>
+                            <% if (typeof error !== 'undefined' && error) { %>
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    <%= error %>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            <% } %>
 
-                                        <% if (!hayClientes) { %>
-                                            <div class="alert alert-warning alert-dismissible fade show">
-                                                <i class="bi bi-exclamation-triangle me-2"></i>
-                                                <strong>Atención:</strong> No se encontraron clientes activos en la base
-                                                de datos.
-                                                El sistema creará automáticamente un cliente principal antes de guardar
-                                                la persona.
+                            <ul class="nav nav-tabs mb-4" id="personaTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="datos-tab" data-bs-toggle="tab" data-bs-target="#datos" type="button" role="tab">
+                                        <i class="bi bi-person-vcard me-2"></i>Datos Personales
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="docs-tab" data-bs-toggle="tab" data-bs-target="#docs" type="button" role="tab">
+                                        <i class="bi bi-file-earmark-pdf me-2"></i>Documentos y Mineras
+                                    </button>
+                                </li>
+                            </ul>
+
+                            <form method="POST" action="/personas/agregar" id="formAgregarPersona">
+                                <div class="tab-content" id="personaTabsContent">
+                                    
+                                    <div class="tab-pane fade show active" id="datos" role="tabpanel">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="id_cliente" class="form-label required-field">Cliente</label>
+                                                <select class="form-select <%= !hayClientes ? 'border-warning' : '' %>" id="id_cliente" name="id_cliente" required>
+                                                    <option value="">Seleccionar cliente...</option>
+                                                    <% if (clientes && clientes.length > 0) { %>
+                                                        <% clientes.forEach(cliente => { %>
+                                                            <option value="<%= cliente.id_cliente %>" <%= (datosFormulario && datosFormulario.id_cliente == cliente.id_cliente) ? 'selected' : '' %>>
+                                                                <%= cliente.nombre_cliente || cliente.nombre %>
+                                                            </option>
+                                                        <% }); %>
+                                                    <% } %>
+                                                </select>
+                                                <% if (!hayClientes) { %>
+                                                    <div class="form-text text-warning">
+                                                        <i class="bi bi-info-circle me-1"></i> Se creará un cliente automáticamente al guardar.
+                                                    </div>
+                                                <% } %>
                                             </div>
-                                            <% } %>
 
-                                                <!-- Formulario -->
-                                                <form method="POST" action="/personas/agregar" id="formAgregarPersona">
-                                                    <div class="row">
-                                                        <!-- Cliente -->
-                                                        <div class="col-md-6 mb-3">
-                                                            <label for="id_cliente"
-                                                                class="form-label required-field">Cliente</label>
-                                                            <select
-                                                                class="form-select <%= !hayClientes ? 'border-warning' : '' %>"
-                                                                id="id_cliente" name="id_cliente" required>
-                                                                <option value="">Seleccionar cliente...</option>
-                                                                <% if (clientes && clientes.length> 0) { %>
-                                                                    <% clientes.forEach(cliente=> { %>
-                                                                        <option value="<%= cliente.id_cliente %>"
-                                                                            <%=(datosFormulario &&
-                                                                            datosFormulario.id_cliente==cliente.id_cliente)
-                                                                            ? 'selected' : '' %>>
-                                                                            <%= cliente.nombre_cliente || cliente.nombre
-                                                                                %>
-                                                                        </option>
-                                                                        <% }); %>
-                                                                            <% } else { %>
-                                                                                <option value="0">-- SIN CLIENTES
-                                                                                    DISPONIBLES --</option>
-                                                                                <% } %>
-                                                            </select>
-                                                            <% if (!hayClientes) { %>
-                                                                <div class="form-text text-warning">
-                                                                    <i class="bi bi-info-circle me-1"></i>
-                                                                    Se creará un cliente automáticamente al guardar.
-                                                                </div>
-                                                                <% } %>
-                                                        </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label for="run" class="form-label required-field">RUN</label>
+                                                <input type="text" class="form-control" id="run" name="run" value="<%= datosFormulario ? datosFormulario.run : '' %>" placeholder="12345678" required>
+                                                <div class="form-text small">Sin puntos ni guión</div>
+                                            </div>
 
-                                                        <!-- RUN y DV -->
-                                                        <div class="col-md-4 mb-3">
-                                                            <label for="run"
-                                                                class="form-label required-field">RUN</label>
-                                                            <input type="text" class="form-control" id="run" name="run"
-                                                                value="<%= datosFormulario ? datosFormulario.run : '' %>"
-                                                                placeholder="12345678" pattern="\d{7,8}"
-                                                                title="7 u 8 dígitos sin puntos ni guión" required>
-                                                            <div class="form-text">
-                                                                <small>Sin puntos ni guión</small>
-                                                            </div>
-                                                        </div>
+                                            <div class="col-md-2 mb-3">
+                                                <label for="dv" class="form-label required-field">DV</label>
+                                                <input type="text" class="form-control text-uppercase" id="dv" name="dv" value="<%= datosFormulario ? datosFormulario.dv : '' %>" placeholder="K" maxlength="1" required>
+                                            </div>
 
-                                                        <div class="col-md-2 mb-3">
-                                                            <label for="dv" class="form-label required-field">DV</label>
-                                                            <input type="text" class="form-control text-uppercase"
-                                                                id="dv" name="dv"
-                                                                value="<%= datosFormulario ? datosFormulario.dv : '' %>"
-                                                                placeholder="K" maxlength="1" pattern="[0-9K]"
-                                                                title="Dígito verificador (0-9 o K)" required>
-                                                        </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="nombres" class="form-label required-field">Nombres</label>
+                                                <input type="text" class="form-control" id="nombres" name="nombres" value="<%= datosFormulario ? datosFormulario.nombres : '' %>" placeholder="Juan Carlos" required>
+                                            </div>
 
-                                                        <!-- Nombres -->
-                                                        <div class="col-md-6 mb-3">
-                                                            <label for="nombres"
-                                                                class="form-label required-field">Nombres</label>
-                                                            <input type="text" class="form-control" id="nombres"
-                                                                name="nombres"
-                                                                value="<%= datosFormulario ? datosFormulario.nombres : '' %>"
-                                                                placeholder="Juan Carlos" required>
-                                                        </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="apellido_paterno" class="form-label required-field">Apellido Paterno</label>
+                                                <input type="text" class="form-control" id="apellido_paterno" name="apellido_paterno" value="<%= datosFormulario ? datosFormulario.apellido_paterno : '' %>" placeholder="Pérez" required>
+                                            </div>
 
-                                                        <!-- Apellido Paterno -->
-                                                        <div class="col-md-6 mb-3">
-                                                            <label for="apellido_paterno"
-                                                                class="form-label required-field">Apellido
-                                                                Paterno</label>
-                                                            <input type="text" class="form-control"
-                                                                id="apellido_paterno" name="apellido_paterno"
-                                                                value="<%= datosFormulario ? datosFormulario.apellido_paterno : '' %>"
-                                                                placeholder="Pérez" required>
-                                                        </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="apellido_materno" class="form-label">Apellido Materno</label>
+                                                <input type="text" class="form-control" id="apellido_materno" name="apellido_materno" value="<%= datosFormulario ? datosFormulario.apellido_materno : '' %>" placeholder="González (opcional)">
+                                            </div>
 
-                                                        <!-- Apellido Materno -->
-                                                        <div class="col-md-6 mb-3">
-                                                            <label for="apellido_materno" class="form-label">Apellido
-                                                                Materno</label>
-                                                            <input type="text" class="form-control"
-                                                                id="apellido_materno" name="apellido_materno"
-                                                                value="<%= datosFormulario ? datosFormulario.apellido_materno : '' %>"
-                                                                placeholder="González (opcional)">
-                                                        </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="email" class="form-label">Email</label>
+                                                <input type="email" class="form-control" id="email" name="email" value="<%= datosFormulario ? datosFormulario.email : '' %>" placeholder="ejemplo@correo.com (opcional)">
+                                            </div>
 
-                                                        <!-- Email -->
-                                                        <div class="col-md-6 mb-3">
-                                                            <label for="email" class="form-label">Email</label>
-                                                            <input type="email" class="form-control" id="email"
-                                                                name="email"
-                                                                value="<%= datosFormulario ? datosFormulario.email : '' %>"
-                                                                placeholder="ejemplo@correo.com (opcional)">
-                                                        </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="telefono" class="form-label">Teléfono</label>
+                                                <input type="tel" class="form-control" id="telefono" name="telefono" value="<%= datosFormulario ? datosFormulario.telefono : '' %>" placeholder="+56 9 1234 5678 (opcional)">
+                                            </div>
 
-                                                        <!-- Teléfono -->
-                                                        <div class="col-md-6 mb-3">
-                                                            <label for="telefono" class="form-label">Teléfono</label>
-                                                            <input type="tel" class="form-control" id="telefono"
-                                                                name="telefono"
-                                                                value="<%= datosFormulario ? datosFormulario.telefono : '' %>"
-                                                                placeholder="+56 9 1234 5678 (opcional)">
-                                                        </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
+                                                <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento" value="<%= datosFormulario ? datosFormulario.fecha_nacimiento : '' %>">
+                                                <div class="form-text small">Formato: AAAA-MM-DD</div>
+                                            </div>
 
-                                                        <!-- Fecha de Nacimiento -->
-                                                        <div class="col-md-6 mb-3">
-                                                            <label for="fecha_nacimiento" class="form-label">Fecha de
-                                                                Nacimiento</label>
-                                                            <input type="date" class="form-control"
-                                                                id="fecha_nacimiento" name="fecha_nacimiento"
-                                                                value="<%= datosFormulario ? datosFormulario.fecha_nacimiento : '' %>"
-                                                                max="<%= new Date().toISOString().split('T')[0] %>">
-                                                            <div class="form-text">
-                                                                <small>Formato: AAAA-MM-DD</small>
-                                                            </div>
-                                                        </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="cargo" class="form-label">Cargo</label>
+                                                <select class="form-select" id="cargo" name="cargo">
+                                                    <option value="" <%= !datosFormulario || !datosFormulario.cargo ? 'selected' : '' %>>Seleccione un cargo...</option>
+                                                    <% let cargos = ['Gerente', 'Supervisor', 'Conductor', 'Administrativo', 'Operaciones', 'Logística', 'Mantenimiento', 'Recursos Humanos', 'Prevencionista de Riesgos', 'Vendedor', 'Contador']; %>
+                                                    <% cargos.forEach(function(opcion) { %>
+                                                        <option value="<%= opcion %>" <%= (datosFormulario && datosFormulario.cargo === opcion) ? 'selected' : '' %>><%= opcion %></option>
+                                                    <% }); %>
+                                                    <option value="Otro" <%= (datosFormulario && datosFormulario.cargo === 'Otro') ? 'selected' : '' %>>Otro...</option>
+                                                </select>
+                                                <div class="form-text small">Seleccione el cargo correspondiente al cliente/contacto.</div>
+                                            </div>
 
-                                                        <!-- Cargo -->
-                                                        <div class="col-md-6 mb-3">
-                                                            <label for="cargo" class="form-label">Cargo</label>
-                                                            <select class="form-select" id="cargo" name="cargo">
-                                                                <option value="" <%=!datosFormulario ||
-                                                                    !datosFormulario.cargo ? 'selected' : '' %>
-                                                                    >Seleccione un cargo...</option>
+                                            <div class="col-md-12 mb-3">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="activo" name="activo" value="1" <%= (!datosFormulario || datosFormulario.activo == '1') ? 'checked' : '' %>>
+                                                    <label class="form-check-label" for="activo">
+                                                        <i class="bi bi-check-circle me-1"></i>Persona activa
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
 
-                                                                <% // Definimos la lista de cargos para iterar const
-                                                                    cargos=[ 'Gerente' , 'Supervisor' , 'Conductor'
-                                                                    , 'Administrativo' , 'Operaciones' , 'Logística'
-                                                                    , 'Mantenimiento' , 'Recursos Humanos'
-                                                                    , 'Prevencionista de Riesgos' , 'Vendedor'
-                                                                    , 'Contador' ]; %>
+                                    <div class="tab-pane fade" id="docs" role="tabpanel">
+                                        <div class="alert alert-info py-2 small">
+                                            <i class="bi bi-info-circle me-2"></i>Gestione documentos (PDF) según requerimientos de mineras (vencimientos 6 meses o 1 año).
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Minera / Destino</label>
+                                                <input type="text" class="form-control" placeholder="Ej: Minera Escondida">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Archivo de Certificación (PDF)</label>
+                                                <input type="file" class="form-control" accept=".pdf">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
-                                                                    <% cargos.forEach(function(opcion) { %>
-                                                                        <option value="<%= opcion %>"
-                                                                            <%=(datosFormulario &&
-                                                                            datosFormulario.cargo===opcion) ? 'selected'
-                                                                            : '' %>>
-                                                                            <%= opcion %>
-                                                                        </option>
-                                                                        <% }); %>
-
-                                                                            <option value="Otro" <%=(datosFormulario &&
-                                                                                datosFormulario.cargo==='Otro' )
-                                                                                ? 'selected' : '' %>>Otro...</option>
-                                                            </select>
-                                                            <div class="form-text">Seleccione el cargo correspondiente
-                                                                al cliente/contacto.</div>
-                                                        </div>
-                                                        <!-- Estado Activo -->
-                                                        <div class="col-md-12 mb-3">
-                                                            <div class="form-check">
-                                                                <input class="form-check-input" type="checkbox"
-                                                                    id="activo" name="activo" value="1"
-                                                                    <%=(!datosFormulario || datosFormulario.activo=='1'
-                                                                    ) ? 'checked' : '' %>>
-                                                                <label class="form-check-label" for="activo">
-                                                                    <i class="bi bi-check-circle me-1"></i>Persona
-                                                                    activa
-                                                                </label>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Botones -->
-                                                    <div class="d-flex justify-content-between mt-4">
-                                                        <a href="/" class="btn btn-secondary">
-                                                            <i class="bi bi-arrow-left me-2"></i>Volver al Inicio
-                                                        </a>
-                                                        <button type="submit" class="btn btn-primary-custom"
-                                                            id="btnSubmit">
-                                                            <i class="bi bi-save me-2"></i>Guardar Persona
-                                                        </button>
-                                                    </div>
-                                                </form>
+                                <div class="d-flex justify-content-between mt-4">
+                                    <a href="/" class="btn btn-secondary">
+                                        <i class="bi bi-arrow-left me-2"></i>Volver al Inicio
+                                    </a>
+                                    <button type="submit" class="btn btn-primary-custom" id="btnSubmit">
+                                        <i class="bi bi-save me-2"></i>Guardar Persona
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Información de ayuda -->
-                <div class="card mt-3 border-info">
-                    <div class="card-body">
-                        <h6 class="card-title text-info">
-                            <i class="bi bi-info-circle me-2"></i>Información importante
-                        </h6>
-                        <ul class="mb-0 small">
-                            <li><strong>Campos obligatorios:</strong> Cliente, RUN, DV, Nombres y Apellido Paterno</li>
-                            <li><strong>RUN:</strong> 7 u 8 dígitos sin puntos ni guión (ejemplo: 12345678)</li>
-                            <li><strong>DV:</strong> Dígito verificador (0-9 o la letra K)</li>
-                            <li><strong>Validación:</strong> Los datos se validan antes de guardar en la base de datos
-                            </li>
-                            <li><strong>Cliente:</strong> Si no hay clientes, se creará uno automáticamente</li>
-                            <li><strong>Duplicados:</strong> No se permiten RUN duplicados para el mismo cliente</li>
-                        </ul>
+                    <div class="card mt-3 border-info">
+                        <div class="card-body">
+                            <h6 class="card-title text-info">
+                                <i class="bi bi-info-circle me-2"></i>Información importante
+                            </h6>
+                            <ul class="mb-0 small">
+                                <li><strong>Campos obligatorios:</strong> Cliente, RUN, DV, Nombres y Apellido Paterno</li>
+                                <li><strong>RUN:</strong> 7 u 8 dígitos sin puntos ni guión (ejemplo: 12345678)</li>
+                                <li><strong>DV:</strong> Dígito verificador (0-9 o la letra K)</li>
+                                <li><strong>Validación:</strong> Los datos se validan antes de guardar en la base de datos</li>
+                                <li><strong>Documentos:</strong> Suba los PDF provenientes de empresas certificadoras.</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Footer -->
     <footer class="bg-primary-custom text-center text-white mt-5 py-4">
         <div class="container">
             <p class="mb-1">
                 &copy; <%= new Date().getFullYear() %> Sistema de Gestión Vehicular
             </p>
+            <p class="small mb-0">
+                <i class="bi bi-calendar-check me-1"></i>Fecha del servidor: 
+                <%= (typeof fecha !== 'undefined' && fecha) ? fecha.toLocaleString() : new Date().toLocaleString() %>
+            </p>
             <small>Control • Seguridad • Reportes</small>
         </div>
     </footer>
 
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Scripts -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
 
             function validarRUT(run, dv) {
                 run = run.replace(/\D/g, '');
                 dv = dv.toUpperCase();
-
-                let suma = 0;
-                let multiplo = 2;
-
+                let suma = 0, multiplo = 2;
                 for (let i = run.length - 1; i >= 0; i--) {
                     suma += parseInt(run.charAt(i)) * multiplo;
                     multiplo = multiplo < 7 ? multiplo + 1 : 2;
                 }
                 let resto = suma % 11;
                 let dvEsperado = 11 - resto;
-
                 if (dvEsperado === 11) dvEsperado = "0";
                 else if (dvEsperado === 10) dvEsperado = "K";
                 else dvEsperado = dvEsperado.toString();
-
                 return dv === dvEsperado;
             }
+
             const dvInput = document.getElementById('dv');
             const runInput = document.getElementById('run');
 
             if (dvInput) {
-                dvInput.addEventListener('input', function () {
-                    this.value = this.value.toUpperCase();
-                });
-
-                dvInput.addEventListener('blur', function () {
-                    this.value = this.value.toUpperCase();
-                });
+                dvInput.addEventListener('input', function () { this.value = this.value.toUpperCase(); });
             }
 
             if (runInput) {
-                runInput.addEventListener('input', function () {
-                    this.value = this.value.replace(/\D/g, '');
-                });
+                runInput.addEventListener('input', function () { this.value = this.value.replace(/\D/g, ''); });
             }
 
             const form = document.getElementById('formAgregarPersona');
@@ -392,72 +335,26 @@
 
             if (form) {
                 form.addEventListener('submit', function (e) {
+                    const run = runInput.value.trim();
+                    const dv = dvInput.value.trim().toUpperCase();
+                    
+                    if (!validarRUT(run, dv)) {
+                        e.preventDefault();
+                        alert('El RUT ingresado no es válido');
+                        // Volver a la primera pestaña si hay error
+                        const firstTab = new bootstrap.Tab(document.getElementById('datos-tab'));
+                        firstTab.show();
+                        return false;
+                    }
 
                     if (btnSubmit) {
                         btnSubmit.disabled = true;
                         btnSubmit.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Procesando...';
                     }
-
-                    const run = runInput.value.trim();
-                    const dv = dvInput.value.trim().toUpperCase();
-                    const nombres = document.getElementById('nombres').value.trim();
-                    const apellidoPaterno = document.getElementById('apellido_paterno').value.trim();
-                    const clienteId = document.getElementById('id_cliente').value;
-
-                    let errores = [];
-
-                    if (!/^\d{7,8}$/.test(run)) errores.push('El RUN debe tener 7 u 8 dígitos');
-                    if (!/^[0-9K]$/.test(dv)) errores.push('DV inválido');
-
-                    if (!validarRUT(run, dv)) {
-                        errores.push('El RUT ingresado no es válido');
-
-                        runInput.classList.add('is-invalid');
-                        dvInput.classList.add('is-invalid');
-                    } else {
-                        runInput.classList.remove('is-invalid');
-                        dvInput.classList.remove('is-invalid');
-                    }
-
-                    if (nombres.length < 2) errores.push('Los nombres deben tener al menos 2 caracteres');
-                    if (apellidoPaterno.length < 2) errores.push('Apellido paterno muy corto');
-
-                    if (!clienteId) errores.push('Debe seleccionar un cliente');
-
-                    if (errores.length > 0) {
-                        e.preventDefault();
-
-                        alert('Corrija lo siguiente:\n\n• ' + errores.join('\n• '));
-
-                        btnSubmit.disabled = false;
-                        btnSubmit.innerHTML = '<i class="bi bi-save me-2"></i>Guardar Persona';
-
-                        runInput.focus();
-                        return false;
-                    }
-
-                    return true;
                 });
-            }
-            const clienteSelect = document.getElementById('id_cliente');
-            if (clienteSelect && clienteSelect.options.length === 2) clienteSelect.selectedIndex = 1;
-            const fechaNacimientoInput = document.getElementById('fecha_nacimiento');
-            if (fechaNacimientoInput && !fechaNacimientoInput.value) {
-                const hoy = new Date();
-                const hace100 = new Date(hoy.getFullYear() - 100, hoy.getMonth(), hoy.getDate());
-                fechaNacimientoInput.max = hoy.toISOString().split('T')[0];
-                fechaNacimientoInput.min = hace100.toISOString().split('T')[0];
-            }
-
-            const campos = ['id_cliente', 'run', 'dv', 'nombres', 'apellido_paterno'];
-            for (const id of campos) {
-                const campo = document.getElementById(id);
-                if (campo && !campo.value.trim()) {
-                    campo.focus();
-                    break;
-                }
             }
         });
     </script>
 </body>
+
 </html>

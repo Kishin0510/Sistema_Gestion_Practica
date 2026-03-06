@@ -58,7 +58,6 @@ cargarRutas('Vehículos', '/vehiculos', './routes/vehiculos.routes');
 cargarRutas('Documentos', '/documentos', './routes/documentos.routes');
 cargarRutas('Logs', '/registro-cambios', './routes/logs.routes');
 
-
 app.get('/', async (req, res) => {
     try {
         const [rows] = await db.query('SELECT NOW() AS fecha');

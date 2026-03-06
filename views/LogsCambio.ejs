@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,30 +9,33 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         :root {
             --primary: #1e3a8a;
             --primary-dark: #172554;
         }
-
-        .bg-primary {
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .content-wrapper {
+            flex: 1;
+        }
+        .bg-primary, .bg-primary-custom {
             background-color: var(--primary) !important;
         }
-
         .text-primary {
             color: var(--primary) !important;
         }
-
         .card-header.bg-primary {
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
         }
-
         .badge-op {
             width: 85px;
             display: inline-block;
         }
-
         pre {
             background: #f4f4f4;
             padding: 10px;
@@ -44,100 +46,88 @@
         }
     </style>
 </head>
-
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="/"><i class="fas fa-car me-2"></i>Gestión Vehicular</a>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="/vehiculos">Vehículos</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/documentos">Documentos</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="/registro-cambios">Auditoría</a></li>
-                </ul>
+    <div class="content-wrapper">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="/"><i class="fas fa-car me-2"></i>Gestión Vehicular</a>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item"><a class="nav-link" href="/vehiculos">Vehículos</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/documentos">Documentos</a></li>
+                        <li class="nav-item"><a class="nav-link active" href="/registro-cambios">Auditoría</a></li>
+                    </ul>
+                </div>
             </div>
-        </div>
-    </nav>
-
-    <div class="container mt-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><i class="fas fa-history me-2" style="color: var(--primary);"></i>Registro de Cambios</h2>
-            <button class="btn btn-outline-primary" onclick="window.location.reload()">
-                <i class="fas fa-sync-alt me-2"></i>Actualizar
-            </button>
-        </div>
-
-        <% if (typeof error !=='undefined' && error) { %>
-            <div class="alert alert-danger alert-dismissible fade show">
-                <i class="fas fa-exclamation-circle me-2"></i>
-                <%= error %>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </nav>
+        <div class="container mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-history me-2" style="color: var(--primary);"></i>Registro de Cambios</h2>
+                <button class="btn btn-outline-primary" onclick="window.location.reload()">
+                    <i class="fas fa-sync-alt me-2"></i>Actualizar
+                </button>
             </div>
-            <% } %>
-
-                <div class="card shadow-sm">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Historial del Sistema</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table id="tablaLogs" class="table table-striped table-hover align-middle">
-                                <thead>
+            <div class="card shadow-sm mb-5">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Historial del Sistema</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="tablaLogs" class="table table-striped table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Fecha y Hora</th>
+                                    <th>Usuario</th>
+                                    <th>Operación</th>
+                                    <th>Tabla</th>
+                                    <th>ID Ref.</th>
+                                    <th>Actividad</th>
+                                    <th class="text-center">Detalle</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% logs.forEach(log=> {
+                                    let badgeClass = 'bg-secondary';
+                                    if(log.operacion === 'INSERT') badgeClass = 'bg-success';
+                                    if(log.operacion === 'UPDATE') badgeClass = 'bg-warning text-dark';
+                                    if(log.operacion === 'DELETE') badgeClass = 'bg-danger';
+                                    %>
                                     <tr>
-                                        <th>Fecha y Hora</th>
-                                        <th>Usuario</th>
-                                        <th>Operación</th>
-                                        <th>Tabla</th>
-                                        <th>ID Ref.</th>
-                                        <th>Actividad</th>
-                                        <th class="text-center">Detalle</th>
+                                        <td class="small">
+                                            <%= log.fecha_formateada %>
+                                        </td>
+                                        <td>
+                                            <strong>
+                                                <%= log.usuario_nombre %>
+                                            </strong><br>
+                                            <small class="text-muted">
+                                                <%= log.nombre_cliente %>
+                                            </small>
+                                        </td>
+                                        <td><span class="badge <%= badgeClass %> badge-op">
+                                                <%= log.operacion %>
+                                            </span></td>
+                                        <td><code><%= log.tabla_afectada %></code></td>
+                                        <td>#<%= log.id_registro_afectado %>
+                                        </td>
+                                        <td>
+                                            <%= log.actividad %>
+                                        </td>
+                                        <td class="text-center">
+                                            <button class="btn btn-sm btn-info text-white btn-detalle"
+                                                data-id="<%= log.id_log %>">
+                                                <i class="fas fa-search-plus"></i>
+                                            </button>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    <% logs.forEach(log=> {
-                                        let badgeClass = 'bg-secondary';
-                                        if(log.operacion === 'INSERT') badgeClass = 'bg-success';
-                                        if(log.operacion === 'UPDATE') badgeClass = 'bg-warning text-dark';
-                                        if(log.operacion === 'DELETE') badgeClass = 'bg-danger';
-                                        %>
-                                        <tr>
-                                            <td class="small">
-                                                <%= log.fecha_formateada %>
-                                            </td>
-                                            <td>
-                                                <strong>
-                                                    <%= log.usuario_nombre %>
-                                                </strong><br>
-                                                <small class="text-muted">
-                                                    <%= log.nombre_cliente %>
-                                                </small>
-                                            </td>
-                                            <td>
-                                                <span class="badge <%= badgeClass %> badge-op">
-                                                    <%= log.operacion %>
-                                                </span>
-                                            </td>
-                                            <td><code><%= log.tabla_afectada %></code></td>
-                                            <td>#<%= log.id_registro_afectado %>
-                                            </td>
-                                            <td>
-                                                <%= log.actividad %>
-                                            </td>
-                                            <td class="text-center">
-                                                <button class="btn btn-sm btn-info text-white btn-detalle"
-                                                    data-id="<%= log.id_log %>">
-                                                    <i class="fas fa-search-plus"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <% }) %>
-                                </tbody>
-                            </table>
-                        </div>
+                                    <% }) %>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
+            </div>
+        </div>
     </div>
-
     <div class="modal fade" id="modalLog" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -146,38 +136,45 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div id="logContent">
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="fw-bold">IP Origen:</label>
-                                <p id="logIp" class="text-muted"></p>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="fw-bold">Tabla:</label>
-                                <p id="logTabla" class="badge bg-dark"></p>
-                            </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="fw-bold">IP Origen:</label>
+                            <p id="logIp" class="text-muted"></p>
                         </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label class="fw-bold text-danger">Datos Anteriores:</label>
-                                <pre id="logPrev"></pre>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="fw-bold text-success">Datos Nuevos:</label>
-                                <pre id="logNew"></pre>
-                            </div>
+                        <div class="col-md-6">
+                            <label class="fw-bold">Tabla:</label>
+                            <p id="logTabla" class="badge bg-dark"></p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="fw-bold text-danger">Datos Anteriores:</label>
+                            <pre id="logPrev"></pre>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="fw-bold text-success">Datos Nuevos:</label>
+                            <pre id="logNew"></pre>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <footer class="bg-primary-custom text-center text-white mt-auto py-4">
+        <div class="container">
+            <p class="mb-1">
+                &copy; <%= new Date().getFullYear() %> Sistema de Gestión Vehicular
+            </p>
+            <p class="small mb-0">
+                <i class="bi bi-calendar-check me-1"></i>Fecha del servidor: <%= typeof fecha !== 'undefined' ? fecha.toLocaleString() : new Date().toLocaleString() %>
+            </p>
+            <small>Control • Seguridad • Reportes</small>
+        </div>
+    </footer>
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-
     <script>
         $(document).ready(function () {
             $('#tablaLogs').DataTable({
@@ -188,18 +185,14 @@
 
             $('.btn-detalle').on('click', function () {
                 const id = $(this).data('id');
-                fetch(`/registro-cambios/detalle/${id}`) // Ajusta según tu ruta real
+                fetch(`/registro-cambios/detalle/${id}`)
                     .then(res => res.json())
                     .then(data => {
                         if (data.error) return alert(data.error);
-
                         $('#logIp').text(data.ip_origen || 'N/A');
                         $('#logTabla').text(data.tabla_afectada);
-
-                        // Formatear JSON para lectura fácil
                         $('#logPrev').text(JSON.stringify(JSON.parse(data.datos_anteriores || '{}'), null, 2));
                         $('#logNew').text(JSON.stringify(JSON.parse(data.datos_nuevos || '{}'), null, 2));
-
                         new bootstrap.Modal('#modalLog').show();
                     })
                     .catch(err => console.error(err));
@@ -207,5 +200,4 @@
         });
     </script>
 </body>
-
 </html>

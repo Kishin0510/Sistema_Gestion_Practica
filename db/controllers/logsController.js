@@ -1,14 +1,9 @@
 const db = require('../conexion');
 
 const logsController = {
-
-    
     listarLogs: async (req, res) => {
         try {
-            console.log('Cargando registro de cambios...');
-
-            
-            const id_cliente_session = 1;
+            const id_cliente_session = 1; // Acceso libre para cliente 1
 
             const query = `
                 SELECT 
@@ -33,9 +28,6 @@ const logsController = {
 
             const [logs] = await db.query(query, [id_cliente_session]);
 
-            console.log(` ${logs.length} registro(s) de actividad cargado(s)`);
-
-            
             const stats = {
                 total: logs.length,
                 inserts: logs.filter(l => l.operacion === 'INSERT').length,
@@ -43,7 +35,8 @@ const logsController = {
                 deletes: logs.filter(l => l.operacion === 'DELETE').length
             };
 
-            res.render('logs/index', {
+            // CAMBIO AQUÍ: Nombre exacto de tu archivo .ejs
+            res.render('LogsCambio', {
                 title: 'Registro de Auditoría y Cambios',
                 logs: logs,
                 stats: stats,
@@ -53,8 +46,7 @@ const logsController = {
 
         } catch (error) {
             console.error(' Error al listar logs:', error);
-
-            res.render('logs/index', {
+            res.render('LogsCambio', {
                 title: 'Registro de Cambios',
                 logs: [],
                 stats: { total: 0, inserts: 0, updates: 0, deletes: 0 },
@@ -63,45 +55,26 @@ const logsController = {
         }
     },
 
-    
     verDetalleLog: async (req, res) => {
         try {
             const { id } = req.params;
-            const id_cliente_session = 1; 
-
             const query = `
-                SELECT 
-                    l.*, 
-                    CONCAT(p.nombres, ' ', p.apellido_paterno) AS usuario_nombre,
-                    p.email AS usuario_email,
-                    c.nombre_cliente
+                SELECT l.*, 
+                CONCAT(p.nombres, ' ', p.apellido_paterno) AS usuario_nombre,
+                c.nombre_cliente
                 FROM logs_registro_cambios l
                 INNER JOIN personas p ON l.id_persona = p.id_persona
                 INNER JOIN clientes c ON l.id_cliente = c.id_cliente
-                WHERE l.id_log = ? AND l.id_cliente = ?
+                WHERE l.id_log = ?
             `;
+            const [rows] = await db.query(query, [id]);
 
-            const [rows] = await db.query(query, [id, id_cliente_session]);
-
-            if (rows.length === 0) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Registro de log no encontrado o sin permisos'
-                });
-            }
-
+            if (rows.length === 0) return res.status(404).json({ error: 'No encontrado' });
             
-            res.json({
-                success: true,
-                log: rows[0]
-            });
-
+            // Enviamos el objeto directo para que el JS de la vista lo entienda
+            res.json(rows[0]);
         } catch (error) {
-            console.error(' Error al obtener detalle del log:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Error interno al procesar la solicitud de detalle'
-            });
+            res.status(500).json({ error: error.message });
         }
     }
 };

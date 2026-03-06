@@ -583,8 +583,6 @@
                     if (!clienteId || clienteId === '0') {
                         errores.push('Debe seleccionar un cliente válido');
                     }
-
-                    // Si hay errores
                     if (errores.length > 0) {
                         e.preventDefault();
                         alert('Por favor corrija los siguientes errores:\n\n• ' + errores.join('\n• '));
@@ -607,5 +605,4 @@
         });
     </script>
 </body>
-
 </html>
