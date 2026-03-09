@@ -327,7 +327,7 @@ const documentoVehiculoController = {
 
             const doc = documento[0];
 
-            // Formatear fechas para el input date (YYYY-MM-DD)
+            
             if (doc.fecha_emision) {
                 const fecha = new Date(doc.fecha_emision);
                 doc.fecha_emision = fecha.toISOString().split('T')[0];

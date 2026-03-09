@@ -1,16 +1,16 @@
 const db = require('../conexion');
 
 const personasController = {
-    // Listar todas las personas
+    
     listarPersonas: async (req, res) => {
         try {
             console.log(' Cargando listado de personas...');
 
-            // Primero, verifiquemos la estructura de la tabla
+            
             const [estructura] = await db.query('DESCRIBE personas');
             console.log('Estructura tabla personas:', estructura);
 
-            // Consulta corregida usando id_persona
+            
             const query = `
                 SELECT 
                     p.*,

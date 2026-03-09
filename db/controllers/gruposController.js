@@ -26,7 +26,7 @@ exports.listar = async (req, res) => {
   }
 };
 
-// Mostrar formulario para crear nuevo grupo
+
 exports.formCrear = async (req, res) => {
   try {
     // Obtener clientes activos
@@ -37,7 +37,7 @@ exports.formCrear = async (req, res) => {
       ORDER BY nombre
     `);
 
-    // Obtener personas activas para el select
+    
     const [personas] = await db.query(`
       SELECT 
         id_persona, 
@@ -120,7 +120,7 @@ exports.crear = async (req, res) => {
       return res.redirect('/grupos/crear');
     }
 
-    // Insertar el grupo
+    
     const [result] = await connection.query(`
       INSERT INTO grupos 
       (id_cliente, nombre_grupo, nombre_contacto, email_contacto, 
@@ -139,19 +139,15 @@ exports.crear = async (req, res) => {
 
     const nuevoGrupoId = result.insertId;
 
-    // Vincular persona si se proporcionó
+    
     if (id_persona_vincular && id_persona_vincular !== '') {
-      // Actualizar el campo id_persona_contacto en el grupo
+      
       await connection.query(
         'UPDATE grupos SET id_persona_contacto = ? WHERE id_grupo = ?',
         [parseInt(id_persona_vincular), nuevoGrupoId]
       );
 
-      // Si tienes tabla grupo_personas para múltiples personas, también insertar allí
-      // await connection.query(`
-      //   INSERT INTO grupo_personas (id_grupo, id_persona, fecha_vinculacion)
-      //   VALUES (?, ?, NOW())
-      // `, [nuevoGrupoId, parseInt(id_persona_vincular)]);
+    
     }
 
     await connection.commit();
@@ -170,12 +166,12 @@ exports.crear = async (req, res) => {
   }
 };
 
-// Mostrar formulario para editar grupo
+
 exports.formEditar = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Obtener el grupo
+    
     const [grupos] = await db.query(`
       SELECT * FROM grupos WHERE id_grupo = ?
     `, [id]);
@@ -187,7 +183,7 @@ exports.formEditar = async (req, res) => {
 
     const grupo = grupos[0];
 
-    // Obtener clientes activos
+    
     const [clientes] = await db.query(`
       SELECT id_cliente, nombre 
       FROM clientes 
@@ -195,7 +191,7 @@ exports.formEditar = async (req, res) => {
       ORDER BY nombre
     `);
 
-    // Obtener personas activas
+    
     const [personas] = await db.query(`
       SELECT 
         id_persona, 
@@ -210,7 +206,7 @@ exports.formEditar = async (req, res) => {
       ORDER BY apellido_paterno, nombres
     `);
 
-    // Obtener persona vinculada actualmente (si existe)
+    
     let personaVinculada = null;
     if (grupo.id_persona_contacto) {
       const [personasVinculadas] = await db.query(`
@@ -237,7 +233,7 @@ exports.formEditar = async (req, res) => {
   }
 };
 
-// Actualizar grupo
+
 exports.actualizar = async (req, res) => {
   const connection = await db.getConnection();
 
@@ -257,7 +253,7 @@ exports.actualizar = async (req, res) => {
       activo = '1'
     } = req.body;
 
-    // Validaciones
+    
     const errores = [];
 
     if (!id_cliente || id_cliente === '') {
@@ -385,7 +381,7 @@ exports.eliminar = async (req, res) => {
   }
 };
 
-// API: Buscar persona por ID (para AJAX)
+
 exports.buscarPersonaPorId = async (req, res) => {
   try {
     const { id } = req.params;
@@ -415,7 +411,7 @@ exports.buscarPersonaPorId = async (req, res) => {
 
     const persona = personas[0];
 
-    // Formatear nombre completo
+    
     persona.nombre_completo = `${persona.nombres} ${persona.apellido_paterno} ${persona.apellido_materno}`.trim();
 
     res.json({
@@ -431,12 +427,12 @@ exports.buscarPersonaPorId = async (req, res) => {
   }
 };
 
-// API: Buscar persona por RUN (para AJAX)
+
 exports.buscarPersonaPorRun = async (req, res) => {
   try {
     const { run } = req.params;
 
-    // Separar RUN y DV si vienen juntos (ej: 12345678-9)
+    
     let runNumero = run;
     let dv = '';
 
@@ -444,7 +440,7 @@ exports.buscarPersonaPorRun = async (req, res) => {
       [runNumero, dv] = run.split('-');
     }
 
-    // Construir consulta
+    
     let query = `
       SELECT 
         id_persona, 
@@ -479,7 +475,7 @@ exports.buscarPersonaPorRun = async (req, res) => {
 
     const persona = personas[0];
 
-    // Formatear nombre completo
+    
     persona.nombre_completo = `${persona.nombres} ${persona.apellido_paterno} ${persona.apellido_materno}`.trim();
 
     res.json({
@@ -495,7 +491,7 @@ exports.buscarPersonaPorRun = async (req, res) => {
   }
 };
 
-// Función auxiliar para validar email
+
 function isValidEmail(email) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);

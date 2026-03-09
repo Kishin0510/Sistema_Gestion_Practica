@@ -11,7 +11,6 @@ CREATE TABLE clientes (
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
     activo BOOLEAN DEFAULT TRUE
 );
-
 CREATE TABLE usuarios (
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
     id_cliente INT NOT NULL,
@@ -25,7 +24,6 @@ CREATE TABLE usuarios (
     ultimo_login DATETIME,
     FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente)
 );
-
 CREATE TABLE personas (
     id_persona INT AUTO_INCREMENT PRIMARY KEY,
     id_cliente INT NOT NULL,
@@ -44,7 +42,6 @@ CREATE TABLE personas (
     FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente),
     UNIQUE KEY idx_run_cliente (id_cliente, run, dv)
 );
-
 CREATE TABLE logs_registro_cambios (
     id_log BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_persona INT NOT NULL,
@@ -60,7 +57,6 @@ CREATE TABLE logs_registro_cambios (
     FOREIGN KEY (id_persona) REFERENCES personas(id_persona),
     FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente)
 );
-
 CREATE TABLE grupos (
   id_grupo INT AUTO_INCREMENT PRIMARY KEY,
   id_cliente INT NOT NULL,
@@ -74,7 +70,6 @@ CREATE TABLE grupos (
   fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente)
 );
-
 CREATE TABLE tipo_documentos_persona (
     id_tipo_documento INT AUTO_INCREMENT PRIMARY KEY,
     id_cliente INT NOT NULL,
@@ -86,8 +81,6 @@ CREATE TABLE tipo_documentos_persona (
     FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente),
     UNIQUE KEY idx_tipo_doc_cliente (id_cliente, nombre_documento)
 );
-
-
 CREATE TABLE documentos_persona (
     id_documento INT AUTO_INCREMENT PRIMARY KEY,
     id_persona INT NOT NULL,
@@ -106,13 +99,11 @@ CREATE TABLE documentos_persona (
     FOREIGN KEY (id_tipo_documento) REFERENCES tipo_documentos_persona(id_tipo_documento),
     FOREIGN KEY (usuario_subida) REFERENCES usuarios(id_usuario)
 );
-
 CREATE TABLE tipos_vehiculo (
     id_tipo_vehiculo INT AUTO_INCREMENT PRIMARY KEY,
     nombre_tipo VARCHAR(50) NOT NULL,
     descripcion TEXT
 );
-
 CREATE TABLE vehiculos (
     id_vehiculo INT AUTO_INCREMENT PRIMARY KEY,
     id_cliente INT NOT NULL,
@@ -132,7 +123,6 @@ CREATE TABLE vehiculos (
     FOREIGN KEY (tipo_vehiculo) REFERENCES tipos_vehiculo(id_tipo_vehiculo),
     UNIQUE KEY idx_patente_cliente (id_cliente, patente)
 );
-
 CREATE TABLE tipos_documento_veh (
     id_tipo_documento_veh INT AUTO_INCREMENT PRIMARY KEY,
     id_cliente INT NOT NULL,
@@ -145,7 +135,6 @@ CREATE TABLE tipos_documento_veh (
     FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente),
     UNIQUE KEY idx_tipo_doc_veh_cliente (id_cliente, nombre_documento)
 );
-
 CREATE TABLE documentos_vehiculo (
     id_documento_veh INT AUTO_INCREMENT PRIMARY KEY,
     id_vehiculo INT NOT NULL,
@@ -164,7 +153,6 @@ CREATE TABLE documentos_vehiculo (
     FOREIGN KEY (id_tipo_documento_veh) REFERENCES tipos_documento_veh(id_tipo_documento_veh),
     FOREIGN KEY (usuario_subida) REFERENCES usuarios(id_usuario)
 );
-
 CREATE TABLE alertas (
     id_alerta INT AUTO_INCREMENT PRIMARY KEY,
     tipo_entidad ENUM('persona', 'vehiculo') NOT NULL,
@@ -178,7 +166,6 @@ CREATE TABLE alertas (
     metodo_envio ENUM('email', 'sistema', 'ambos') DEFAULT 'sistema',
     leido BOOLEAN DEFAULT FALSE
 );
-
 CREATE TABLE config_alertas_cliente (
     id_config INT AUTO_INCREMENT PRIMARY KEY,
     id_cliente INT NOT NULL,
@@ -191,7 +178,6 @@ CREATE TABLE config_alertas_cliente (
     FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente),
     UNIQUE KEY idx_cliente_entidad (id_cliente, tipo_entidad)
 );
-
 CREATE TABLE persona_vehiculo (
     id_relacion INT AUTO_INCREMENT PRIMARY KEY,
     id_persona INT NOT NULL,

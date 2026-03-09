@@ -3,15 +3,15 @@ const fs = require('fs');
 const path = require('path');
 const ExcelJS = require('exceljs');
 
-// Configuración de rutas
+
 const DESCARGAS_PATH = path.join(__dirname, '../../descargas');
 const DOCS_PERSONAS_PATH = path.join(DESCARGAS_PATH, 'documentos_personas');
 
-// Asegurar que las carpetas existen
+
 if (!fs.existsSync(DESCARGAS_PATH)) fs.mkdirSync(DESCARGAS_PATH, { recursive: true });
 if (!fs.existsSync(DOCS_PERSONAS_PATH)) fs.mkdirSync(DOCS_PERSONAS_PATH, { recursive: true });
 
-// Calcular estado según fecha
+
 const calcularEstado = (fechaVencimiento) => {
     const hoy = new Date();
     const venc = new Date(fechaVencimiento);
@@ -23,9 +23,6 @@ const calcularEstado = (fechaVencimiento) => {
 
 const documentosPersonaController = {
 
-    // ===============================
-    // VISTA PRINCIPAL
-    // ===============================
     async index(req, res) {
         try {
             const [documentos] = await db.query(`
@@ -117,7 +114,7 @@ const documentosPersonaController = {
 
             const id_cliente = persona[0].id_cliente;
 
-            // Crear tipo si no existe
+            
             let [tipo] = await conn.query(`
                 SELECT id_tipo_documento 
                 FROM tipo_documentos_persona 
@@ -138,29 +135,29 @@ const documentosPersonaController = {
                 id_tipo_documento = tipo[0].id_tipo_documento;
             }
 
-            // Procesar archivo
+            
             let nombre_archivo = null;
             let ruta_archivo_relativa = null;
 
             if (req.file) {
-                // Generar nombre único para el archivo
+                
                 const timestamp = Date.now();
                 const random = Math.round(Math.random() * 1000);
                 const ext = path.extname(req.file.originalname);
                 const nombreSinEspacios = req.file.originalname.replace(/\s+/g, '_');
                 const nombreUnico = `${timestamp}-${random}${ext}`;
 
-                // Ruta donde se guardará el archivo
+                
                 const rutaCompleta = path.join(DOCS_PERSONAS_PATH, nombreUnico);
 
-                // Mover el archivo de temp a descargas
+                
                 fs.renameSync(req.file.path, rutaCompleta);
 
-                nombre_archivo = req.file.originalname; // Nombre original para mostrar
-                ruta_archivo_relativa = `/descargas/documentos_personas/${nombreUnico}`; // Ruta relativa para servir
+                nombre_archivo = req.file.originalname; 
+                ruta_archivo_relativa = `/descargas/documentos_personas/${nombreUnico}`;
             }
 
-            // Insertar documento
+            
             await conn.query(`
                 INSERT INTO documentos_persona
                 (id_persona, id_tipo_documento, numero_documento, fecha_emision, fecha_vencimiento, 
@@ -186,7 +183,7 @@ const documentosPersonaController = {
             if (conn) await conn.rollback();
             console.error('Error en registrar:', error);
 
-            // Limpiar archivo temporal si existe
+            
             if (req.file && req.file.path && fs.existsSync(req.file.path)) {
                 try {
                     fs.unlinkSync(req.file.path);
@@ -201,9 +198,7 @@ const documentosPersonaController = {
         }
     },
 
-    // ===============================
-    // OBTENER DOCUMENTO POR ID
-    // ===============================
+    
     async obtenerPorId(req, res) {
         try {
             const { id } = req.params;

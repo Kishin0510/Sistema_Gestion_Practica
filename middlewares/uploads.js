@@ -8,7 +8,7 @@ const {
     enrichFileInfo
 } = require('../../middleware/upload');
 
-// Ruta para subir documento de persona
+
 router.post('/:id_persona/documentos',
     personaDocument,
     enrichFileInfo,
@@ -22,17 +22,14 @@ router.post('/:id_persona/documentos',
                 fecha_emision,
                 fecha_vencimiento,
                 observaciones,
-                id_cliente // Tomar de la persona, no del body
+                id_cliente 
             } = req.body;
-
-            // Validar que se subió un archivo
             if (!req.file) {
                 return res.status(400).json({
                     success: false,
                     message: 'No se ha subido ningún archivo'
                 });
             }
-
             // Validar campos requeridos
             if (!id_tipo_documento || !fecha_vencimiento) {
                 return res.status(400).json({
@@ -40,8 +37,6 @@ router.post('/:id_persona/documentos',
                     message: 'id_tipo_documento y fecha_vencimiento son requeridos'
                 });
             }
-
-            // Obtener información de la persona para verificar existencia
             const [persona] = await db.query(
                 'SELECT id_cliente FROM personas WHERE id_persona = ?',
                 [id_persona]
@@ -56,7 +51,7 @@ router.post('/:id_persona/documentos',
 
             const clienteId = persona[0].id_cliente;
 
-            // Calcular estado del documento
+           
             const hoy = new Date();
             const fechaVenc = new Date(fecha_vencimiento);
             const diasDiferencia = Math.ceil((fechaVenc - hoy) / (1000 * 60 * 60 * 24));
@@ -68,10 +63,10 @@ router.post('/:id_persona/documentos',
                 estado = 'por_vencer';
             }
 
-            // Obtener usuario que sube (ajustar según tu sistema)
+            
             const usuario_subida = req.user ? req.user.id_usuario : 1;
 
-            // Insertar en la tabla documentos_persona
+            
             const query = `
         INSERT INTO documentos_persona (
           id_persona, id_tipo_documento, nombre_archivo,
@@ -84,7 +79,7 @@ router.post('/:id_persona/documentos',
                 id_persona,
                 id_tipo_documento,
                 req.file.originalname,
-                req.file.path.replace(/\\/g, '/'), // Normalizar para Windows/Linux
+                req.file.path.replace(/\\/g, '/'), 
                 numero_documento || null,
                 fecha_emision || null,
                 fecha_vencimiento,
@@ -95,7 +90,7 @@ router.post('/:id_persona/documentos',
 
             const [result] = await db.query(query, values);
 
-            // Obtener información completa del documento insertado
+            
             const [documentoInsertado] = await db.query(`
         SELECT dp.*, tdp.nombre as tipo_documento_nombre 
         FROM documentos_persona dp
@@ -116,7 +111,7 @@ router.post('/:id_persona/documentos',
         } catch (error) {
             console.error('Error al subir documento:', error);
 
-            // Si hay error, eliminar el archivo subido
+            
             if (req.file && req.file.path) {
                 try {
                     fs.unlinkSync(req.file.path);
@@ -134,7 +129,6 @@ router.post('/:id_persona/documentos',
     }
 );
 
-// Ruta para listar documentos de una persona
 router.get('/:id_persona/documentos', async (req, res) => {
     try {
         const { id_persona } = req.params;
@@ -162,16 +156,12 @@ router.get('/:id_persona/documentos', async (req, res) => {
     `;
 
         const [documentos] = await db.query(query, [id_persona]);
-
-        // Agregar URLs de acceso
         documentos.forEach(doc => {
             if (doc.ruta_archivo) {
-                // Extraer solo el nombre del archivo de la ruta completa
+                
                 const fileName = path.basename(doc.ruta_archivo);
                 doc.url = `/uploads/documentos/personas/persona_${id_persona}/${fileName}`;
             }
-
-            // Formato RUN
             doc.run_completo = doc.run ? `${doc.run}-${doc.dv}` : null;
         });
 
@@ -180,7 +170,6 @@ router.get('/:id_persona/documentos', async (req, res) => {
             count: documentos.length,
             data: documentos
         });
-
     } catch (error) {
         console.error('Error al obtener documentos:', error);
         res.status(500).json({
@@ -189,8 +178,6 @@ router.get('/:id_persona/documentos', async (req, res) => {
         });
     }
 });
-
-// Ruta para descargar documento
 router.get('/documentos/descargar/:id_documento', async (req, res) => {
     try {
         const { id_documento } = req.params;
@@ -206,11 +193,8 @@ router.get('/documentos/descargar/:id_documento', async (req, res) => {
                 message: 'Documento no encontrado'
             });
         }
-
         const doc = documentos[0];
         const filePath = doc.ruta_archivo;
-
-        // Verificar que el archivo existe
         if (!fs.existsSync(filePath)) {
             return res.status(404).json({
                 success: false,
@@ -229,5 +213,4 @@ router.get('/documentos/descargar/:id_documento', async (req, res) => {
         });
     }
 });
-
 module.exports = router;

@@ -4,62 +4,22 @@
 <head>
     <meta charset="utf-8">
     <title>
-        <%= typeof title !== 'undefined' ? title : 'Gestión Vehicular' %>
+        <%= typeof title !=='undefined' ? title : 'Gestión Vehicular' %>
     </title>
-
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/Index.css">
     <link rel="stylesheet" href="/css/Login_Registrer.css">
 </head>
-
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg">
+    <nav class="navbar navbar-expand-lg" style="background-color: #172554;">
         <div class="container">
-            <a class="navbar-brand" href="/">Gestión Vehicular</a>
+            <a class="navbar-brand text-white" href="/">Gestión Vehicular</a>
         </div>
     </nav>
-
-    <!-- Mensajes de alerta - VERSIÓN SEGURA -->
-    <div class="container mt-3" style="max-width: 500px;">
-        <% 
-            // Verificar si messages existe (múltiples formas)
-            let messagesObj = {};
-            
-            if (typeof messages !== 'undefined') {
-                messagesObj = messages;
-            } else if (typeof locals !== 'undefined' && locals.messages) {
-                messagesObj = locals.messages;
-            } else if (typeof session !== 'undefined' && session.messages) {
-                messagesObj = session.messages;
-            }
-            
-            // También podemos usar las variables directamente de locals
-            const errorMsg = locals.error || messagesObj.error;
-            const successMsg = locals.success || messagesObj.success;
-        %>
-        
-        <% if (errorMsg) { %>
-            <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
-                <%= errorMsg %>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        <% } %>
-
-        <% if (successMsg) { %>
-            <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
-                <%= successMsg %>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        <% } %>
-    </div>
-
-    <!-- Contenedor principal -->
-    <main class="container mt-5 pt-3">
-        <div class="card mx-auto" style="max-width: 500px;">
-            <div class="card-body">
-                <!-- Pestañas -->
+    <main class="container d-flex align-items-center justify-content-center" style="min-height: calc(100vh - 160px);">
+        <div class="card"
+            style="max-width: 600px; width: 100%; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+            <div class="card-body p-4">
                 <ul class="nav nav-tabs mb-4" id="authTabs" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#login"
@@ -70,9 +30,7 @@
                             type="button" role="tab">Registrarse</button>
                     </li>
                 </ul>
-
                 <div class="tab-content" id="authTabsContent">
-                    <!-- Login -->
                     <div class="tab-pane fade show active" id="login" role="tabpanel">
                         <form method="POST" action="/auth/login">
                             <h2 class="text-center mb-4">Inicio de Sesión</h2>
@@ -86,7 +44,8 @@
                                     required>
                             </div>
                             <div>
-                                <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+                                <button type="submit" class="btn w-100"
+                                    style="background-color: #172554; color: white; border: none; padding: 10px;">Ingresar</button>
                             </div>
                         </form>
 
@@ -94,55 +53,28 @@
                             <a href="/" class="btn btn-secondary">Volver al Inicio</a>
                         </div>
                     </div>
-
-                    <!-- Registro -->
                     <div class="tab-pane fade" id="register" role="tabpanel">
                         <div id="mensajeRegistro"></div>
                         <form id="registerForm" method="POST" action="/auth/register">
-                            <h2 class="text-center mb-4">Registrarse</h2>
+                            <h2 class="text-center mb-4">Registro de Usuario</h2>
 
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label for="RegisterNombre" class="form-label">Nombre Completo</label>
-                                    <input type="text" class="form-control" id="RegisterNombre" name="nombre_completo"
-                                        required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="RegisterUsername" class="form-label">Nombre de Usuario</label>
-                                    <input type="text" class="form-control" id="RegisterUsername" name="username"
-                                        required>
-                                </div>
+                            <div class="mb-3">
+                                <label for="RegisterNombre" class="form-label">Nombre Completo</label>
+                                <input type="text" class="form-control" id="RegisterNombre" name="nombre_completo"
+                                    required>
                             </div>
-
                             <div class="mb-3">
                                 <label for="RegisterEmail" class="form-label">Correo Electrónico</label>
                                 <input type="email" class="form-control" id="RegisterEmail" name="correo" required>
                             </div>
-
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label for="RegisterPassword" class="form-label">Contraseña</label>
-                                    <input type="password" class="form-control" id="RegisterPassword" name="contrasena"
-                                        required minlength="6">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="RegisterConfirmPassword" class="form-label">Confirmar Contraseña</label>
-                                    <input type="password" class="form-control" id="RegisterConfirmPassword"
-                                        name="confirmar_contrasena" required>
-                                </div>
-                            </div>
-
                             <div class="mb-3">
-                                <label for="RegisterTipoUsuario" class="form-label">Tipo de Usuario</label>
-                                <select class="form-control" id="RegisterTipoUsuario" name="tipo_usuario" required>
-                                    <option value="">Seleccionar tipo...</option>
-                                    <option value="usuario">Usuario Normal</option>
-                                    <option value="admin">Administrador</option>
-                                </select>
+                                <label for="RegisterPassword" class="form-label">Contraseña</label>
+                                <input type="password" class="form-control" id="RegisterPassword" name="contrasena"
+                                    required minlength="6">
                             </div>
-                            <button type="submit" class="btn btn-success w-100">Registrarse</button>
-
-                            <div class="text-center mt-3">
+                            <button type="submit" class="btn w-100 mb-3"
+                                style="background-color: #059669; color: white; border: none; padding: 10px;">Registrarse</button>
+                            <div class="text-center">
                                 <a href="/" class="btn btn-secondary">Volver al Inicio</a>
                             </div>
                         </form>
@@ -151,59 +83,44 @@
             </div>
         </div>
     </main>
-    <div class="login-footer-space"></div>
-
+    <!-- Footer -->
+    <footer style="background-color: #172554; color: white; padding: 1rem 0; text-align: center;">
+        <div class="container">
+            <p class="mb-0">&copy; 2024 Gestión Vehicular - Todos los derechos reservados</p>
+        </div>
+    </footer>
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Validaciones JavaScript -->
     <script>
-        // Validación del formulario de registro
+        window.mostrarMensaje = function (mensaje, tipo) {
+            const mensajeDiv = document.getElementById('mensajeRegistro');
+            if (mensajeDiv) {
+                mensajeDiv.innerHTML = `
+                    <div class="alert alert-${tipo} alert-dismissible fade show" role="alert">
+                        ${mensaje}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `;
+            }
+        };
         document.addEventListener('DOMContentLoaded', function () {
             const registerForm = document.getElementById('registerForm');
 
             if (registerForm) {
                 registerForm.addEventListener('submit', function (e) {
                     const password = document.getElementById('RegisterPassword').value;
-                    const confirmPassword = document.getElementById('RegisterConfirmPassword').value;
-                    const tipoUsuario = document.getElementById('RegisterTipoUsuario').value;
-                    const cliente = document.getElementById('RegisterCliente').value;
 
-                    const mensajeDiv = document.getElementById('mensajeRegistro');
 
-                    // Validar que las contraseñas coincidan
-                    if (password !== confirmPassword) {
-                        e.preventDefault();
-                        mostrarMensaje('Las contraseñas no coinciden.', 'danger');
-                        return;
-                    }
-
-                    // Validar longitud de contraseña
                     if (password.length < 6) {
                         e.preventDefault();
                         mostrarMensaje('La contraseña debe tener al menos 6 caracteres.', 'warning');
                         return;
                     }
 
-                    // Validar que se haya seleccionado tipo de usuario
-                    if (!tipoUsuario) {
-                        e.preventDefault();
-                        mostrarMensaje('Por favor, seleccione un tipo de usuario.', 'warning');
-                        return;
-                    }
 
-                    // Validar que se haya seleccionado cliente
-                    if (!cliente) {
-                        e.preventDefault();
-                        mostrarMensaje('Por favor, seleccione un cliente asociado.', 'warning');
-                        return;
-                    }
-
-                    // Si todo está bien, mostrar mensaje de procesando
                     mostrarMensaje('Procesando registro...', 'info');
                 });
             }
-            // Cambiar automáticamente a pestaña de registro si hay error de registro
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('tab') === 'register') {
                 const registerTab = new bootstrap.Tab(document.getElementById('register-tab'));
