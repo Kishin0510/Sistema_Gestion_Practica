@@ -1,6 +1,17 @@
 const bcrypt = require('bcrypt');
 const db = require('../conexion');
 
+
+const obtenerRutaPorRol = (rol) => {
+    switch (rol) {
+        case 'super_admin': return '/admin/dashboard';
+        case 'admin_cliente': return '/dashboard';
+        case 'actualizador': return '/documentos';
+        case 'visualizador': return '/lista-general';
+        default: return '/';
+    }
+};
+
 exports.login = async (req, res) => {
     const { correo, contrasena } = req.body;
 
@@ -28,6 +39,7 @@ exports.login = async (req, res) => {
             return res.redirect('/login');
         }
 
+        
         req.session.usuarioId = usuario.id_usuario;
         req.session.nombre = usuario.nombre_completo;
         req.session.rol = usuario.tipo_usuario;
@@ -35,18 +47,23 @@ exports.login = async (req, res) => {
 
         await db.execute('UPDATE usuarios SET ultimo_login = NOW() WHERE id_usuario = ?', [usuario.id_usuario]);
 
-        res.redirect('/');
+        
+        const rutaDestino = obtenerRutaPorRol(usuario.tipo_usuario);
+        res.redirect(rutaDestino);
+
     } catch (err) {
         console.error(err);
         req.flash('error', 'Error en el servidor');
         res.redirect('/login');
     }
 };
-exports.registrar = async (req, res) => {
-    const { nombre_completo, correo, contrasena, tipo_usuario } = req.body;
 
-    if (!nombre_completo || !correo || !contrasena || !tipo_usuario) {
-        return res.status(400).json({ error: 'Faltan campos requeridos' });
+exports.registrar = async (req, res) => {
+    
+    const { nombre_completo, correo, contrasena, tipo_usuario, id_cliente } = req.body;
+
+    if (!nombre_completo || !correo || !contrasena || !tipo_usuario || !id_cliente) {
+        return res.status(400).json({ error: 'Faltan campos requeridos incluyendo el Cliente' });
     }
 
     try {
@@ -55,21 +72,18 @@ exports.registrar = async (req, res) => {
             return res.status(400).json({ error: 'El correo ya está registrado' });
         }
 
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(contrasena, saltRounds);
+        const hashedPassword = await bcrypt.hash(contrasena, 10);
 
+        
         const [result] = await db.execute(
-            'INSERT INTO usuarios (nombre_completo, correo, contrasena, tipo_usuario, activo) VALUES (?, ?, ?, ?, 1)',
-            [nombre_completo, correo, hashedPassword, tipo_usuario]
+            'INSERT INTO usuarios (nombre_completo, correo, contrasena, tipo_usuario, id_cliente, activo) VALUES (?, ?, ?, ?, ?, 1)',
+            [nombre_completo, correo, hashedPassword, tipo_usuario, id_cliente]
         );
-
-        req.session.usuarioId = result.insertId;
-        req.session.nombre = nombre_completo;
-        req.session.rol = tipo_usuario;
 
         res.status(200).json({
             success: true,
-            redirect: '/'
+            message: 'Usuario creado exitosamente',
+            redirect: '/login' 
         });
 
     } catch (err) {
