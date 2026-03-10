@@ -4,44 +4,30 @@ const path = require('path');
 const session = require('express-session');
 const flash = require('connect-flash');
 const db = require('./db/conexion');
-
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
-
-
-// Configuración de sesión
 app.use(session({
     secret: process.env.SESSION_SECRET || 'mi_secreto_vehicular',
     resave: false,
     saveUninitialized: true,
     cookie: { secure: false }
 }));
-
 app.use(flash());
-
-
 app.use((req, res, next) => {
     res.locals.success_msg = req.flash('success');
     res.locals.error_msg = req.flash('error');
-
-
     res.locals.formData = req.flash('formData')[0] || {};
     res.locals.error = req.flash('error');
     res.locals.success = req.flash('success');
-
     res.locals.usuario = req.session.usuario || null;
     next();
 });
-
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-
 const cargarRutas = (nombre, ruta, pathArchivo) => {
     try {
         const router = require(pathArchivo);
@@ -51,13 +37,10 @@ const cargarRutas = (nombre, ruta, pathArchivo) => {
         console.error(` Error al cargar rutas de ${nombre}:`, error.message);
     }
 };
-
-
 cargarRutas('Personas', '/personas', './routes/personas.routes');
 cargarRutas('Vehículos', '/vehiculos', './routes/vehiculos.routes');
 cargarRutas('Documentos', '/documentos', './routes/documentos.routes');
 cargarRutas('Logs', '/registro-cambios', './routes/logs.routes');
-
 app.get('/', async (req, res) => {
     try {
         const [rows] = await db.query('SELECT NOW() AS fecha');
@@ -66,8 +49,6 @@ app.get('/', async (req, res) => {
         res.render('Home', { title: 'Inicio', fecha: new Date() });
     }
 });
-
-
 app.get('/login', async (req, res) => {
     try {
         res.render('Login', {
@@ -82,15 +63,12 @@ app.get('/login', async (req, res) => {
         });
     }
 });
-
 app.get('/documentos-personas', async (req, res) => {
     res.render('DocumentosPersonas', {
         title: 'Gestión Documental - Personas',
         currentRoute: '/documentos-personas',
     });
 });
-
-
 app.get('/grupos/crear', async (req, res) => {
     try {
         const [clientes] = await db.query('SELECT id_cliente, nombre_cliente as nombre FROM clientes WHERE activo = 1');
@@ -107,8 +85,6 @@ app.get('/grupos/crear', async (req, res) => {
         res.status(500).send('Error al cargar el formulario de grupos');
     }
 });
-
-
 app.post('/grupos/crear', async (req, res) => {
     let { id_cliente, nombre_grupo, nombre_compania, nombre_contacto, email_contacto, direccion, ciudad, activo } = req.body;
 
@@ -120,7 +96,6 @@ app.post('/grupos/crear', async (req, res) => {
             );
             id_cliente = nuevoCliente.insertId;
         }
-
         await db.query(`
             INSERT INTO grupos 
             (id_cliente, nombre_grupo, nombre_compania, nombre_contacto, email_contacto, direccion, ciudad, activo)
@@ -137,11 +112,9 @@ app.post('/grupos/crear', async (req, res) => {
         res.redirect('/grupos/crear');
     }
 });
-
-
 app.get('/grupos', async (req, res) => {
     try {
-        
+
         const [grupos] = await db.query(`
             SELECT 
                 g.*,
@@ -150,16 +123,12 @@ app.get('/grupos', async (req, res) => {
             LEFT JOIN clientes c ON g.id_cliente = c.id_cliente
             ORDER BY g.fecha_creacion DESC
         `);
-
-        
         const cliente_nombre = {};
         grupos.forEach(grupo => {
             if (grupo.nombre_cliente) {
                 cliente_nombre[grupo.id_cliente] = grupo.nombre_cliente;
             }
         });
-
-        
         res.render('listaGrupos', {
             title: 'Mis Grupos',
             grupos: grupos,
@@ -171,7 +140,7 @@ app.get('/grupos', async (req, res) => {
     } catch (error) {
         console.error('Error al obtener grupos:', error);
         req.flash('error', 'Error al cargar los grupos');
-        // CAMBIO IMPORTANTE: También aquí
+        
         res.render('listaGrupos', {
             title: 'Mis Grupos',
             grupos: [],
@@ -181,11 +150,8 @@ app.get('/grupos', async (req, res) => {
         });
     }
 });
-
 const documentosPersonaRoutes = require('./routes/documentos_personas.routes');
 app.use('/documentos-persona', documentosPersonaRoutes);
-
-
 app.use((req, res) => {
     res.status(404).render('Home', {
         title: 'Página no encontrada',

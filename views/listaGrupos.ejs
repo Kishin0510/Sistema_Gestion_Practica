@@ -569,7 +569,6 @@
             </div>
         </div>
     </nav>
-
     <div class="content-wrapper">
         <!-- Contenido principal -->
         <div class="container mt-4">
@@ -1087,7 +1086,7 @@
                 }
             });
 
-            // Actualizar controles de paginación
+            
             for (let i = 1; i <= 3; i++) {
                 const pageLink = document.getElementById(`page${i}`);
                 if (pageLink) {
@@ -1104,12 +1103,12 @@
                 }
             }
 
-            // Controlar botones anterior/siguiente
+            
             document.getElementById('prevPage').classList.toggle('disabled', paginaActual === 1);
             document.getElementById('nextPage').classList.toggle('disabled', paginaActual === totalPaginas);
         }
 
-        // Función para cambiar página
+        
         function cambiarPagina(direccion) {
             const items = document.querySelectorAll('.grupo-item');
             const itemsVisibles = Array.from(items).filter(item => item.style.display !== 'none');
@@ -1125,8 +1124,7 @@
 
             aplicarPaginacion();
         }
-
-        // Limpiar filtros
+        
         function limpiarFiltros() {
             document.getElementById('buscarGrupo').value = '';
             document.getElementById('filtroEstado').value = 'todos';
@@ -1140,12 +1138,12 @@
             aplicarPaginacion();
         }
 
-        // Inicializar paginación
+        
         document.addEventListener('DOMContentLoaded', function () {
             aplicarPaginacion();
         });
 
-        // Tooltips de Bootstrap
+        
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);

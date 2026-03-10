@@ -1,4 +1,4 @@
--- Base de datos para Gestión de Personas y Vehículos con Sistema de Alertas
+
 CREATE DATABASE IF NOT EXISTS sistema_gpv;
 USE sistema_gpv;
 
@@ -12,16 +12,17 @@ CREATE TABLE clientes (
     activo BOOLEAN DEFAULT TRUE
 );
 CREATE TABLE usuarios (
-    id_usuario INT AUTO_INCREMENT PRIMARY KEY,
-    id_cliente INT NOT NULL,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    contrasena VARCHAR(255) NOT NULL,
-    correo VARCHAR(100) NOT NULL,
+    id_usuario INT(11) NOT NULL AUTO_INCREMENT,
+    id_cliente INT(11) NOT NULL,
     nombre_completo VARCHAR(100) NOT NULL,
-    tipo_usuario ENUM('admin', 'usuario') DEFAULT 'usuario',
-    activo BOOLEAN DEFAULT TRUE,
-    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-    ultimo_login DATETIME,
+    correo VARCHAR(100) NOT NULL,
+    contrasena VARCHAR(255) NOT NULL,
+    tipo_usuario ENUM('super_admin', 'admin_cliente', 'actualizador', 'visualizador') NOT NULL DEFAULT 'visualizador',
+    activo TINYINT(1) DEFAULT 1,
+    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP(),
+    ultimo_login DATETIME DEFAULT NULL,
+    PRIMARY KEY (id_usuario),
+    UNIQUE KEY (correo),
     FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente)
 );
 CREATE TABLE personas (
@@ -69,6 +70,13 @@ CREATE TABLE grupos (
   activo BOOLEAN DEFAULT TRUE,
   fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente)
+);
+CREATE TABLE vehiculo_grupos (
+    id_vehiculo INT NOT NULL,
+    id_grupo INT NOT NULL,
+    PRIMARY KEY (id_vehiculo, id_grupo),
+    FOREIGN KEY (id_vehiculo) REFERENCES vehiculos(id_vehiculo),
+    FOREIGN KEY (id_grupo) REFERENCES grupos(id_grupo)
 );
 CREATE TABLE tipo_documentos_persona (
     id_tipo_documento INT AUTO_INCREMENT PRIMARY KEY,

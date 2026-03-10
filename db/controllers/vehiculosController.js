@@ -1,5 +1,4 @@
 const db = require('../conexion');
-
 const vehiculosController = {
     
     listarVehiculos: async (req, res) => {
@@ -23,7 +22,6 @@ const vehiculosController = {
             `;
 
             const [vehiculos] = await db.query(query);
-            
             console.log(` ${vehiculos.length} vehículo(s) cargado(s)`);
 
             res.render('listarVehiculos', {
@@ -42,8 +40,6 @@ const vehiculosController = {
             });
         }
     },
-
-    
     mostrarFormularioAgregar: async (req, res) => {
         try {
             console.log(' Cargando formulario de vehículo...');
@@ -96,9 +92,7 @@ const vehiculosController = {
                 error: 'Error al cargar el formulario'
             });
         }
-    },
-
-    
+    }, 
     agregarVehiculo: async (req, res) => {
         try {
             console.log(' Procesando nuevo vehículo...');
@@ -223,8 +217,6 @@ const vehiculosController = {
             return res.redirect(`/vehiculos/agregar?error=Error del servidor: ${error.message}&datos=${datosJSON}`);
         }
     },
-
-    
     eliminarVehiculo: async (req, res) => {
         try {
             const { id } = req.params;
@@ -249,8 +241,6 @@ const vehiculosController = {
             return res.redirect('/vehiculos?error=Error al eliminar vehículo');
         }
     },
-
-    
     mostrarFormularioEditar: async (req, res) => {
         try {
             const { id } = req.params;
@@ -290,9 +280,7 @@ const vehiculosController = {
             console.error(' Error al cargar formulario de edición:', error);
             res.redirect('/vehiculos?error=Error al cargar formulario de edición');
         }
-    },
-
-    
+    },  
     actualizarVehiculo: async (req, res) => {
         try {
             const { id } = req.params;
@@ -312,7 +300,6 @@ const vehiculosController = {
                 activo
             } = req.body;
 
-            
             const camposObligatorios = [
                 { campo: id_cliente, nombre: 'Cliente' },
                 { campo: patente, nombre: 'Patente' },
@@ -323,7 +310,6 @@ const vehiculosController = {
                 { campo: capacidad, nombre: 'Capacidad' },
                 { campo: color, nombre: 'Color' }
             ];
-
             const camposFaltantes = camposObligatorios
                 .filter(item => !item.campo || item.campo.trim() === '')
                 .map(item => item.nombre);
@@ -331,28 +317,20 @@ const vehiculosController = {
             if (camposFaltantes.length > 0) {
                 return res.redirect(`/vehiculos/editar/${id}?error=Faltan campos obligatorios: ${camposFaltantes.join(', ')}`);
             }
-
-            
             const [vehiculoExistente] = await db.query(
                 'SELECT id_vehiculo FROM vehiculos WHERE id_vehiculo = ?',
                 [id]
             );
-
             if (vehiculoExistente.length === 0) {
                 return res.redirect('/vehiculos?error=Vehículo no encontrado');
             }
-
-            // Verificar patente única (excluyendo el actual)
             const [patenteDuplicada] = await db.query(
                 'SELECT id_vehiculo FROM vehiculos WHERE id_cliente = ? AND patente = ? AND id_vehiculo != ?',
                 [id_cliente, patente.toUpperCase(), id]
             );
-
             if (patenteDuplicada.length > 0) {
                 return res.redirect(`/vehiculos/editar/${id}?error=La patente ya existe para otro vehículo de este cliente`);
             }
-
-            
             const [result] = await db.query(
                 `UPDATE vehiculos SET
                     id_cliente = ?,
@@ -390,8 +368,6 @@ const vehiculosController = {
             return res.redirect(`/vehiculos/editar/${req.params.id}?error=Error al actualizar vehículo`);
         }
     },
-
-
     obtenerDetallesVehiculo: async (req, res) => {
         try {
             const { id } = req.params;
@@ -417,7 +393,6 @@ const vehiculosController = {
             if (vehiculos.length === 0) {
                 return res.status(404).json({ error: 'Vehículo no encontrado' });
             }
-            
             res.json(vehiculos[0]);
             
         } catch (error) {
@@ -426,5 +401,4 @@ const vehiculosController = {
         }
     }
 };
-
 module.exports = vehiculosController;

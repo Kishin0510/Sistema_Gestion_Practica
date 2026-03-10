@@ -36,7 +36,7 @@ const personasController = {
         } catch (error) {
             console.error(' Error al listar personas:', error);
             
-            // Intentar con una consulta más simple
+            
             try {
                 const [personas] = await db.query(`
                     SELECT p.*, c.nombre_cliente 
@@ -61,13 +61,11 @@ const personasController = {
             }
         }
     },
-
-    // Mostrar formulario para agregar persona
     mostrarFormularioAgregar: async (req, res) => {
         try {
             console.log(' Cargando formulario de agregar persona...');
 
-            // Obtener clientes activos
+            
             let clientes = [];
             try {
                 const [rowsClientes] = await db.query(
@@ -79,7 +77,7 @@ const personasController = {
                 console.log(' No se pudieron obtener clientes:', err.message);
             }
 
-            // Datos del formulario si hay error
+            
             let datosForm = {};
             if (req.query.datos) {
                 try {
@@ -87,7 +85,7 @@ const personasController = {
                 } catch (e) { }
             }
 
-            // Calcular si hay clientes
+            
             const hayClientes = clientes && clientes.length > 0;
 
             res.render('agregarPersona', {
@@ -109,8 +107,6 @@ const personasController = {
             });
         }
     },
-
-    // Procesar formulario de persona
     agregarPersona: async (req, res) => {
         try {
             console.log(' Procesando nueva persona...');
@@ -134,7 +130,7 @@ const personasController = {
                 apellido_materno, email, telefono, fecha_nacimiento, cargo, activo
             });
 
-            // Validación de campos obligatorios
+            
             const camposObligatorios = [
                 { campo: run, nombre: 'RUN' },
                 { campo: dv, nombre: 'DV' },
@@ -163,11 +159,11 @@ const personasController = {
                 return res.redirect(`/personas/agregar?error=DV debe ser un número (0-9) o la letra K&datos=${datosJSON}`);
             }
 
-            // Manejar cliente
+            
             let clienteId = id_cliente;
             let clienteCreado = false;
 
-            // Si no hay cliente seleccionado o es 0, crear uno
+
             if (!clienteId || clienteId === '0') {
                 console.log(' Creando cliente automáticamente...');
                 
