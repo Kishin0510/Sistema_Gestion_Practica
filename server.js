@@ -36,7 +36,6 @@ app.use((req, res, next) => {
 
     next();
 });
-
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 const cargarRutas = (nombre, ruta, pathArchivo) => {
@@ -48,14 +47,11 @@ const cargarRutas = (nombre, ruta, pathArchivo) => {
         console.error(` Error al cargar rutas de ${nombre}:`, error.message);
     }
 };
-
-
 cargarRutas('Autenticación', '/auth', './routes/auth.routes');
 cargarRutas('Personas', '/personas', './routes/personas.routes');
 cargarRutas('Vehículos', '/vehiculos', './routes/vehiculos.routes');
 cargarRutas('Documentos', '/documentos', './routes/documentos.routes');
 cargarRutas('Logs', '/registro-cambios', './routes/logs.routes');
-
 
 app.get('/', async (req, res) => {
     try {

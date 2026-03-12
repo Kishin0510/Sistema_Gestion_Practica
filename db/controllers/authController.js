@@ -1,100 +1,80 @@
-const db = require('../conexion'); 
+const db = require('../conexion');
 const bcrypt = require('bcryptjs');
 
 const authController = {};
 
 authController.register = async (req, res) => {
     const { nombre_completo, correo, contrasena, tipo_usuario } = req.body;
-    const id_cliente = 1; 
+    const id_cliente = 1;
 
     try {
-        
         const hashedPassword = await bcrypt.hash(contrasena, 10);
-
         const query = 'INSERT INTO usuarios (id_cliente, nombre_completo, correo, contrasena, tipo_usuario) VALUES (?, ?, ?, ?, ?)';
 
         
-        db.query(query, [id_cliente, nombre_completo, correo, hashedPassword, tipo_usuario], (err, result) => {
-            if (err) {
-                console.error("Error en DB durante registro:", err.code);
+        await db.query(query, [id_cliente, nombre_completo, correo, hashedPassword, tipo_usuario]);
+        
+        return res.status(201).json({ success: 'Usuario registrado con éxito.' });
+    } catch (error) {
+        console.error(" Error en registro:", error);
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({ error: 'El correo ya existe.' });
+        }
+        return res.status(500).json({ error: 'Error interno al registrar.' });
+    }
+};
 
-                
-                if (err.code === 'ER_DUP_ENTRY') {
-                    return res.status(400).json({ error: 'El correo electrónico ya está registrado.' });
-                }
+authController.login = async (req, res) => {
+    const { correo, contrasena } = req.body;
 
-                
-                return res.status(500).json({ error: 'Error al guardar en la base de datos.' });
+    try {
+        console.log(` Intentando login para: ${correo}`);
+        
+        const [results] = await db.query('SELECT * FROM usuarios WHERE correo = ? AND activo = 1', [correo]);
+
+        if (results.length === 0) {
+            console.log(" Usuario no encontrado");
+            return res.render('Login', { title: 'Iniciar Sesión', error: 'Credenciales inválidas.', success: null });
+        }
+
+        let userFound = null;
+        for (const user of results) {
+            const match = await bcrypt.compare(contrasena, user.contrasena);
+            if (match) {
+                userFound = user;
+                break;
             }
+        }
 
-            // Registro exitoso
-            return res.status(201).json({ success: 'Usuario registrado con éxito.' });
+        if (!userFound) {
+            return res.render('Login', { title: 'Iniciar Sesión', error: 'Contraseña incorrecta.', success: null });
+        }
+
+        
+        req.session.usuario = {
+            id: userFound.id_usuario,
+            nombre: userFound.nombre_completo,
+            rol: userFound.tipo_usuario
+        };
+
+        
+        req.session.save(() => {
+            console.log(" Login exitoso, redirigiendo...");
+            
+            db.query('UPDATE usuarios SET ultimo_login = NOW() WHERE id_usuario = ?', [userFound.id_usuario]);
+            res.redirect('/');
         });
 
     } catch (error) {
-        console.error("Error en el proceso de encriptación/registro:", error);
-        return res.status(500).json({ error: 'Error interno al procesar el registro.' });
+        console.error(" Error crítico en login:", error);
+        res.render('Login', { title: 'Iniciar Sesión', error: 'Error en el servidor.', success: null });
     }
-};
-
-authController.login = (req, res) => {
-    const { correo, contrasena } = req.body;
-
-    // Buscamos al usuario por correo y que esté activo
-    const query = 'SELECT * FROM usuarios WHERE correo = ? AND activo = 1';
-
-    db.query(query, [correo], async (err, results) => {
-        if (err) {
-            console.error("Error en DB durante login:", err);
-            return res.render('login', { error: 'Error en el servidor. Intente más tarde.', success: null });
-        }
-
-        // Si no existe el usuario
-        if (results.length === 0) {
-            return res.render('login', { error: 'El correo no está registrado o la cuenta está inactiva.', success: null });
-        }
-
-        const user = results[0];
-
-        try {
-            
-            const validPassword = await bcrypt.compare(contrasena, user.contrasena);
-
-            if (!validPassword) {
-                return res.render('login', { error: 'Contraseña incorrecta.', success: null });
-            }
-
-            // Crear sesión del usuario
-            req.session.user = {
-                id: user.id_usuario,
-                nombre: user.nombre_completo,
-                rol: user.tipo_usuario
-            };
-
-            
-            db.query('UPDATE usuarios SET ultimo_login = NOW() WHERE id_usuario = ?', [user.id_usuario]);
-
-            
-            return res.redirect('/');
-
-        } catch (error) {
-            console.error("Error al comparar contraseñas:", error);
-            return res.render('login', { error: 'Error al validar credenciales.', success: null });
-        }
-    });
 };
 
 authController.logout = (req, res) => {
-    if (req.session) {
-        req.session.destroy((err) => {
-            if (err) {
-                console.error("Error al cerrar sesión:", err);
-            }
-            res.redirect('/auth/login');
-        });
-    } else {
-        res.redirect('/auth/login');
-    }
+    req.session.destroy(() => {
+        res.redirect('/login');
+    });
 };
 
 module.exports = authController;
