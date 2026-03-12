@@ -2,7 +2,6 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
-const flash = require('connect-flash');
 const db = require('./db/conexion');
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -16,16 +15,28 @@ app.use(session({
     saveUninitialized: true,
     cookie: { secure: false }
 }));
-app.use(flash());
 app.use((req, res, next) => {
-    res.locals.success_msg = req.flash('success');
-    res.locals.error_msg = req.flash('error');
-    res.locals.formData = req.flash('formData')[0] || {};
-    res.locals.error = req.flash('error');
-    res.locals.success = req.flash('success');
+    
+    req.flash = (tipo, mensaje) => {
+        if (!req.session.flashData) req.session.flashData = {};
+        req.session.flashData[tipo] = mensaje;
+    };
+
+    
+    const flashMessages = req.session.flashData || {};
+
+    
+    res.locals.success_msg = flashMessages.success || null;
+    res.locals.error_msg = flashMessages.error || null;
+    res.locals.error = flashMessages.error || null; 
+    res.locals.success = flashMessages.success || null; 
+    res.locals.formData = flashMessages.formData || {};
     res.locals.usuario = req.session.usuario || null;
+    delete req.session.flashData;
+
     next();
 });
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 const cargarRutas = (nombre, ruta, pathArchivo) => {
@@ -37,10 +48,15 @@ const cargarRutas = (nombre, ruta, pathArchivo) => {
         console.error(` Error al cargar rutas de ${nombre}:`, error.message);
     }
 };
+
+
+cargarRutas('Autenticación', '/auth', './routes/auth.routes');
 cargarRutas('Personas', '/personas', './routes/personas.routes');
 cargarRutas('Vehículos', '/vehiculos', './routes/vehiculos.routes');
 cargarRutas('Documentos', '/documentos', './routes/documentos.routes');
 cargarRutas('Logs', '/registro-cambios', './routes/logs.routes');
+
+
 app.get('/', async (req, res) => {
     try {
         const [rows] = await db.query('SELECT NOW() AS fecha');
@@ -49,19 +65,13 @@ app.get('/', async (req, res) => {
         res.render('Home', { title: 'Inicio', fecha: new Date() });
     }
 });
-app.get('/login', async (req, res) => {
-    try {
-        res.render('Login', {
-            title: 'Iniciar Sesión | Registrarse',
-            messages: req.flash ? req.flash() : {}
-        });
-    } catch (error) {
-        console.error('Error al cargar la página de login:', error);
-        res.render('LoginRegister', {
-            title: 'Iniciar Sesión | Registrarse',
-            messages: { error: 'Error al cargar la página' }
-        });
-    }
+app.get('/login', (req, res) => {
+    
+    if (req.session.usuario) return res.redirect('/');
+
+    res.render('Login', {
+        title: 'Iniciar Sesión | Registrarse'
+    });
 });
 app.get('/documentos-personas', async (req, res) => {
     res.render('DocumentosPersonas', {
@@ -114,40 +124,30 @@ app.post('/grupos/crear', async (req, res) => {
 });
 app.get('/grupos', async (req, res) => {
     try {
-
         const [grupos] = await db.query(`
-            SELECT 
-                g.*,
-                c.nombre_cliente 
+            SELECT g.*, c.nombre_cliente 
             FROM grupos g
             LEFT JOIN clientes c ON g.id_cliente = c.id_cliente
             ORDER BY g.fecha_creacion DESC
         `);
+
         const cliente_nombre = {};
         grupos.forEach(grupo => {
             if (grupo.nombre_cliente) {
                 cliente_nombre[grupo.id_cliente] = grupo.nombre_cliente;
             }
         });
+
         res.render('listaGrupos', {
             title: 'Mis Grupos',
             grupos: grupos,
-            cliente_nombre: cliente_nombre,
-            success_msg: req.flash('success'),
-            error_msg: req.flash('error')
+            cliente_nombre: cliente_nombre
         });
 
     } catch (error) {
         console.error('Error al obtener grupos:', error);
         req.flash('error', 'Error al cargar los grupos');
-        
-        res.render('listaGrupos', {
-            title: 'Mis Grupos',
-            grupos: [],
-            cliente_nombre: {},
-            success_msg: req.flash('success'),
-            error_msg: 'Error al cargar los grupos'
-        });
+        res.redirect('/');
     }
 });
 const documentosPersonaRoutes = require('./routes/documentos_personas.routes');
@@ -162,6 +162,6 @@ app.use((req, res) => {
 
 app.listen(PORT, () => {
     console.log('='.repeat(50));
-    console.log(` Servidor: http://localhost:${PORT}`);
+    console.log(` Servidor corriendo en: http://localhost:${PORT}`);
     console.log('='.repeat(50));
 });
