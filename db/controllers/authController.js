@@ -11,7 +11,6 @@ authController.register = async (req, res) => {
         const hashedPassword = await bcrypt.hash(contrasena, 10);
         const query = 'INSERT INTO usuarios (id_cliente, nombre_completo, correo, contrasena, tipo_usuario) VALUES (?, ?, ?, ?, ?)';
 
-        
         await db.query(query, [id_cliente, nombre_completo, correo, hashedPassword, tipo_usuario]);
         
         return res.status(201).json({ success: 'Usuario registrado con éxito.' });
@@ -51,16 +50,17 @@ authController.login = async (req, res) => {
         }
 
         
+        console.log(`>>> Usuario verificado: ${userFound.nombre_completo} | ROL: ${userFound.tipo_usuario} | Cliente ID: ${userFound.id_cliente}`);
+
         req.session.usuario = {
             id: userFound.id_usuario,
             nombre: userFound.nombre_completo,
             rol: userFound.tipo_usuario
         };
 
-        
         req.session.save(() => {
-            console.log(" Login exitoso, redirigiendo...");
             
+            console.log(` Login exitoso para [${userFound.tipo_usuario}], redirigiendo...`);
             db.query('UPDATE usuarios SET ultimo_login = NOW() WHERE id_usuario = ?', [userFound.id_usuario]);
             res.redirect('/');
         });
