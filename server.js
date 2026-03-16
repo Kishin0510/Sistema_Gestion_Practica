@@ -3,7 +3,7 @@ const express = require('express');
 const path = require('path');
 const session = require('express-session');
 const db = require('./db/conexion');
-const authController = require('./db/controllers/authController'); 
+const authController = require('./db/controllers/authController');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -35,7 +35,7 @@ app.use((req, res, next) => {
     res.locals.error = flashMessages.error || null;
     res.locals.success = flashMessages.success || null;
     res.locals.formData = flashMessages.formData || {};
-    res.locals.usuario = req.session.usuario || null; 
+    res.locals.usuario = req.session.usuario || null;
     delete req.session.flashData;
 
     next();
@@ -66,26 +66,25 @@ cargarRutas('Personas', '/personas', './routes/personas.routes');
 cargarRutas('Vehículos', '/vehiculos', './routes/vehiculos.routes');
 cargarRutas('Documentos', '/documentos', './routes/documentos.routes');
 cargarRutas('Logs', '/registro-cambios', './routes/logs.routes');
+//NUEVA RUTA DE MANTENCIONES DE VEHÍCULOS COMO DATO TAMBIEN DENTRO DE LA GESTION DOCUMENTAL
+cargarRutas('Mantenciones', '/mantenciones', './routes/mantencion.routes');
 
-// RUTA HOME
-app.get('/', authMiddleware, async (req, res) => { 
+app.get('/', authMiddleware, async (req, res) => {
     try {
         const [rows] = await db.query('SELECT NOW() AS fecha');
         res.render('Home', {
             title: 'Inicio',
             fecha: rows[0].fecha,
-            usuario: req.session.usuario 
+            usuario: req.session.usuario
         });
     } catch (error) {
         res.render('Home', {
             title: 'Inicio',
             fecha: new Date(),
-            usuario: req.session.usuario 
+            usuario: req.session.usuario
         });
     }
 });
-
-// RUTA LOGIN - MODIFICADA
 app.get('/login', (req, res) => {
     if (req.session.usuario) return res.redirect('/');
     res.render('Login', {
@@ -94,8 +93,6 @@ app.get('/login', (req, res) => {
         success: null
     });
 });
-
-
 app.get('/documentos-personas', authMiddleware, async (req, res) => {
     res.render('DocumentosPersonas', {
         title: 'Gestión Documental - Personas',
@@ -103,7 +100,6 @@ app.get('/documentos-personas', authMiddleware, async (req, res) => {
         usuario: req.session.usuario
     });
 });
-
 app.get('/grupos/crear', authMiddleware, async (req, res) => {
     try {
         const [clientes] = await db.query('SELECT id_cliente, nombre_cliente as nombre FROM clientes WHERE activo = 1');
@@ -121,7 +117,6 @@ app.get('/grupos/crear', authMiddleware, async (req, res) => {
         res.status(500).send('Error al cargar el formulario de grupos');
     }
 });
-
 app.post('/grupos/crear', authMiddleware, async (req, res) => {
     let { id_cliente, nombre_grupo, nombre_compania, nombre_contacto, email_contacto, direccion, ciudad, activo } = req.body;
 
@@ -149,7 +144,6 @@ app.post('/grupos/crear', authMiddleware, async (req, res) => {
         res.redirect('/grupos/crear');
     }
 });
-
 app.get('/grupos', authMiddleware, async (req, res) => {
     try {
         const [grupos] = await db.query(`
@@ -181,7 +175,6 @@ app.get('/grupos', authMiddleware, async (req, res) => {
 });
 const documentosPersonaRoutes = require('./routes/documentos_personas.routes');
 app.use('/documentos-persona', documentosPersonaRoutes);
-
 app.use((req, res) => {
     res.status(404).render('Home', {
         title: 'Página no encontrada',

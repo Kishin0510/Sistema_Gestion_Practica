@@ -16,53 +16,42 @@
             --primary: #1e3a8a;
             --primary-dark: #172554;
         }
-
         html,
         body {
             height: 100%;
             margin: 0;
         }
-
         body {
             display: flex;
             flex-direction: column;
             min-height: 100vh;
         }
-
         .content-wrapper {
             flex: 1 0 auto;
         }
-
         .bg-primary {
             background-color: var(--primary) !important;
         }
-
         .btn-primary {
             background-color: var(--primary);
             border-color: var(--primary);
         }
-
         .btn-primary:hover {
             background-color: var(--primary-dark);
             border-color: var(--primary-dark);
         }
-
         .text-primary {
             color: var(--primary) !important;
         }
-
         .border-primary {
             border-color: var(--primary) !important;
         }
-
         .card-header.bg-primary {
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
         }
-
         .modal-header.bg-primary {
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
         }
-
         footer {
             flex-shrink: 0;
             width: 100%;
@@ -71,7 +60,6 @@
         }
     </style>
 </head>
-
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
@@ -93,14 +81,18 @@
             </div>
         </div>
     </nav>
-
     <div class="content-wrapper">
         <div class="container mt-4">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2><i class="fas fa-file-alt me-2" style="color: var(--primary);"></i>Gestión Documental</h2>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevoDocumento">
-                    <i class="fas fa-plus me-2"></i>Nuevo Documento
-                </button>
+                <div>
+                    <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#modalNuevaMantencion">
+                        <i class="fas fa-tools me-2"></i>Nueva Mantención
+                    </button>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevoDocumento">
+                        <i class="fas fa-plus me-2"></i>Nuevo Documento
+                    </button>
+                </div>
             </div>
             <% if (typeof success_msg !=='undefined' && success_msg) { %>
                 <div class="alert alert-success alert-dismissible fade show">
@@ -109,411 +101,298 @@
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
                 <% } %>
-                    <% if (typeof error_msg !=='undefined' && error_msg) { %>
-                        <div class="alert alert-danger alert-dismissible fade show">
-                            <i class="fas fa-exclamation-circle me-2"></i>
-                            <%= error_msg %>
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card text-white bg-primary">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Total Documentos</h5>
+                                    <h2>
+                                        <%= totalDocumentos || 0 %>
+                                    </h2>
+                                </div>
+                            </div>
                         </div>
-                        <% } %>
-                            <div class="row mb-4">
-                                <div class="col-md-3">
-                                    <div class="card text-white bg-primary">
-                                        <div class="card-body">
-                                            <h5 class="card-title">Total</h5>
-                                            <h2>
-                                                <%= totalDocumentos || 0 %>
-                                            </h2>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="card text-white bg-success">
-                                        <div class="card-body">
-                                            <h5 class="card-title">Vigentes</h5>
-                                            <h2>
-                                                <%= documentosVigentes || 0 %>
-                                            </h2>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="card text-white bg-warning">
-                                        <div class="card-body">
-                                            <h5 class="card-title">Por Vencer</h5>
-                                            <h2>
-                                                <%= documentosPorVencer || 0 %>
-                                            </h2>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="card text-white bg-danger">
-                                        <div class="card-body">
-                                            <h5 class="card-title">Vencidos</h5>
-                                            <h2>
-                                                <%= documentosVencidos || 0 %>
-                                            </h2>
-                                        </div>
-                                    </div>
+                        <div class="col-md-3">
+                            <div class="card text-white bg-success">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Vigentes</h5>
+                                    <h2>
+                                        <%= documentosVigentes || 0 %>
+                                    </h2>
                                 </div>
                             </div>
-                            <div class="card">
-                                <div class="card-header bg-primary text-white">
-                                    <h5 class="mb-0"><i class="fas fa-list me-2"></i>Documentos Registrados</h5>
-                                </div>
-                                <div class="card-body">
-                                    <% if (documentos && documentos.length> 0) { %>
-                                        <div class="table-responsive">
-                                            <table id="tablaDocumentos" class="table table-striped table-hover">
-                                                <thead>
-                                                    <tr>
-                                                        <th>ID</th>
-                                                        <th>Vehículo</th>
-                                                        <th>Tipo</th>
-                                                        <th>Número</th>
-                                                        <th>Vencimiento</th>
-                                                        <th>Estado</th>
-                                                        <th>Acciones</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <% for(var i=0; i < documentos.length; i++) { var doc=documentos[i];
-                                                        var fechaVenc=new Date(doc.fecha_vencimiento); var hoy=new
-                                                        Date(); var diffTime=fechaVenc - hoy; var
-                                                        diffDays=Math.ceil(diffTime / (1000 * 60 * 60 * 24)); var
-                                                        estadoClass='success' ; var estadoTexto='Vigente' ; if (diffDays
-                                                        <=0) { estadoClass='danger' ; estadoTexto='Vencido' ; } else if
-                                                        (diffDays <=7) { estadoClass='danger' ; estadoTexto='⏳ Urgente'
-                                                        ; } else if (diffDays <=30) { estadoClass='warning' ;
-                                                        estadoTexto='⏳ Por vencer' ; } %>
-                                                        <tr>
-                                                            <td>
-                                                                <%= doc.id_documento_veh %>
-                                                            </td>
-                                                            <td>
-                                                                <strong>
-                                                                    <%= doc.patente || 'N/A' %>
-                                                                </strong><br>
-                                                                <small>
-                                                                    <%= doc.marca || '' %>
-                                                                        <%= doc.modelo || '' %>
-                                                                </small>
-                                                            </td>
-                                                            <td>
-                                                                <%= doc.tipo_documento_nombre || 'Sin tipo' %>
-                                                            </td>
-                                                            <td>
-                                                                <%= doc.numero_documento || 'N/A' %>
-                                                            </td>
-                                                            <td>
-                                                                <%= fechaVenc.toLocaleDateString() %><br>
-                                                                    <small>
-                                                                        <%= diffDays> 0 ? diffDays + ' días' : 'Vencido'
-                                                                            %>
-                                                                    </small>
-                                                            </td>
-                                                            <td>
-                                                                <span class="badge bg-<%= estadoClass %>">
-                                                                    <%= estadoTexto %>
-                                                                </span>
-                                                            </td>
-                                                            <td>
-                                                                <button class="btn btn-sm btn-info ver-documento"
-                                                                    data-id="<%= doc.id_documento_veh %>"
-                                                                    title="Editar documento">
-                                                                    <i class="fas fa-eye"></i>
-                                                                </button>
-
-                                                                <% if (doc.ruta_archivo) { %>
-                                                                    <a href="<%= doc.ruta_archivo %>"
-                                                                        class="btn btn-sm btn-success" target="_blank"
-                                                                        title="Ver archivo">
-                                                                        <i class="fas fa-file-pdf"></i>
-                                                                    </a>
-                                                                    <% } %>
-                                                            </td>
-                                                        </tr>
-                                                        <% } %>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        <% } else { %>
-                                            <div class="text-center py-5">
-                                                <i class="fas fa-file-alt fa-4x text-muted mb-3"></i>
-                                                <h4 class="text-muted">No hay documentos registrados</h4>
-                                                <p>Comienza agregando tu primer documento vehicular</p>
-                                                <button class="btn btn-primary" data-bs-toggle="modal"
-                                                    data-bs-target="#modalNuevoDocumento">
-                                                    <i class="fas fa-plus me-2"></i>Agregar Documento
-                                                </button>
-                                            </div>
-                                            <% } %>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-white bg-warning">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Por Vencer</h5>
+                                    <h2>
+                                        <%= documentosPorVencer || 0 %>
+                                    </h2>
                                 </div>
                             </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-white bg-danger">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Vencidos</h5>
+                                    <h2>
+                                        <%= documentosVencidos || 0 %>
+                                    </h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-list me-2"></i>Documentos Registrados</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table id="tablaDocumentos" class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Vehículo</th>
+                                            <th>Tipo</th>
+                                            <th>Número</th>
+                                            <th>Vencimiento</th>
+                                            <th>Estado</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% if (documentos && documentos.length> 0) { %>
+                                            <% for(var i=0; i < documentos.length; i++) { var doc=documentos[i]; var
+                                                fechaVenc=new Date(doc.fecha_vencimiento); var hoy=new Date(); var
+                                                diffDays=Math.ceil((fechaVenc - hoy) / (1000 * 60 * 60 * 24)); var
+                                                estadoClass='success' ; var estadoTexto='Vigente' ; if (diffDays <=0) {
+                                                estadoClass='danger' ; estadoTexto='Vencido' ; } else if (diffDays <=7)
+                                                { estadoClass='danger' ; estadoTexto='⏳ Urgente' ; } else if (diffDays
+                                                <=30) { estadoClass='warning' ; estadoTexto='⏳ Por vencer' ; } %>
+                                                <tr>
+                                                    <td>
+                                                        <%= doc.id_documento_veh %>
+                                                    </td>
+                                                    <td><strong>
+                                                            <%= doc.patente || 'N/A' %>
+                                                        </strong><br><small>
+                                                            <%= doc.marca || '' %>
+                                                                <%= doc.modelo || '' %>
+                                                        </small></td>
+                                                    <td>
+                                                        <%= doc.tipo_documento_nombre %>
+                                                    </td>
+                                                    <td>
+                                                        <%= doc.numero_documento %>
+                                                    </td>
+                                                    <td>
+                                                        <%= fechaVenc.toLocaleDateString() %>
+                                                    </td>
+                                                    <td><span class="badge bg-<%= estadoClass %>">
+                                                            <%= estadoTexto %>
+                                                        </span></td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-info ver-documento"
+                                                            data-id="<%= doc.id_documento_veh %>"><i
+                                                                class="fas fa-eye"></i></button>
+                                                        <% if (doc.ruta_archivo) { %>
+                                                            <a href="<%= doc.ruta_archivo %>"
+                                                                class="btn btn-sm btn-success" target="_blank"><i
+                                                                    class="fas fa-file-pdf"></i></a>
+                                                            <% } %>
+                                                    </td>
+                                                </tr>
+                                                <% } %>
+                                                    <% } %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mb-4">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="fas fa-tools me-2"></i>Historial de Mantenciones</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table id="tablaMantenciones" class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Vehículo</th>
+                                            <th>Tipo Servicio</th>
+                                            <th>Kilometraje</th>
+                                            <th>Fecha</th>
+                                            <th>Costo</th>
+                                            <th>Taller</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% if (typeof mantenciones !=='undefined' && mantenciones.length> 0) { %>
+                                            <% for(var k=0; k < mantenciones.length; k++) { var m=mantenciones[k]; %>
+                                                <tr>
+                                                    <td><strong>
+                                                            <%= m.patente %>
+                                                        </strong></td>
+                                                    <td>
+                                                        <%= m.tipo_mantencion %>
+                                                    </td>
+                                                    <td>
+                                                        <%= m.kilometraje.toLocaleString() %> km
+                                                    </td>
+                                                    <td>
+                                                        <%= new Date(m.fecha_mantencion).toLocaleDateString() %>
+                                                    </td>
+                                                    <td>$<%= m.costo.toLocaleString() %>
+                                                    </td>
+                                                    <td>
+                                                        <%= m.taller || 'N/A' %>
+                                                    </td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-warning editar-mantencion"
+                                                            data-id="<%= m.id_mantencion %>"><i
+                                                                class="fas fa-edit"></i></button>
+                                                        <button class="btn btn-sm btn-danger eliminar-mantencion"
+                                                            data-id="<%= m.id_mantencion %>"><i
+                                                                class="fas fa-trash"></i></button>
+                                                        <% if (m.ruta_archivo) { %>
+                                                            <a href="<%= m.ruta_archivo %>"
+                                                                class="btn btn-sm btn-outline-secondary"
+                                                                target="_blank"><i class="fas fa-paperclip"></i></a>
+                                                            <% } %>
+                                                    </td>
+                                                </tr>
+                                                <% } %>
+                                                    <% } %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
         </div>
     </div>
-
-    <div class="modal fade" id="modalNuevoDocumento" tabindex="-1">
+    <div class="modal fade" id="modalNuevaMantencion" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title"><i class="fas fa-plus-circle me-2"></i>Nuevo Documento</h5>
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="fas fa-plus-circle me-2"></i>Registrar Mantención</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <form action="/documentos/vehiculo/registrar" method="POST" enctype="multipart/form-data">
+                <form action="/mantenciones/registrar" method="POST" enctype="multipart/form-data">
                     <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Vehículo <span class="text-danger">*</span></label>
-                            <select class="form-select" name="id_vehiculo" required>
-                                <option value="">Seleccione un vehículo...</option>
-                                <% if (vehiculos && vehiculos.length> 0) { %>
-                                    <% for(var j=0; j < vehiculos.length; j++) { var v=vehiculos[j]; %>
-                                        <option value="<%= v.id_vehiculo %>">
-                                            <%= v.patente %> - <%= v.marca || '' %>
-                                                    <%= v.modelo || '' %>
-                                        </option>
-                                        <% } %>
-                                            <% } %>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Tipo de Documento <span
-                                    class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="tipo_documento_nombre"
-                                placeholder="Ej: Permiso de Circulación, SOAT, etc." value="Documento General" required>
-                            <div class="form-text">Se creará automáticamente si no existe</div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Número de Documento <span
-                                    class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="numero_documento"
-                                placeholder="Ej: SOAT-2025-001" required>
-                        </div>
-
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Fecha de Emisión</label>
-                                <input type="date" class="form-control" name="fecha_emision">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold">Vehículo <span class="text-danger">*</span></label>
+                                <select class="form-select" name="id_vehiculo" required>
+                                    <option value="">Seleccione un vehículo...</option>
+                                    <% if (vehiculos && vehiculos.length> 0) { %>
+                                        <% for(var j=0; j < vehiculos.length; j++) { var v=vehiculos[j]; %>
+                                            <option value="<%= v.id_vehiculo %>">
+                                                <%= v.patente %> - <%= v.marca %>
+                                                        <%= v.modelo %>
+                                            </option>
+                                            <% } %>
+                                                <% } %>
+                                </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Fecha de Vencimiento <span
+                                <label class="form-label fw-bold">Tipo de Mantención</label>
+                                <input type="text" class="form-control" name="tipo_mantencion"
+                                    placeholder="Ej: Cambio de aceite" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Kilometraje <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" name="kilometraje" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Fecha Servicio <span
                                         class="text-danger">*</span></label>
-                                <input type="date" class="form-control" name="fecha_vencimiento" required>
+                                <input type="date" class="form-control" name="fecha_mantencion" required>
                             </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Archivo (opcional)</label>
-                            <input type="file" class="form-control" name="archivo_documento"
-                                accept=".pdf,.jpg,.jpeg,.png">
-                            <div class="form-text">PDF, JPG, PNG (Máx. 10MB)</div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Observaciones</label>
-                            <textarea class="form-control" name="observaciones" rows="2"></textarea>
-                        </div>
-
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="enviar_alerta" id="enviarAlerta"
-                                checked>
-                            <label class="form-check-label" for="enviarAlerta">
-                                Enviar alerta por correo
-                            </label>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Costo Total</label>
+                                <input type="number" step="0.01" class="form-control" name="costo">
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Taller / Proveedor</label>
+                                <input type="text" class="form-control" name="taller">
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Archivo Respaldo (Opcional)</label>
+                                <input type="file" class="form-control" name="archivo_mantencion">
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Observaciones</label>
+                                <textarea class="form-control" name="observaciones" rows="2"></textarea>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Guardar</button>
+                        <button type="submit" class="btn btn-success">Guardar Mantención</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-
-    <div class="modal fade" id="modalEditarDocumento" tabindex="-1">
+    <div class="modal fade" id="modalEditarMantencion" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header bg-warning text-white">
-                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Editar Documento</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Editar Mantención</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form id="formEditarDocumento" method="POST" enctype="multipart/form-data">
+                <form id="formEditarMantencion" method="POST" enctype="multipart/form-data">
                     <div class="modal-body">
-                        <input type="hidden" id="edit_id_documento" name="id_documento">
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Vehículo <span class="text-danger">*</span></label>
-                            <select class="form-select" id="edit_id_vehiculo" name="id_vehiculo" required>
-                                <option value="">Seleccione un vehículo...</option>
-                                <% if (vehiculos && vehiculos.length> 0) { %>
-                                    <% for(var j=0; j < vehiculos.length; j++) { var v=vehiculos[j]; %>
-                                        <option value="<%= v.id_vehiculo %>">
-                                            <%= v.patente %> - <%= v.marca || '' %>
-                                                    <%= v.modelo || '' %>
-                                        </option>
-                                        <% } %>
-                                            <% } %>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Tipo de Documento <span
-                                    class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="edit_tipo_documento_nombre"
-                                name="tipo_documento_nombre" placeholder="Ej: Permiso de Circulación, SOAT, etc."
-                                required>
-                            <div class="form-text">Se creará automáticamente si no existe</div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Número de Documento <span
-                                    class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="edit_numero_documento" name="numero_documento"
-                                placeholder="Ej: SOAT-2025-001" required>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Fecha de Emisión</label>
-                                <input type="date" class="form-control" id="edit_fecha_emision" name="fecha_emision">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Fecha de Vencimiento <span
-                                        class="text-danger">*</span></label>
-                                <input type="date" class="form-control" id="edit_fecha_vencimiento"
-                                    name="fecha_vencimiento" required>
-                            </div>
-                        </div>
-
-                        <div class="mb-3" id="archivo_actual_container" style="display: none;">
-                            <label class="form-label">Archivo Actual</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-file-pdf"></i></span>
-                                <input type="text" class="form-control" id="edit_archivo_actual" readonly>
-                                <a href="#" id="ver_archivo_actual" class="btn btn-outline-primary" target="_blank">
-                                    <i class="fas fa-eye"></i> Ver
-                                </a>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Reemplazar Archivo (opcional)</label>
-                            <input type="file" class="form-control" name="archivo_documento"
-                                accept=".pdf,.jpg,.jpeg,.png">
-                            <div class="form-text">PDF, JPG, PNG (Máx. 10MB). Dejar vacío para mantener el archivo
-                                actual.</div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Observaciones</label>
-                            <textarea class="form-control" id="edit_observaciones" name="observaciones"
-                                rows="2"></textarea>
-                        </div>
-
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="enviar_alerta" id="edit_enviarAlerta"
-                                checked>
-                            <label class="form-check-label" for="edit_enviarAlerta">
-                                Enviar alerta por correo
-                            </label>
+                        <input type="hidden" name="id_mantencion" id="edit_m_id">
+                        <div class="row" id="edit_m_body">
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-warning">
-                            <i class="fas fa-save me-2"></i>Actualizar
-                        </button>
+                        <button type="submit" class="btn btn-warning">Actualizar Cambios</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-
+    <div class="modal fade" id="modalNuevoDocumento" tabindex="-1">...</div>
+    <div class="modal fade" id="modalEditarDocumento" tabindex="-1">...</div>
     <footer class="text-center text-white py-4">
         <div class="container">
-            <p class="mb-1">
-                &copy; 2026 Sistema de Gestión Vehicular
-            </p>
-            <p class="small mb-1">
-                <i class="fas fa-shield-alt me-1"></i>Control • Seguridad • Documentación
-            </p>
-            <small class="text-white-50">
-                <i class="fas fa-users me-1"></i> Módulo de Grupos v2.0.0
-            </small>
+            <p class="mb-1">&copy; 2026 Sistema de Gestión Vehicular</p>
         </div>
     </footer>
-    <!-- Scripts al final, después del footer -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-
     <script>
         $(document).ready(function () {
+            
             $('#tablaDocumentos').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
-                },
-                order: [[4, 'asc']],
-                pageLength: 10,
-                lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "Todos"]]
+                language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
+                order: [[4, 'asc']]
             });
-
-            $('.ver-documento').on('click', function () {
+            $('#tablaMantenciones').DataTable({
+                language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
+                order: [[3, 'desc']]
+            });
+            $('.editar-mantencion').on('click', function () {
                 const id = $(this).data('id');
-                cargarDocumentoParaEditar(id);
+                $('#edit_m_id').val(id);
+                $('#formEditarMantencion').attr('action', `/mantenciones/actualizar/${id}`);
+                $('#modalEditarMantencion').modal('show');
+            });
+            $('.eliminar-mantencion').on('click', function () {
+                const id = $(this).data('id');
+                if (confirm('¿Estás seguro de eliminar este registro de mantención? Esta acción no se puede deshacer.')) {
+                    window.location.href = `/mantenciones/eliminar/${id}`;
+                }
             });
         });
-
-        function cargarDocumentoParaEditar(id) {
-            $('#modalEditarDocumento .modal-content').append(
-                '<div class="text-center p-3" id="cargando-editar">' +
-                '<div class="spinner-border text-primary" role="status">' +
-                '<span class="visually-hidden">Cargando...</span></div></div>'
-            );
-
-            fetch(`/documentos/api/documento/${id}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const doc = data.documento;
-
-                        $('#formEditarDocumento').attr('action', `/documentos/actualizar/${id}`);
-                        $('#edit_id_documento').val(doc.id_documento_veh);
-                        $('#edit_id_vehiculo').val(doc.id_vehiculo);
-                        $('#edit_tipo_documento_nombre').val(doc.tipo_documento_nombre);
-                        $('#edit_numero_documento').val(doc.numero_documento);
-                        $('#edit_fecha_emision').val(doc.fecha_emision);
-                        $('#edit_fecha_vencimiento').val(doc.fecha_vencimiento);
-                        $('#edit_observaciones').val(doc.observaciones || '');
-
-                        if (doc.ruta_archivo) {
-                            $('#archivo_actual_container').show();
-                            $('#edit_archivo_actual').val(doc.nombre_archivo || 'Archivo actual');
-                            $('#ver_archivo_actual').attr('href', doc.ruta_archivo);
-                        } else {
-                            $('#archivo_actual_container').hide();
-                        }
-
-                        $('#modalEditarDocumento').modal('show');
-                    } else {
-                        alert('Error al cargar los datos del documento: ' + (data.message || 'Error desconocido'));
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error al cargar los datos del documento');
-                })
-                .finally(() => {
-                    $('#cargando-editar').remove();
-                });
-        }
-        function verDocumento(id) {
-            cargarDocumentoParaEditar(id);
-        }
     </script>
 </body>
+
 </html>

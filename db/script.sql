@@ -107,6 +107,24 @@ CREATE TABLE documentos_persona (
     FOREIGN KEY (id_tipo_documento) REFERENCES tipo_documentos_persona(id_tipo_documento),
     FOREIGN KEY (usuario_subida) REFERENCES usuarios(id_usuario)
 );
+CREATE TABLE mantenciones_vehiculo (
+    id_mantencion INT AUTO_INCREMENT PRIMARY KEY,
+    id_vehiculo INT NOT NULL,               
+    tipo_mantencion VARCHAR(150) NOT NULL,   
+    kilometraje INT NOT NULL,               
+    fecha_mantencion DATE NOT NULL,         
+    costo_total DECIMAL(12, 2) DEFAULT 0.00, 
+    taller_proveedor VARCHAR(255),          
+    nombre_archivo VARCHAR(255),            
+    ruta_archivo LONGBLOB,                  
+    observaciones TEXT,                     
+    
+    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
+    usuario_id INT,                         
+    
+    CONSTRAINT fk_vehiculo_mantencion FOREIGN KEY (id_vehiculo) 
+        REFERENCES vehiculos(id_vehiculo) ON DELETE CASCADE
+);
 CREATE TABLE tipos_vehiculo (
     id_tipo_vehiculo INT AUTO_INCREMENT PRIMARY KEY,
     nombre_tipo VARCHAR(50) NOT NULL,
