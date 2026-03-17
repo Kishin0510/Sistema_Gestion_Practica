@@ -1,6 +1,5 @@
 const db = require('../conexion');
 const bcrypt = require('bcryptjs');
-
 const authController = {};
 
 authController.register = async (req, res) => {
@@ -10,9 +9,7 @@ authController.register = async (req, res) => {
     try {
         const hashedPassword = await bcrypt.hash(contrasena, 10);
         const query = 'INSERT INTO usuarios (id_cliente, nombre_completo, correo, contrasena, tipo_usuario) VALUES (?, ?, ?, ?, ?)';
-
         await db.query(query, [id_cliente, nombre_completo, correo, hashedPassword, tipo_usuario]);
-        
         return res.status(201).json({ success: 'Usuario registrado con éxito.' });
     } catch (error) {
         console.error(" Error en registro:", error);

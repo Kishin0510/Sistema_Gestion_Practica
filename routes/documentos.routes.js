@@ -4,6 +4,8 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const documentoVehiculoController = require('../db/controllers/documentoController');
+// Importamos tu middleware de permisos
+const { permisoPara } = require('../middlewares/roleAuth');
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -45,23 +47,44 @@ const upload = multer({
     }
 });
 
-router.get('/', documentoVehiculoController.mostrarDocumentos);
-router.get('/api/vehiculos', documentoVehiculoController.apiVehiculos);
-router.get('/api/tipos', documentoVehiculoController.apiTiposDocumentos);
-router.get('/api/vehiculo/patente/:patente', documentoVehiculoController.buscarVehiculoPorPatente);
-router.get('/api/documento/:id', documentoVehiculoController.obtenerDocumentoPorId);
+// Rutas de visualización (Todos pueden ver)
+router.get('/', 
+    permisoPara(['SUPER_ADMIN', 'ADMIN_CLIENTE', 'ACTUALIZADOR', 'VISUALIZADOR']), 
+    documentoVehiculoController.mostrarDocumentos
+);
+router.get('/api/vehiculos', 
+    permisoPara(['SUPER_ADMIN', 'ADMIN_CLIENTE', 'ACTUALIZADOR', 'VISUALIZADOR']), 
+    documentoVehiculoController.apiVehiculos
+);
+router.get('/api/tipos', 
+    permisoPara(['SUPER_ADMIN', 'ADMIN_CLIENTE', 'ACTUALIZADOR', 'VISUALIZADOR']), 
+    documentoVehiculoController.apiTiposDocumentos
+);
+router.get('/api/vehiculo/patente/:patente', 
+    permisoPara(['SUPER_ADMIN', 'ADMIN_CLIENTE', 'ACTUALIZADOR', 'VISUALIZADOR']), 
+    documentoVehiculoController.buscarVehiculoPorPatente
+);
+router.get('/api/documento/:id', 
+    permisoPara(['SUPER_ADMIN', 'ADMIN_CLIENTE', 'ACTUALIZADOR', 'VISUALIZADOR']), 
+    documentoVehiculoController.obtenerDocumentoPorId
+);
+
+// Rutas de registro y actualización (Solo Actualizador y Super Admin)
 router.post('/vehiculo/registrar',
+    permisoPara(['SUPER_ADMIN', 'ACTUALIZADOR']),
     upload.single('archivo_documento'),
     documentoVehiculoController.agregarDocumento
 );
 
 router.post('/actualizar/:id',
+    permisoPara(['SUPER_ADMIN', 'ACTUALIZADOR']),
     upload.single('archivo_documento'),
     documentoVehiculoController.actualizarDocumento
 );
-
-router.delete('/eliminar/:id', documentoVehiculoController.eliminarDocumento);
-
+router.delete('/eliminar/:id', 
+    permisoPara(['SUPER_ADMIN', 'ADMIN_CLIENTE']), 
+    documentoVehiculoController.eliminarDocumento
+);
 router.use((err, req, res, next) => {
     console.error('Error en multer:', err);
 
@@ -71,12 +94,9 @@ router.use((err, req, res, next) => {
         }
         return res.redirect('/documentos?error=Error al subir archivo: ' + err.message);
     }
-
     if (err) {
         return res.redirect('/documentos?error=' + encodeURIComponent(err.message));
     }
-
     next();
 });
-
 module.exports = router;

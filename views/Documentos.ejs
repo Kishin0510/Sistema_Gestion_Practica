@@ -289,25 +289,22 @@
                                     <% if (vehiculos && vehiculos.length> 0) { %>
                                         <% for(var j=0; j < vehiculos.length; j++) { var v=vehiculos[j]; %>
                                             <option value="<%= v.id_vehiculo %>">
-                                                <%= v.patente %> - <%= v.marca %>
-                                                        <%= v.modelo %>
+                                                <%= v.patente %> - <%= v.marca %> <%= v.modelo %>
                                             </option>
-                                            <% } %>
-                                                <% } %>
+                                        <% } %>
+                                    <% } %>
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold">Tipo de Mantención</label>
-                                <input type="text" class="form-control" name="tipo_mantencion"
-                                    placeholder="Ej: Cambio de aceite" required>
+                                <input type="text" class="form-control" name="tipo_mantencion" placeholder="Ej: Cambio de aceite" required>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold">Kilometraje <span class="text-danger">*</span></label>
                                 <input type="number" class="form-control" name="kilometraje" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Fecha Servicio <span
-                                        class="text-danger">*</span></label>
+                                <label class="form-label fw-bold">Fecha Servicio <span class="text-danger">*</span></label>
                                 <input type="date" class="form-control" name="fecha_mantencion" required>
                             </div>
                             <div class="col-md-6 mb-3">
@@ -336,6 +333,63 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="modalNuevoDocumento" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-file-medical me-2"></i>Registrar Nuevo Documento</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="/documentos/vehiculo/registrar" method="POST" enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold">Vehículo (Patente) <span class="text-danger">*</span></label>
+                                <select class="form-select" name="id_vehiculo" required>
+                                    <option value="">Seleccione un vehículo...</option>
+                                    <% if (typeof vehiculos !== 'undefined' && vehiculos.length > 0) { %>
+                                        <% for(var j=0; j < vehiculos.length; j++) { var v = vehiculos[j]; %>
+                                            <option value="<%= v.id_vehiculo %>">
+                                                <%= v.patente %> - <%= v.marca %> <%= v.modelo %>
+                                            </option>
+                                        <% } %>
+                                    <% } %>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Tipo de Documento <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="tipo_documento_nombre" placeholder="Ej: Revisión Técnica" required>
+                            </div>                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Número de Documento <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="numero_documento" placeholder="Ej: PIF-123456" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Fecha de Emisión</label>
+                                <input type="date" class="form-control" name="fecha_emision">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Fecha de Vencimiento <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" name="fecha_vencimiento" required>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold">Archivo (PDF, JPG, PNG) <span class="text-danger">*</span></label>
+                                <input type="file" class="form-control" name="archivo_documento" required>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold">Observaciones</label>
+                                <textarea class="form-control" name="observaciones" rows="3" placeholder="Detalles extra del documento..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Registrar Documento</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <div class="modal fade" id="modalEditarMantencion" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -357,8 +411,6 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="modalNuevoDocumento" tabindex="-1">...</div>
-    <div class="modal fade" id="modalEditarDocumento" tabindex="-1">...</div>
     <footer class="text-center text-white py-4">
         <div class="container">
             <p class="mb-1">&copy; 2026 Sistema de Gestión Vehicular</p>
@@ -370,7 +422,6 @@
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     <script>
         $(document).ready(function () {
-            
             $('#tablaDocumentos').DataTable({
                 language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
                 order: [[4, 'asc']]
@@ -394,5 +445,4 @@
         });
     </script>
 </body>
-
 </html>
