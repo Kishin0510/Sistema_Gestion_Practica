@@ -1047,7 +1047,7 @@
             const items = document.querySelectorAll('.grupo-item');
             const itemsVisibles = Array.from(items).filter(item => item.style.display !== 'none');
             const totalPaginas = Math.ceil(itemsVisibles.length / elementosPorPagina);
-
+            
             itemsVisibles.forEach((item, index) => {
                 const pagina = Math.floor(index / elementosPorPagina) + 1;
                 item.style.display = (pagina === paginaActual) ? '' : 'none';

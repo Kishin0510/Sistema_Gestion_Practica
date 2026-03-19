@@ -16,55 +16,45 @@
             height: 100%;
             margin: 0;
         }
-
         body {
             display: flex;
             flex-direction: column;
             min-height: 100vh;
         }
-
         .content-wrapper {
             flex: 1 0 auto;
         }
-
         .required-field::after {
             content: " *";
             color: red;
         }
-
         .bg-primary-dark {
             background-color: #172554 !important;
         }
-
         .btn-primary-dark {
             background-color: #172554;
             color: white;
             border: none;
         }
-
         .btn-primary-dark:hover {
             background-color: #0f1a3d;
             color: white;
         }
-
         .card-header.bg-primary-dark {
             background-color: #172554 !important;
         }
-
         footer {
             flex-shrink: 0;
             width: 100%;
         }
     </style>
 </head>
-
 <body class="bg-light">
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary-dark shadow-sm">
         <div class="container">
             <a class="navbar-brand fw-bold" href="/"><i class="bi bi-car-front-fill me-2"></i>Gestión Vehicular</a>
         </div>
     </nav>
-
     <div class="content-wrapper">
         <div class="container mt-4">
             <div class="row justify-content-center">
@@ -85,7 +75,6 @@
                                             <%= error_msg %>
                                         </div>
                                         <% } %>
-
                                             <form method="POST" action="/grupos/crear">
                                                 <div class="row">
                                                     <div class="col-md-6 mb-3">
@@ -94,7 +83,6 @@
                                                         <input type="text" class="form-control" name="nombre_grupo"
                                                             value="<%= locals.formData?.nombre_grupo || '' %>" required>
                                                     </div>
-
                                                     <div class="col-md-6 mb-3">
                                                         <label class="form-label required-field fw-bold">Cliente
                                                             Responsable</label>
@@ -111,25 +99,21 @@
                                                                         <% } %>
                                                         </select>
                                                     </div>
-
                                                     <div class="col-md-12 mb-3">
                                                         <label class="form-label fw-bold">Nombre de la Compañía</label>
                                                         <input type="text" class="form-control" name="nombre_compania"
                                                             value="<%= locals.formData?.nombre_compania || '' %>">
                                                     </div>
-
                                                     <div class="col-md-6 mb-3">
                                                         <label class="form-label fw-bold">Nombre del Contacto</label>
                                                         <input type="text" class="form-control" name="nombre_contacto"
                                                             value="<%= locals.formData?.nombre_contacto || '' %>">
                                                     </div>
-
                                                     <div class="col-md-6 mb-3">
                                                         <label class="form-label fw-bold">Email de Contacto</label>
                                                         <input type="email" class="form-control" name="email_contacto"
                                                             value="<%= locals.formData?.email_contacto || '' %>">
                                                     </div>
-
                                                     <div class="col-md-12 mb-3">
                                                         <div class="form-check form-switch p-2 border rounded bg-white">
                                                             <input class="form-check-input ms-0 me-2" type="checkbox"
@@ -151,14 +135,9 @@
             </div>
         </div>
     </div>
-
-    <!-- Script de fecha automática -->
     <script>
-
         function actualizarFecha() {
-
             const fecha = new Date();
-
             const opciones = {
                 year: 'numeric',
                 month: 'long',
@@ -167,24 +146,16 @@
                 minute: '2-digit',
                 second: '2-digit'
             };
-
             const fechaFormateada = fecha.toLocaleString('es-CL', opciones);
-
             const elementoFecha = document.getElementById("fechaActual");
 
             if (elementoFecha) {
                 elementoFecha.textContent = fechaFormateada;
             }
         }
-
         actualizarFecha();
-
         setInterval(actualizarFecha, 1000);
-
     </script>
-
-    <!-- Footer partial -->
-    <%- include('partials/footer') %>
+     <%- include('partials/footer') %>
 </body>
-
 </html>

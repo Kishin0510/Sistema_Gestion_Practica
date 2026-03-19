@@ -1,9 +1,9 @@
 const db = require('../conexion');
 
-// Listar todos los grupos y preparar datos para el Modal
+
 exports.listar = async (req, res) => {
   try {
-    // 1. Obtener los grupos registrados
+    
     const [grupos] = await db.query(`
       SELECT g.*, c.nombre as cliente_nombre,
       CONCAT(p.nombres, ' ', p.apellido_paterno) as persona_contacto_nombre
@@ -13,17 +13,17 @@ exports.listar = async (req, res) => {
       ORDER BY g.id_grupo DESC
     `);
 
-    // 2. Obtener Clientes para el select del modal (Imagen 2)
+    
     const [clientes] = await db.query('SELECT id_cliente, nombre FROM clientes WHERE activo = 1 ORDER BY nombre ASC');
 
-    // 3. Obtener Personas para la tabla del modal (Imagen 1)
+    
     const [personas] = await db.query('SELECT id_persona, nombres, apellido_paterno, run, dv, email, telefono FROM personas WHERE activo = 1');
 
     res.render('grupos/listar', {
       title: 'Mis Grupos',
       grupos,
-      clientes,  // Vital: Soluciona el error "clientes is not defined"
-      personas,  // Vital: Soluciona el error "personas is not defined"
+      clientes,  
+      personas,  
       usuario: req.session.usuario, 
       success_msg: req.flash('success'),
       error_msg: req.flash('error')
@@ -34,7 +34,6 @@ exports.listar = async (req, res) => {
   }
 };
 
-// --- API PARA EL MODAL (AJAX) ---
 
 exports.getUsuariosPorGrupo = async (req, res) => {
   try {
