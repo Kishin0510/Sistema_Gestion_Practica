@@ -567,10 +567,11 @@
                     <% if (locals.usuario) { %>
                         <li class="nav-item">
                             <span class="nav-link text-white small">
-                                <i class="bi bi-person-circle me-1"></i> <%= usuario.nombre %> (<%= usuario.rol %>)
+                                <i class="bi bi-person-circle me-1"></i>
+                                <%= usuario.nombre %> (<%= usuario.rol %>)
                             </span>
                         </li>
-                    <% } %>
+                        <% } %>
                 </ul>
             </div>
         </div>
@@ -582,259 +583,280 @@
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="bi bi-check-circle-fill me-2"></i>
                     <%= success_msg %>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
-            <% } %>
+                <% } %>
 
-            <% if (locals.error_msg && error_msg.length> 0) { %>
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                    <%= error_msg %>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            <% } %>
-
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
-                <div>
-                    <h1 class="display-5 fw-bold text-primary-custom">
-                        <i class="bi bi-people-fill me-2"></i>Mis Grupos
-                    </h1>
-                    <p class="text-muted">Gestiona todos los grupos registrados en el sistema</p>
-                </div>
-                <div class="mt-3 mt-md-0">
-                    <a href="/grupos/crear" class="btn btn-primary-custom btn-lg">
-                        <i class="bi bi-plus-circle me-2"></i>Nuevo Grupo
-                    </a>
-                </div>
-            </div>
-
-            <div class="filtro-section">
-                <div class="row g-3">
-                    <div class="col-md-5">
-                        <div class="input-group">
-                            <span class="input-group-text bg-white">
-                                <i class="bi bi-search"></i>
-                            </span>
-                            <input type="text" class="form-control" id="buscarGrupo"
-                                placeholder="Buscar por nombre, compañía o contacto...">
+                    <% if (locals.error_msg && error_msg.length> 0) { %>
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <%= error_msg %>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
-                    </div>
-                    <div class="col-md-3">
-                        <select class="form-select" id="filtroEstado">
-                            <option value="todos">Todos los estados</option>
-                            <option value="activos">Activos</option>
-                            <option value="inactivos">Inactivos</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <select class="form-select" id="ordenarPor">
-                            <option value="reciente">Más reciente</option>
-                            <option value="antiguo">Más antiguo</option>
-                            <option value="nombre">Nombre A-Z</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <button class="btn btn-outline-secondary w-100" onclick="limpiarFiltros()">
-                            <i class="bi bi-x-circle me-2"></i>Limpiar
-                        </button>
-                    </div>
-                </div>
-            </div>
+                        <% } %>
 
-            <div class="mb-3">
-                <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-outline-primary active" id="vistaCards"
-                        onclick="cambiarVista('cards')">
-                        <i class="bi bi-grid-3x3-gap-fill me-2"></i>Cards
-                    </button>
-                    <button type="button" class="btn btn-outline-primary" id="vistaTabla"
-                        onclick="cambiarVista('tabla')">
-                        <i class="bi bi-table me-2"></i>Tabla
-                    </button>
-                </div>
-            </div>
+                            <div
+                                class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+                                <div>
+                                    <h1 class="display-5 fw-bold text-primary-custom">
+                                        <i class="bi bi-people-fill me-2"></i>Mis Grupos
+                                    </h1>
+                                    <p class="text-muted">Gestiona todos los grupos registrados en el sistema</p>
+                                </div>
+                                <div class="mt-3 mt-md-0">
+                                    <a href="/grupos/crear" class="btn btn-primary-custom btn-lg">
+                                        <i class="bi bi-plus-circle me-2"></i>Nuevo Grupo
+                                    </a>
+                                </div>
+                            </div>
 
-            <div id="vistaCardsContainer">
-                <% if (grupos && grupos.length> 0) { %>
-                    <div class="row" id="gruposContainer">
-                        <% grupos.forEach(grupo=> { %>
-                            <div class="col-md-6 col-lg-4 mb-4 grupo-item"
-                                data-nombre="<%= grupo.nombre_grupo.toLowerCase() %>"
-                                data-compania="<%= (grupo.nombre_compania || '').toLowerCase() %>"
-                                data-contacto="<%= (grupo.nombre_contacto || '').toLowerCase() %>"
-                                data-estado="<%= grupo.activo ? 'activo' : 'inactivo' %>"
-                                data-fecha="<%= new Date(grupo.fecha_creacion).getTime() %>"
-                                data-id="<%= grupo.id_grupo %>">
-
-                                <div class="card grupo-card shadow-sm h-100">
-                                    <div class="card-header-grupo d-flex justify-content-between align-items-center">
-                                        <h5 class="mb-0 fw-bold">
-                                            <i class="bi bi-people me-2"></i>
-                                            <%= grupo.nombre_grupo %>
-                                        </h5>
-                                        <span class="badge-estado <%= grupo.activo ? 'badge-activo' : 'badge-inactivo' %>">
-                                            <i class="bi <%= grupo.activo ? 'bi-check-circle' : 'bi-x-circle' %> me-1"></i>
-                                            <%= grupo.activo ? 'Activo' : 'Inactivo' %>
-                                        </span>
-                                    </div>
-
-                                    <div class="card-body">
-                                        <div class="info-item">
-                                            <div class="info-label">
-                                                <i class="bi bi-building me-2 text-primary"></i>ID:
-                                            </div>
-                                            <div class="info-value">
-                                                <%= grupo.id_cliente %>
-                                                <% if (locals.cliente_nombre && cliente_nombre[grupo.id_cliente]) { %>
-                                                    <span class="text-muted">(<%= cliente_nombre[grupo.id_cliente] %>)</span>
-                                                <% } %>
-                                            </div>
-                                        </div>
-
-                                        <% if (grupo.nombre_compania) { %>
-                                            <div class="info-item">
-                                                <div class="info-label">
-                                                    <i class="bi bi-briefcase me-2 text-primary"></i>Compañía:
-                                                </div>
-                                                <div class="info-value">
-                                                    <%= grupo.nombre_compania %>
-                                                </div>
-                                            </div>
-                                        <% } %>
-
-                                        <% if (grupo.nombre_contacto) { %>
-                                            <div class="info-item">
-                                                <div class="info-label">
-                                                    <i class="bi bi-person me-2 text-primary"></i>Contacto:
-                                                </div>
-                                                <div class="info-value">
-                                                    <%= grupo.nombre_contacto %>
-                                                </div>
-                                            </div>
-                                        <% } %>
-
-                                        <div class="info-item">
-                                            <div class="info-label">
-                                                <i class="bi bi-calendar me-2 text-primary"></i>Fecha:
-                                            </div>
-                                            <div class="info-value">
-                                                <%= new Date(grupo.fecha_creacion).toLocaleDateString() %>
-                                            </div>
+                            <div class="filtro-section">
+                                <div class="row g-3">
+                                    <div class="col-md-5">
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-white">
+                                                <i class="bi bi-search"></i>
+                                            </span>
+                                            <input type="text" class="form-control" id="buscarGrupo"
+                                                placeholder="Buscar por nombre, compañía o contacto...">
                                         </div>
                                     </div>
-
-                                    <div class="card-footer bg-white border-0 pb-3 d-flex justify-content-end gap-2">
-                                        <button type="button" 
-                                                class="btn btn-warning btn-sm action-btn" 
-                                                data-bs-toggle="modal" 
-                                                data-bs-target="#modalEditarGrupo"
-                                                onclick="abrirEditorGrupo('<%= grupo.id_grupo %>', '<%= grupo.nombre_grupo %>')">
-                                            <i class="bi bi-pencil me-1"></i>Editar
-                                        </button>
-
-                                        <a href="/grupos/ver/<%= grupo.id_grupo %>" class="btn btn-info btn-sm action-btn text-white">
-                                            <i class="bi bi-eye me-1"></i>Ver
-                                        </a>
-
-                                        <button class="btn btn-danger btn-sm action-btn"
-                                            onclick="eliminarGrupo('<%= grupo.id_grupo %>', '<%= grupo.nombre_grupo %>')">
-                                            <i class="bi bi-trash me-1"></i>
+                                    <div class="col-md-3">
+                                        <select class="form-select" id="filtroEstado">
+                                            <option value="todos">Todos los estados</option>
+                                            <option value="activos">Activos</option>
+                                            <option value="inactivos">Inactivos</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <select class="form-select" id="ordenarPor">
+                                            <option value="reciente">Más reciente</option>
+                                            <option value="antiguo">Más antiguo</option>
+                                            <option value="nombre">Nombre A-Z</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button class="btn btn-outline-secondary w-100" onclick="limpiarFiltros()">
+                                            <i class="bi bi-x-circle me-2"></i>Limpiar
                                         </button>
                                     </div>
                                 </div>
                             </div>
-                        <% }); %>
-                    </div>
 
-                    <nav aria-label="Paginación de grupos" class="mt-4" id="paginacion">
-                        <ul class="pagination justify-content-center">
-                            <li class="page-item" id="prevPage">
-                                <a class="page-link" href="#" onclick="cambiarPagina('prev')">Anterior</a>
-                            </li>
-                            <li class="page-item active" id="page1">
-                                <a class="page-link" href="#" onclick="cambiarPagina(1)">1</a>
-                            </li>
-                            <li class="page-item" id="page2">
-                                <a class="page-link" href="#" onclick="cambiarPagina(2)">2</a>
-                            </li>
-                            <li class="page-item" id="page3">
-                                <a class="page-link" href="#" onclick="cambiarPagina(3)">3</a>
-                            </li>
-                            <li class="page-item" id="nextPage">
-                                <a class="page-link" href="#" onclick="cambiarPagina('next')">Siguiente</a>
-                            </li>
-                        </ul>
-                    </nav>
-                <% } else { %>
-                    <div class="empty-state">
-                        <i class="bi bi-people" style="font-size: 4rem; color: #0d6efd;"></i>
-                        <h3 class="mt-3">No hay grupos registrados</h3>
-                        <p class="text-muted mb-4">Comienza creando tu primer grupo para organizar vehículos y personas</p>
-                        <a href="/grupos/crear" class="btn btn-primary-custom btn-lg">
-                            <i class="bi bi-plus-circle me-2"></i>Crear mi primer grupo
-                        </a>
-                    </div>
-                <% } %>
-            </div>
+                            <div class="mb-3">
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-outline-primary active" id="vistaCards"
+                                        onclick="cambiarVista('cards')">
+                                        <i class="bi bi-grid-3x3-gap-fill me-2"></i>Cards
+                                    </button>
+                                    <button type="button" class="btn btn-outline-primary" id="vistaTabla"
+                                        onclick="cambiarVista('tabla')">
+                                        <i class="bi bi-table me-2"></i>Tabla
+                                    </button>
+                                </div>
+                            </div>
 
-            <div id="vistaTablaContainer" style="display: none;">
-                <% if (grupos && grupos.length> 0) { %>
-                    <div class="table-responsive">
-                        <table class="table table-grupos">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Nombre del Grupo</th>
-                                    <th>Compañía</th>
-                                    <th>Contacto</th>
-                                    <th>Estado</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% grupos.forEach(grupo=> { %>
-                                    <tr class="grupo-item-tabla"
-                                        data-nombre="<%= grupo.nombre_grupo.toLowerCase() %>"
-                                        data-compania="<%= (grupo.nombre_compania || '').toLowerCase() %>"
-                                        data-contacto="<%= (grupo.nombre_contacto || '').toLowerCase() %>"
-                                        data-estado="<%= grupo.activo ? 'activo' : 'inactivo' %>"
-                                        data-fecha="<%= new Date(grupo.fecha_creacion).getTime() %>">
+                            <div id="vistaCardsContainer">
+                                <% if (grupos && grupos.length> 0) { %>
+                                    <div class="row" id="gruposContainer">
+                                        <% grupos.forEach(grupo=> { %>
+                                            <div class="col-md-6 col-lg-4 mb-4 grupo-item"
+                                                data-nombre="<%= grupo.nombre_grupo.toLowerCase() %>"
+                                                data-compania="<%= (grupo.nombre_compania || '').toLowerCase() %>"
+                                                data-contacto="<%= (grupo.nombre_contacto || '').toLowerCase() %>"
+                                                data-estado="<%= grupo.activo ? 'activo' : 'inactivo' %>"
+                                                data-fecha="<%= new Date(grupo.fecha_creacion).getTime() %>"
+                                                data-id="<%= grupo.id_grupo %>">
 
-                                        <td><strong>#<%= grupo.id_grupo %></strong></td>
-                                        <td><%= grupo.nombre_grupo %></td>
-                                        <td><%= grupo.nombre_compania || '-' %></td>
-                                        <td><%= grupo.nombre_contacto || '-' %></td>
-                                        <td>
-                                            <span class="badge <%= grupo.activo ? 'bg-success' : 'bg-danger' %>">
-                                                <%= grupo.activo ? 'Activo' : 'Inactivo' %>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group" role="group">
-                                                <button type="button" 
-                                                        class="btn btn-warning btn-sm" 
-                                                        title="Editar"
-                                                        data-bs-toggle="modal" 
-                                                        data-bs-target="#modalEditarGrupo"
-                                                        onclick="abrirEditorGrupo('<%= grupo.id_grupo %>', '<%= grupo.nombre_grupo %>')">
-                                                    <i class="bi bi-pencil"></i>
-                                                </button>
-                                                <a href="/grupos/ver/<%= grupo.id_grupo %>" class="btn btn-info btn-sm text-white" title="Ver">
-                                                    <i class="bi bi-eye"></i>
-                                                </a>
-                                                <button class="btn btn-danger btn-sm" title="Eliminar"
-                                                    onclick="eliminarGrupo('<%= grupo.id_grupo %>', '<%= grupo.nombre_grupo %>')">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
+                                                <div class="card grupo-card shadow-sm h-100">
+                                                    <div
+                                                        class="card-header-grupo d-flex justify-content-between align-items-center">
+                                                        <h5 class="mb-0 fw-bold">
+                                                            <i class="bi bi-people me-2"></i>
+                                                            <%= grupo.nombre_grupo %>
+                                                        </h5>
+                                                        <span
+                                                            class="badge-estado <%= grupo.activo ? 'badge-activo' : 'badge-inactivo' %>">
+                                                            <i
+                                                                class="bi <%= grupo.activo ? 'bi-check-circle' : 'bi-x-circle' %> me-1"></i>
+                                                            <%= grupo.activo ? 'Activo' : 'Inactivo' %>
+                                                        </span>
+                                                    </div>
+
+                                                    <div class="card-body">
+                                                        <div class="info-item">
+                                                            <div class="info-label">
+                                                                <i class="bi bi-building me-2 text-primary"></i>ID:
+                                                            </div>
+                                                            <div class="info-value">
+                                                                <%= grupo.id_cliente %>
+                                                                    <% if (locals.cliente_nombre &&
+                                                                        cliente_nombre[grupo.id_cliente]) { %>
+                                                                        <span class="text-muted">(<%=
+                                                                                cliente_nombre[grupo.id_cliente] %>
+                                                                                )</span>
+                                                                        <% } %>
+                                                            </div>
+                                                        </div>
+
+                                                        <% if (grupo.nombre_compania) { %>
+                                                            <div class="info-item">
+                                                                <div class="info-label">
+                                                                    <i
+                                                                        class="bi bi-briefcase me-2 text-primary"></i>Compañía:
+                                                                </div>
+                                                                <div class="info-value">
+                                                                    <%= grupo.nombre_compania %>
+                                                                </div>
+                                                            </div>
+                                                            <% } %>
+
+                                                                <% if (grupo.nombre_contacto) { %>
+                                                                    <div class="info-item">
+                                                                        <div class="info-label">
+                                                                            <i
+                                                                                class="bi bi-person me-2 text-primary"></i>Contacto:
+                                                                        </div>
+                                                                        <div class="info-value">
+                                                                            <%= grupo.nombre_contacto %>
+                                                                        </div>
+                                                                    </div>
+                                                                    <% } %>
+
+                                                                        <div class="info-item">
+                                                                            <div class="info-label">
+                                                                                <i
+                                                                                    class="bi bi-calendar me-2 text-primary"></i>Fecha:
+                                                                            </div>
+                                                                            <div class="info-value">
+                                                                                <%= new
+                                                                                    Date(grupo.fecha_creacion).toLocaleDateString()
+                                                                                    %>
+                                                                            </div>
+                                                                        </div>
+                                                    </div>
+
+                                                    <div
+                                                        class="card-footer bg-white border-0 pb-3 d-flex justify-content-end gap-2">
+                                                        <button type="button" class="btn btn-warning btn-sm action-btn"
+                                                            data-bs-toggle="modal" data-bs-target="#modalEditarGrupo"
+                                                            onclick="abrirEditorGrupo('<%= grupo.id_grupo %>', '<%= grupo.nombre_grupo %>')">
+                                                            <i class="bi bi-pencil me-1"></i>Editar
+                                                        </button>
+
+                                                        <a href="/grupos/ver/<%= grupo.id_grupo %>"
+                                                            class="btn btn-info btn-sm action-btn text-white">
+                                                            <i class="bi bi-eye me-1"></i>Ver
+                                                        </a>
+
+                                                        <button class="btn btn-danger btn-sm action-btn"
+                                                            onclick="eliminarGrupo('<%= grupo.id_grupo %>', '<%= grupo.nombre_grupo %>')">
+                                                            <i class="bi bi-trash me-1"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </td>
-                                    </tr>
-                                <% }); %>
-                            </tbody>
-                        </table>
-                    </div>
-                <% } %>
-            </div>
+                                            <% }); %>
+                                    </div>
+
+                                    <nav aria-label="Paginación de grupos" class="mt-4" id="paginacion">
+                                        <ul class="pagination justify-content-center">
+                                            <li class="page-item" id="prevPage">
+                                                <a class="page-link" href="#"
+                                                    onclick="cambiarPagina('prev')">Anterior</a>
+                                            </li>
+                                            <li class="page-item active" id="page1">
+                                                <a class="page-link" href="#" onclick="cambiarPagina(1)">1</a>
+                                            </li>
+                                            <li class="page-item" id="page2">
+                                                <a class="page-link" href="#" onclick="cambiarPagina(2)">2</a>
+                                            </li>
+                                            <li class="page-item" id="page3">
+                                                <a class="page-link" href="#" onclick="cambiarPagina(3)">3</a>
+                                            </li>
+                                            <li class="page-item" id="nextPage">
+                                                <a class="page-link" href="#"
+                                                    onclick="cambiarPagina('next')">Siguiente</a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                    <% } else { %>
+                                        <div class="empty-state">
+                                            <i class="bi bi-people" style="font-size: 4rem; color: #0d6efd;"></i>
+                                            <h3 class="mt-3">No hay grupos registrados</h3>
+                                            <p class="text-muted mb-4">Comienza creando tu primer grupo para organizar
+                                                vehículos y personas</p>
+                                            <a href="/grupos/crear" class="btn btn-primary-custom btn-lg">
+                                                <i class="bi bi-plus-circle me-2"></i>Crear mi primer grupo
+                                            </a>
+                                        </div>
+                                        <% } %>
+                            </div>
+
+                            <div id="vistaTablaContainer" style="display: none;">
+                                <% if (grupos && grupos.length> 0) { %>
+                                    <div class="table-responsive">
+                                        <table class="table table-grupos">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Nombre del Grupo</th>
+                                                    <th>Compañía</th>
+                                                    <th>Contacto</th>
+                                                    <th>Estado</th>
+                                                    <th>Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <% grupos.forEach(grupo=> { %>
+                                                    <tr class="grupo-item-tabla"
+                                                        data-nombre="<%= grupo.nombre_grupo.toLowerCase() %>"
+                                                        data-compania="<%= (grupo.nombre_compania || '').toLowerCase() %>"
+                                                        data-contacto="<%= (grupo.nombre_contacto || '').toLowerCase() %>"
+                                                        data-estado="<%= grupo.activo ? 'activo' : 'inactivo' %>"
+                                                        data-fecha="<%= new Date(grupo.fecha_creacion).getTime() %>">
+
+                                                        <td><strong>#<%= grupo.id_grupo %></strong></td>
+                                                        <td>
+                                                            <%= grupo.nombre_grupo %>
+                                                        </td>
+                                                        <td>
+                                                            <%= grupo.nombre_compania || '-' %>
+                                                        </td>
+                                                        <td>
+                                                            <%= grupo.nombre_contacto || '-' %>
+                                                        </td>
+                                                        <td>
+                                                            <span
+                                                                class="badge <%= grupo.activo ? 'bg-success' : 'bg-danger' %>">
+                                                                <%= grupo.activo ? 'Activo' : 'Inactivo' %>
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <div class="btn-group" role="group">
+                                                                <button type="button" class="btn btn-warning btn-sm"
+                                                                    title="Editar" data-bs-toggle="modal"
+                                                                    data-bs-target="#modalEditarGrupo"
+                                                                    onclick="abrirEditorGrupo('<%= grupo.id_grupo %>', '<%= grupo.nombre_grupo %>')">
+                                                                    <i class="bi bi-pencil"></i>
+                                                                </button>
+                                                                <a href="/grupos/ver/<%= grupo.id_grupo %>"
+                                                                    class="btn btn-info btn-sm text-white" title="Ver">
+                                                                    <i class="bi bi-eye"></i>
+                                                                </a>
+                                                                <button class="btn btn-danger btn-sm" title="Eliminar"
+                                                                    onclick="eliminarGrupo('<%= grupo.id_grupo %>', '<%= grupo.nombre_grupo %>')">
+                                                                    <i class="bi bi-trash"></i>
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <% }); %>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <% } %>
+                            </div>
         </div>
     </div>
 
@@ -843,50 +865,133 @@
             <div class="modal-content border-0 shadow-lg">
                 <div class="modal-header bg-primary-custom text-white">
                     <h5 class="modal-title fw-bold">
-                        <i class="bi bi-pencil-square me-2"></i>Gestionar Grupo: <span id="txtNombreGrupo"></span>
+                        <i class="bi bi-pencil-square me-2"></i>Editar Grupo: <span id="txtNombreGrupo"></span>
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
-                    
-                    <% if (locals.usuario && usuario.rol === 'super_admin') { %>
-                        <div class="alert alert-warning border-0 shadow-sm d-flex align-items-center mb-4">
-                            <i class="bi bi-shield-lock-fill fs-4 me-3 text-warning"></i>
-                            <div>
-                                <h6 class="mb-0 fw-bold">Panel de Súper Administrador</h6>
-                                <p class="mb-0 small">Cambios de equipos y usuarios a otros grupos habilitado.</p>
+                    <form id="formEditarGrupo" onsubmit="guardarCambiosGrupo(event)">
+                        <input type="hidden" id="editIdGrupo">
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="editNombreGrupo" class="form-label fw-bold">
+                                    <i class="bi bi-people-fill me-2 text-primary"></i>Nombre del Grupo
+                                </label>
+                                <input type="text" class="form-control border-2" id="editNombreGrupo" required
+                                    placeholder="Ej: Grupo Norte, Flota Principal, etc.">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label required-field fw-bold">Cliente Responsable</label>
+                                <select class="form-select" name="id_cliente" id="edit_id_cliente" required>
+                                    <option value="">Seleccionar...</option>
+                                    <% if (locals.clientes) { %>
+                                        <% clientes.forEach(c=> { %>
+                                            <option value="<%= c.id_cliente %>">
+                                                <%= c.nombre %>
+                                            </option>
+                                            <% }); %>
+                                                <% } %>
+                                </select>
                             </div>
                         </div>
 
-                        <h6 class="fw-bold text-primary-custom mb-3">
-                            <i class="bi bi-people-fill me-2"></i>Integrantes del Grupo y Reasignación
-                        </h6>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle border">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Nombre Completo</th>
-                                        <th>RUN</th>
-                                        <th>Contacto</th>
-                                        <th>Mover a Grupo</th>
-                                        <th>Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tablaUsuariosCuerpo">
-                                    </tbody>
-                            </table>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="editNombreCompania" class="form-label fw-bold">
+                                    <i class="bi bi-briefcase me-2 text-primary"></i>Compañía
+                                </label>
+                                <input type="text" class="form-control border-2" id="editNombreCompania"
+                                    placeholder="Nombre de la compañía">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="editNombreContacto" class="form-label fw-bold">
+                                    <i class="bi bi-person me-2 text-primary"></i>Contacto
+                                </label>
+                                <input type="text" class="form-control border-2" id="editNombreContacto"
+                                    placeholder="Persona de contacto">
+                            </div>
                         </div>
-                    <% } else { %>
-                        <div class="text-center py-5">
-                            <i class="bi bi-lock text-muted fs-1"></i>
-                            <p class="mt-3 text-muted">Acceso restringido: Solo los <strong>Super Admin</strong> pueden realizar cambios de equipos o reasignar usuarios a otros grupos.</p>
-                        </div>
-                    <% } %>
 
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-toggle-on me-2 text-primary"></i>Estado del Grupo
+                            </label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="editActivo" checked>
+                                <label class="form-check-label" for="editActivo" id="estadoLabel">Grupo Activo</label>
+                            </div>
+                            <small class="text-muted">Los grupos inactivos no aparecerán en las listas
+                                principales</small>
+                        </div>
+
+                        <% if (locals.usuario && usuario.rol==='super_admin' ) { %>
+                            <hr class="my-4">
+
+                            <div class="alert alert-info border-0 shadow-sm d-flex align-items-center mb-4">
+                                <i class="bi bi-arrow-left-right fs-4 me-3 text-info"></i>
+                                <div>
+                                    <h6 class="mb-0 fw-bold">Mover Usuarios a Otro Grupo</h6>
+                                    <p class="mb-0 small">Selecciona usuarios para reasignarlos a un grupo diferente</p>
+                                </div>
+                            </div>
+
+                            <div id="moverUsuariosContainer">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">
+                                        <i class="bi bi-person-check me-2 text-primary"></i>Usuarios del Grupo
+                                    </label>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle border">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th width="40px">
+                                                        <input type="checkbox" id="seleccionarTodos"
+                                                            onchange="toggleSeleccionarTodos()">
+                                                    </th>
+                                                    <th>Nombre Completo</th>
+                                                    <th>RUN</th>
+                                                    <th>Correo</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tablaUsuariosParaMover">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 align-items-end">
+                                    <div class="col-md-8">
+                                        <label for="selectGrupoDestino" class="form-label fw-bold">
+                                            <i class="bi bi-arrow-right-circle me-2 text-primary"></i>Mover a Grupo
+                                        </label>
+                                        <select class="form-select border-2" id="selectGrupoDestino">
+                                            <option value="">Seleccionar grupo destino...</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button type="button" class="btn btn-primary w-100"
+                                            onclick="moverUsuariosSeleccionados()">
+                                            <i class="bi bi-arrow-right-circle-fill me-2"></i>Mover Seleccionados
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <% } else { %>
+                                <div class="alert alert-secondary mt-3">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    Solo los administradores pueden mover usuarios entre grupos.
+                                </div>
+                                <% } %>
+                    </form>
                 </div>
                 <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="button" class="btn btn-primary-custom px-4" onclick="location.reload()">Finalizar</button>
+                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-2"></i>Cancelar
+                    </button>
+                    <button type="submit" form="formEditarGrupo" class="btn btn-primary-custom px-4">
+                        <i class="bi bi-check-circle me-2"></i>Guardar Cambios
+                    </button>
                 </div>
             </div>
         </div>
@@ -907,169 +1012,190 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
     <script>
-        // --- CONSTANTES Y ESTADO ---
         const ROL_ACTUAL = "<%= locals.usuario ? usuario.rol : '' %>";
-        let paginaActual = 1;
-        const elementosPorPagina = 6;
 
-        // --- LÓGICA DEL MODAL Y REASIGNACIÓN ---
         async function abrirEditorGrupo(idGrupo, nombreGrupo) {
-            document.getElementById('txtNombreGrupo').innerText = nombreGrupo;
-            
-            // Solo si es super_admin, cargamos los usuarios mediante Fetch API
-            if (ROL_ACTUAL === 'super_admin') {
-                const tbody = document.getElementById('tablaUsuariosCuerpo');
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div> Cargando...</td></tr>';
-                
-                try {
-                    // LLAMADAS A TU BACKEND (Asegúrate de tener estas rutas en tu controlador de grupos)
-                    const [resUsers, resGrupos] = await Promise.all([
-                        fetch(`/api/usuarios/grupo/${idGrupo}`), // Devuelve usuarios del grupo X
-                        fetch(`/api/grupos/lista`)              // Devuelve todos los grupos
+            // 1. Preparar UI
+            const txtNombre = document.getElementById('txtNombreGrupo');
+            if (txtNombre) txtNombre.innerText = nombreGrupo;
+            document.getElementById('editIdGrupo').value = idGrupo;
+
+            const tbody = document.getElementById('tablaUsuariosParaMover');
+            if (tbody) tbody.innerHTML = '<tr><td colspan="4" class="text-center">Cargando...</td></tr>';
+
+            try {
+                // 2. Cargar Datos del Grupo
+                const resGrupo = await fetch(`/api/grupos/${idGrupo}`);
+                if (!resGrupo.ok) throw new Error('No se pudo obtener la info del grupo');
+                const grupo = await resGrupo.json();
+
+                // Rellenar campos (Sincronizados con los IDs del HTML)
+                if (document.getElementById('editNombreGrupo')) document.getElementById('editNombreGrupo').value = grupo.nombre_grupo || grupo.nombre || '';
+                if (document.getElementById('edit_id_cliente')) document.getElementById('edit_id_cliente').value = grupo.id_cliente || '';
+                if (document.getElementById('editNombreCompania')) document.getElementById('editNombreCompania').value = grupo.nombre_compania || '';
+                if (document.getElementById('editNombreContacto')) document.getElementById('editNombreContacto').value = grupo.nombre_contacto || '';
+
+                const checkActivo = document.getElementById('editActivo');
+                if (checkActivo) {
+                    checkActivo.checked = (grupo.activo == 1 || grupo.activo === true);
+                    document.getElementById('estadoLabel').innerText = checkActivo.checked ? 'Grupo Activo' : 'Grupo Inactivo';
+                }
+
+                // 3. Cargar Usuarios (Personas) y Grupos Destino
+                if (ROL_ACTUAL === 'super_admin') {
+                    const [resUsers, resLista] = await Promise.all([
+                        fetch(`/api/usuarios/grupo/${idGrupo}`),
+                        fetch('/api/grupos/lista')
                     ]);
-                    
-                    const usuarios = await resUsers.json();
-                    const gruposDestino = await resGrupos.json();
 
-                    tbody.innerHTML = ''; // Limpiar spinner
+                    if (resUsers.ok && tbody) {
+                        const personas = await resUsers.json();
+                        tbody.innerHTML = '';
+                        if (personas.length === 0) {
+                            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Sin usuarios en este grupo</td></tr>';
+                        } else {
+                            personas.forEach(p => {
+                                const nombre = p.nombre_completo || `${p.nombres || ''} ${p.apellido_paterno || ''}`.trim();
+                                const run = p.run ? `${p.run}-${p.dv || ''}` : '---';
+                                const email = p.email || p.correo || '---';
 
-                    if (usuarios.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Este grupo no tiene usuarios asignados.</td></tr>';
-                        return;
+                                tbody.innerHTML += `
+                                    <tr>
+                                        <td><input type="checkbox" class="usuario-checkbox" value="${p.id_persona}"></td>
+                                        <td>${nombre}</td>
+                                        <td>${run}</td>
+                                        <td>${email}</td>
+                                    </tr>`;
+                            });
+                        }
                     }
 
-                    usuarios.forEach(user => {
-                        // Crear opciones del select (excluyendo el grupo actual)
-                        let options = gruposDestino
-                            .map(g => `<option value="${g.id_grupo}" ${g.id_grupo == idGrupo ? 'disabled text-muted' : ''}>${g.nombre_grupo}</option>`)
-                            .join('');
-
-                        tbody.innerHTML += `
-                            <tr>
-                                <td class="fw-bold">${user.nombre_completo}</td>
-                                <td>${user.run || '---'}</td>
-                                <td class="small">
-                                    <div><i class="bi bi-envelope me-1"></i>${user.correo}</div>
-                                </td>
-                                <td>
-                                    <select class="form-select form-select-sm border-primary" id="selectGrupo_${user.id_usuario}">
-                                        <option value="">Seleccionar destino...</option>
-                                        ${options}
-                                    </select>
-                                </td>
-                                <td>
-                                    <button class="btn btn-primary btn-sm rounded-pill" onclick="ejecutarCambioGrupo(${user.id_usuario}, '${user.nombre_completo}')" title="Trasladar">
-                                        <i class="bi bi-arrow-right-circle-fill"></i> Mover
-                                    </button>
-                                </td>
-                            </tr>`;
-                    });
-                } catch (e) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="text-danger text-center py-3"><i class="bi bi-exclamation-triangle"></i> Error al conectar con el servidor.</td></tr>';
-                    console.error(e);
+                    if (resLista.ok) {
+                        const grupos = await resLista.json();
+                        const select = document.getElementById('selectGrupoDestino');
+                        if (select) {
+                            select.innerHTML = '<option value="">Seleccionar grupo destino...</option>';
+                            grupos.filter(g => g.id_grupo != idGrupo).forEach(g => {
+                                select.innerHTML += `<option value="${g.id_grupo}">${g.nombre_grupo}</option>`;
+                            });
+                        }
+                    }
                 }
+            } catch (error) {
+                console.error("Error al cargar datos:", error);
+                if (tbody) tbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">Error al cargar datos. Verifique la conexión.</td></tr>`;
             }
         }
 
-        async function ejecutarCambioGrupo(idUsuario, nombreUser) {
-            const idNuevoGrupo = document.getElementById(`selectGrupo_${idUsuario}`).value;
-            if (!idNuevoGrupo) return alert("Por favor, seleccione un grupo de destino.");
+        async function moverUsuariosSeleccionados() {
+            const destino = document.getElementById('selectGrupoDestino').value;
+            const seleccionados = Array.from(document.querySelectorAll('.usuario-checkbox:checked')).map(cb => cb.value);
 
-            const select = document.getElementById(`selectGrupo_${idUsuario}`);
-            const nombreNuevoGrupo = select.options[select.selectedIndex].text;
+            if (!destino || seleccionados.length === 0) {
+                return alert("Selecciona usuarios y un grupo de destino.");
+            }
 
-            if (confirm(`¿Está seguro de mover a "${nombreUser}" al grupo "${nombreNuevoGrupo}"?`)) {
-                try {
-                    const res = await fetch('/api/usuarios/cambiar-grupo', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ id_usuario: idUsuario, id_grupo_nuevo: idNuevoGrupo })
-                    });
+            if (!confirm("¿Mover usuarios seleccionados?")) return;
 
-                    const data = await res.json();
-                    
-                    if (data.success) {
-                        alert("Usuario reasignado con éxito.");
-                        // Recargar el modal (puedes volver a llamar a abrirEditorGrupo o recargar página)
-                        location.reload(); 
-                    } else {
-                        alert("Error: " + data.error);
-                    }
-                } catch (error) {
-                    alert("Error crítico en el servidor.");
+            try {
+                const res = await fetch('/api/usuarios/cambiar-grupo-multiple', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usuarios: seleccionados, id_grupo_nuevo: destino })
+                });
+
+                if (res.ok) {
+                    alert("Usuarios movidos correctamente");
+                    location.reload();
+                } else {
+                    throw new Error("Error en el servidor al mover usuarios");
                 }
+            } catch (e) {
+                alert(e.message);
             }
         }
 
-        // --- FUNCIONES ORIGINALES DE VISTA (PAGINACIÓN Y FILTROS) ---
+        async function guardarCambiosGrupo(event) {
+            event.preventDefault();
+            const id = document.getElementById('editIdGrupo').value;
+            const data = {
+                nombre_grupo: document.getElementById('editNombreGrupo').value,
+                id_cliente: document.getElementById('edit_id_cliente').value,
+                nombre_compania: document.getElementById('editNombreCompania').value,
+                nombre_contacto: document.getElementById('editNombreContacto').value,
+                activo: document.getElementById('editActivo').checked ? 1 : 0
+            };
+
+            try {
+                const res = await fetch(`/api/grupos/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) {
+                    alert("Grupo actualizado con éxito");
+                    location.reload();
+                } else {
+                    alert("Error al actualizar el grupo");
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Error de conexión");
+            }
+        }
+
+        function toggleSeleccionarTodos() {
+            const selectAll = document.getElementById('seleccionarTodos');
+            const checkboxes = document.querySelectorAll('.usuario-checkbox');
+            checkboxes.forEach(cb => cb.checked = selectAll.checked);
+        }
+
         function cambiarVista(vista) {
             const vistaCards = document.getElementById('vistaCardsContainer');
             const vistaTabla = document.getElementById('vistaTablaContainer');
-            const btnCards = document.getElementById('vistaCards');
-            const btnTabla = document.getElementById('vistaTabla');
-
             if (vista === 'cards') {
                 vistaCards.style.display = 'block';
                 vistaTabla.style.display = 'none';
-                btnCards.classList.add('active');
-                btnTabla.classList.remove('active');
+                document.getElementById('vistaCards').classList.add('active');
+                document.getElementById('vistaTabla').classList.remove('active');
             } else {
                 vistaCards.style.display = 'none';
                 vistaTabla.style.display = 'block';
-                btnTabla.classList.add('active');
-                btnCards.classList.remove('active');
+                document.getElementById('vistaTabla').classList.add('active');
+                document.getElementById('vistaCards').classList.remove('active');
             }
         }
 
-        function filtrarYOrdenar() {
-            const busqueda = document.getElementById('buscarGrupo')?.value.toLowerCase() || '';
-            const filtroEstado = document.getElementById('filtroEstado')?.value || 'todos';
-            const items = document.querySelectorAll('.grupo-item, .grupo-item-tabla');
-
-            items.forEach(item => {
-                const nombre = item.dataset.nombre || '';
-                const compania = item.dataset.compania || '';
-                const contacto = item.dataset.contacto || '';
-                const estado = item.dataset.estado;
-
-                const cumpleBusqueda = busqueda === '' || nombre.includes(busqueda) || compania.includes(busqueda) || contacto.includes(busqueda);
-                const cumpleEstado = filtroEstado === 'todos' || estado === (filtroEstado === 'activos' ? 'activo' : 'inactivo');
-
-                item.style.display = (cumpleBusqueda && cumpleEstado) ? '' : 'none';
-            });
-            paginaActual = 1;
-            aplicarPaginacion();
-        }
-
-        function aplicarPaginacion() {
-            const items = document.querySelectorAll('.grupo-item');
-            const itemsVisibles = Array.from(items).filter(item => item.style.display !== 'none');
-            const totalPaginas = Math.ceil(itemsVisibles.length / elementosPorPagina);
-            
-            itemsVisibles.forEach((item, index) => {
-                const pagina = Math.floor(index / elementosPorPagina) + 1;
-                item.style.display = (pagina === paginaActual) ? '' : 'none';
-            });
-
-            document.getElementById('prevPage').classList.toggle('disabled', paginaActual === 1);
-            document.getElementById('nextPage').classList.toggle('disabled', paginaActual === totalPaginas || totalPaginas === 0);
-        }
-        function cambiarPagina(p) {
-            if (p === 'prev') paginaActual--;
-            else if (p === 'next') paginaActual++;
-            else paginaActual = p;
-            aplicarPaginacion();
-        }
         function limpiarFiltros() {
             document.getElementById('buscarGrupo').value = '';
             document.getElementById('filtroEstado').value = 'todos';
             filtrarYOrdenar();
         }
-        document.getElementById('buscarGrupo')?.addEventListener('input', filtrarYOrdenar);
-        document.getElementById('filtroEstado')?.addEventListener('change', filtrarYOrdenar);
-        document.addEventListener('DOMContentLoaded', aplicarPaginacion);
+        function filtrarYOrdenar() {
+            const busqueda = document.getElementById('buscarGrupo').value.toLowerCase();
+            const estado = document.getElementById('filtroEstado').value;
+            const items = document.querySelectorAll('.grupo-item');
+
+            items.forEach(item => {
+                const nombre = item.dataset.nombre;
+                const itemEstado = item.dataset.estado;
+                const cumpleBusqueda = busqueda === '' || nombre.includes(busqueda);
+                const cumpleEstado = estado === 'todos' || itemEstado === (estado === 'activos' ? 'activo' : 'inactivo');
+                item.style.display = (cumpleBusqueda && cumpleEstado) ? '' : 'none';
+            });
+        }
+            document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('buscarGrupo').addEventListener('input', filtrarYOrdenar);
+            document.getElementById('filtroEstado').addEventListener('change', filtrarYOrdenar);
+
+            const editActivo = document.getElementById('editActivo');
+            if (editActivo) {
+                editActivo.addEventListener('change', function () {
+                    document.getElementById('estadoLabel').innerText = this.checked ? 'Grupo Activo' : 'Grupo Inactivo';
+                });
+            }
+        });
     </script>
 </body>
 </html>
