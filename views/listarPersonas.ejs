@@ -180,15 +180,12 @@
             </div>
         </div>
     </div>
-
     <%- include('partials/footer') %>
-
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
     <script>
         $(document).ready(function () {
-            // Lógica para llenar el modal al abrirse
+            
             const modalEditar = document.getElementById('modalEditarPersona');
             if (modalEditar) {
                 modalEditar.addEventListener('show.bs.modal', event => {
@@ -209,7 +206,6 @@
                     $('#edit_telefono').val(telefono);
                 });
             }
-            // Script para la fecha del sistema en el footer partial
             const fechaSpan = document.getElementById('fechaActual');
             if(fechaSpan) {
                 fechaSpan.textContent = new Date().toLocaleDateString();

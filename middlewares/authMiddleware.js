@@ -5,8 +5,6 @@ module.exports = {
         req.session.error = "Sesión expirada. Inicia sesión nuevamente.";
         return res.redirect('/auth/login');
     },
-
-    
     permitirSolo: (...roles) => {
         return (req, res, next) => {
             if (req.session && roles.includes(req.session.rol)) return next();

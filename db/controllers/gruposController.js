@@ -2,72 +2,143 @@ const db = require('../conexion');
 
 
 exports.listar = async (req, res) => {
-  try {
-    
-    const [grupos] = await db.query(`
-      SELECT g.*, c.nombre as cliente_nombre,
-      CONCAT(p.nombres, ' ', p.apellido_paterno) as persona_contacto_nombre
-      FROM grupos g
-      LEFT JOIN clientes c ON g.id_cliente = c.id_cliente
-      LEFT JOIN personas p ON g.id_persona_contacto = p.id_persona
-      ORDER BY g.id_grupo DESC
-    `);
+    try {
+        
+        const [grupos] = await db.query(`
+            SELECT g.*, c.nombre as cliente_nombre
+            FROM grupos g
+            LEFT JOIN clientes c ON g.id_cliente = c.id_cliente
+            ORDER BY g.id_grupo DESC
+        `);
 
-    
-    const [clientes] = await db.query('SELECT id_cliente, nombre FROM clientes WHERE activo = 1 ORDER BY nombre ASC');
+        
+        const [clientes] = await db.query('SELECT id_cliente, nombre FROM clientes WHERE activo = 1 ORDER BY nombre ASC');
 
-    
-    const [personas] = await db.query('SELECT id_persona, nombres, apellido_paterno, run, dv, email, telefono FROM personas WHERE activo = 1');
-
-    res.render('grupos/listar', {
-      title: 'Mis Grupos',
-      grupos,
-      clientes,  
-      personas,  
-      usuario: req.session.usuario, 
-      success_msg: req.flash('success'),
-      error_msg: req.flash('error')
-    });
-  } catch (error) {
-    console.error('Error al listar:', error);
-    res.status(500).send('Error en el servidor');
-  }
+        res.render('grupos/listar', {
+            title: 'Mis Grupos',
+            grupos,
+            clientes,
+            usuario: req.session.usuario,
+            success_msg: req.flash('success'),
+            error_msg: req.flash('error')
+        });
+    } catch (error) {
+        console.error('Error al listar:', error);
+        res.status(500).send('Error en el servidor');
+    }
 };
-
-
+exports.obtenerPorId = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const [grupos] = await db.query('SELECT * FROM grupos WHERE id_grupo = ?', [id]);
+        if (grupos.length > 0) {
+            res.json(grupos[0]);
+        } else {
+            res.status(404).json({ error: 'Grupo no encontrado' });
+        }
+    } catch (error) {
+        console.error('Error al obtener grupo:', error);
+        res.status(500).json({ error: 'Error del servidor' });
+    }
+};
 exports.getUsuariosPorGrupo = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const [usuarios] = await db.query(`
-      SELECT id_persona, CONCAT(nombres, ' ', apellido_paterno) as nombre_completo, run, email as correo 
-      FROM personas WHERE id_grupo = ?`, [id]);
-    res.json(usuarios);
-  } catch (e) { res.status(500).json([]); }
+    try {
+        const { id } = req.params;
+        // Consulta basada en tu tabla personas y la relación con grupos
+        const [usuarios] = await db.query(`
+            SELECT id_persona, nombres, apellido_paterno, run, dv, email 
+            FROM personas 
+            WHERE id_grupo = ?`, [id]);
+        
+        // Mapeamos para enviar un nombre completo ya formateado si lo prefiere el frontend
+        const respuesta = usuarios.map(u => ({
+            ...u,
+            nombre_completo: `${u.nombres} ${u.apellido_paterno}`
+        }));
+        
+        res.json(respuesta);
+    } catch (error) {
+        console.error('Error al obtener usuarios del grupo:', error);
+        res.status(500).json([]);
+    }
 };
-
 exports.getListaGrupos = async (req, res) => {
-  try {
-    const [grups] = await db.query('SELECT id_grupo, nombre_grupo FROM grupos WHERE activo = 1');
-    res.json(grups);
-  } catch (e) { res.status(500).json([]); }
+    try {
+        const [grups] = await db.query('SELECT id_grupo, nombre_grupo FROM grupos WHERE activo = 1');
+        res.json(grups);
+    } catch (error) {
+        res.status(500).json([]);
+    }
 };
+exports.cambiarGrupoMultiple = async (req, res) => {
+    // Seguridad: Solo permitimos esto a administradores
+    if (!req.session.usuario || req.session.usuario.rol !== 'super_admin') {
+        return res.status(403).json({ success: false, error: 'No autorizado' });
+    }
 
-exports.cambiarGrupoUsuario = async (req, res) => {
-  if (!req.session.usuario || req.session.usuario.rol !== 'super_admin') {
-    return res.status(403).json({ success: false, error: 'No autorizado' });
-  }
-  const { id_usuario, id_grupo_nuevo } = req.body;
-  try {
-    await db.query('UPDATE personas SET id_grupo = ? WHERE id_persona = ?', [id_grupo_nuevo, id_usuario]);
-    res.json({ success: true });
-  } catch (e) { res.status(500).json({ success: false }); }
+    const { usuarios, id_grupo_nuevo } = req.body; 
+    
+    if (!usuarios || !id_grupo_nuevo) {
+        return res.status(400).json({ success: false, error: 'Datos incompletos' });
+    }
+
+    try {
+        
+        await db.query('UPDATE personas SET id_grupo = ? WHERE id_persona IN (?)', [id_grupo_nuevo, usuarios]);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error al mover usuarios:', error);
+        res.status(500).json({ success: false, error: 'Error en base de datos' });
+    }
 };
-
-// Mantener funciones crear, eliminar, actualizar, buscarPersonaPorId, etc.
-exports.crear = async (req, res) => { /* Tu código original sin borrar nada */ };
-exports.actualizar = async (req, res) => { /* Tu código original sin borrar nada */ };
-exports.eliminar = async (req, res) => { /* Tu código original sin borrar nada */ };
-exports.buscarPersonaPorId = async (req, res) => { /* Tu código original sin borrar nada */ };
-exports.buscarPersonaPorRun = async (req, res) => { /* Tu código original sin borrar nada */ };
-exports.formCrear = async (req, res) => { /* Tu código original sin borrar nada */ };
-exports.formEditar = async (req, res) => { /* Tu código original sin borrar nada */ };
+exports.crear = async (req, res) => {
+    const { nombre_grupo, id_cliente, nombre_compania, nombre_contacto, email_contacto, activo } = req.body;
+    try {
+        await db.query(`
+            INSERT INTO grupos (nombre_grupo, id_cliente, nombre_compania, nombre_contacto, email_contacto, activo) 
+            VALUES (?, ?, ?, ?, ?, ?)`, 
+            [nombre_grupo, id_cliente, nombre_compania, nombre_contacto, email_contacto, activo || 1]);
+        
+        req.flash('success', 'Grupo creado exitosamente');
+        res.redirect('/grupos');
+    } catch (error) {
+        console.error(error);
+        req.flash('error', 'Error al crear el grupo');
+        res.redirect('/grupos/crear');
+    }
+};
+exports.actualizar = async (req, res) => {
+    const { id } = req.params;
+    const { nombre_grupo, id_cliente, nombre_compania, nombre_contacto, email_contacto, activo } = req.body;
+    
+    try {
+        await db.query(`
+            UPDATE grupos 
+            SET nombre_grupo = ?, id_cliente = ?, nombre_compania = ?, nombre_contacto = ?, email_contacto = ?, activo = ?
+            WHERE id_grupo = ?`, 
+            [nombre_grupo, id_cliente, nombre_compania, nombre_contacto, email_contacto, activo, id]);
+        
+        res.json({ success: true, message: 'Grupo actualizado correctamente' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, error: 'Error al actualizar' });
+    }
+};
+exports.eliminar = async (req, res) => {
+    const { id } = req.params;
+    try {
+        await db.query('DELETE FROM grupos WHERE id_grupo = ?', [id]);
+        res.json({ success: true });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, error: 'No se puede eliminar el grupo porque tiene registros asociados' });
+    }
+};
+exports.formCrear = (req, res) => {
+    res.render('grupos/crear', { title: 'Registrar Grupo' });
+};
+exports.formEditar = async (req, res) => {
+    const { id } = req.params;
+    const [grupo] = await db.query('SELECT * FROM grupos WHERE id_grupo = ?', [id]);
+    res.render('grupos/editar', { title: 'Editar Grupo', grupo: grupo[0] });
+};
