@@ -882,7 +882,9 @@
                                     placeholder="Ej: Grupo Norte, Flota Principal, etc.">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required-field fw-bold">Cliente Responsable</label>
+                                <label class="form-label required-field fw-bold">
+                                    <i class="bi bi-building me-2 text-primary"></i>Cliente Responsable
+                                </label>
                                 <select class="form-select" name="id_cliente" id="edit_id_cliente" required>
                                     <option value="">Seleccionar...</option>
                                     <% if (locals.clientes) { %>
@@ -921,8 +923,7 @@
                                 <input class="form-check-input" type="checkbox" id="editActivo" checked>
                                 <label class="form-check-label" for="editActivo" id="estadoLabel">Grupo Activo</label>
                             </div>
-                            <small class="text-muted">Los grupos inactivos no aparecerán en las listas
-                                principales</small>
+                            <small class="text-muted">Los grupos inactivos no aparecerán en las listas principales</small>
                         </div>
 
                         <% if (locals.usuario && usuario.rol==='super_admin' ) { %>
@@ -941,13 +942,12 @@
                                     <label class="form-label fw-bold">
                                         <i class="bi bi-person-check me-2 text-primary"></i>Usuarios del Grupo
                                     </label>
-                                    <div class="table-responsive">
-                                        <table class="table table-hover align-middle border">
-                                            <thead class="table-light">
+                                    <div class="table-responsive border rounded bg-white" style="max-height: 250px;">
+                                        <table class="table table-hover align-middle mb-0">
+                                            <thead class="table-light sticky-top">
                                                 <tr>
                                                     <th width="40px">
-                                                        <input type="checkbox" id="seleccionarTodos"
-                                                            onchange="toggleSeleccionarTodos()">
+                                                        <input type="checkbox" id="seleccionarTodos" onchange="toggleSeleccionarTodos()">
                                                     </th>
                                                     <th>Nombre Completo</th>
                                                     <th>RUN</th>
@@ -955,7 +955,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody id="tablaUsuariosParaMover">
-                                            </tbody>
+                                                </tbody>
                                         </table>
                                     </div>
                                 </div>
@@ -963,33 +963,27 @@
                                 <div class="row g-3 align-items-end">
                                     <div class="col-md-8">
                                         <label for="selectGrupoDestino" class="form-label fw-bold">
-                                            <i class="bi bi-arrow-right-circle me-2 text-primary"></i>Mover a Grupo
+                                            <i class="bi bi-arrow-right-circle me-2 text-primary"></i>Mover a Grupo:
                                         </label>
-                                        <select class="form-select border-2" id="selectGrupoDestino">
+                                        <select class="form-select border-primary" id="selectGrupoDestino">
                                             <option value="">Seleccionar grupo destino...</option>
                                         </select>
                                     </div>
                                     <div class="col-md-4">
-                                        <button type="button" class="btn btn-primary w-100"
-                                            onclick="moverUsuariosSeleccionados()">
+                                        <button type="button" class="btn btn-primary w-100 fw-bold" onclick="moverUsuariosSeleccionados()">
                                             <i class="bi bi-arrow-right-circle-fill me-2"></i>Mover Seleccionados
                                         </button>
                                     </div>
                                 </div>
                             </div>
-                            <% } else { %>
-                                <div class="alert alert-secondary mt-3">
-                                    <i class="bi bi-info-circle me-2"></i>
-                                    Solo los administradores pueden mover usuarios entre grupos.
-                                </div>
-                                <% } %>
+                            <% } %>
                     </form>
                 </div>
                 <div class="modal-footer bg-light">
                     <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
                         <i class="bi bi-x-circle me-2"></i>Cancelar
                     </button>
-                    <button type="submit" form="formEditarGrupo" class="btn btn-primary-custom px-4">
+                    <button type="button" onclick="guardarCambiosGrupo(event)" class="btn btn-primary-custom px-4">
                         <i class="bi bi-check-circle me-2"></i>Guardar Cambios
                     </button>
                 </div>
@@ -997,17 +991,10 @@
         </div>
     </div>
 
-    <footer class="text-center text-white py-4">
+    <footer class="text-center text-white py-4 mt-auto">
         <div class="container">
-            <p class="mb-1">
-                &copy; 2026 Sistema de Gestión Vehicular
-            </p>
-            <p class="small mb-1">
-                <i class="bi bi-shield-check me-1"></i>Control • Seguridad • Reportes
-            </p>
-            <small class="text-white-50">
-                <i class="bi bi-people-fill me-1"></i> Módulo de Grupos v2.0.0
-            </small>
+            <p class="mb-1">&copy; 2026 Sistema de Gestión Vehicular</p>
+            <p class="small mb-1"><i class="bi bi-shield-check me-1"></i>Control • Seguridad • Reportes</p>
         </div>
     </footer>
 
@@ -1016,103 +1003,59 @@
         const ROL_ACTUAL = "<%= locals.usuario ? usuario.rol : '' %>";
 
         async function abrirEditorGrupo(idGrupo, nombreGrupo) {
-            // 1. Preparar UI
-            const txtNombre = document.getElementById('txtNombreGrupo');
-            if (txtNombre) txtNombre.innerText = nombreGrupo;
+            document.getElementById('txtNombreGrupo').innerText = nombreGrupo;
             document.getElementById('editIdGrupo').value = idGrupo;
-
+            
             const tbody = document.getElementById('tablaUsuariosParaMover');
             if (tbody) tbody.innerHTML = '<tr><td colspan="4" class="text-center">Cargando...</td></tr>';
 
             try {
-                // 2. Cargar Datos del Grupo
+                // 1. Cargar Datos del Grupo
                 const resGrupo = await fetch(`/api/grupos/${idGrupo}`);
-                if (!resGrupo.ok) throw new Error('No se pudo obtener la info del grupo');
+                if (!resGrupo.ok) throw new Error('Error al conectar con el servidor');
                 const grupo = await resGrupo.json();
 
-                // Rellenar campos (Sincronizados con los IDs del HTML)
-                if (document.getElementById('editNombreGrupo')) document.getElementById('editNombreGrupo').value = grupo.nombre_grupo || grupo.nombre || '';
-                if (document.getElementById('edit_id_cliente')) document.getElementById('edit_id_cliente').value = grupo.id_cliente || '';
-                if (document.getElementById('editNombreCompania')) document.getElementById('editNombreCompania').value = grupo.nombre_compania || '';
-                if (document.getElementById('editNombreContacto')) document.getElementById('editNombreContacto').value = grupo.nombre_contacto || '';
-
+                // Rellenar inputs
+                document.getElementById('editNombreGrupo').value = grupo.nombre_grupo || '';
+                document.getElementById('edit_id_cliente').value = grupo.id_cliente || '';
+                document.getElementById('editNombreCompania').value = grupo.nombre_compania || '';
+                document.getElementById('editNombreContacto').value = grupo.nombre_contacto || '';
+                
                 const checkActivo = document.getElementById('editActivo');
-                if (checkActivo) {
-                    checkActivo.checked = (grupo.activo == 1 || grupo.activo === true);
-                    document.getElementById('estadoLabel').innerText = checkActivo.checked ? 'Grupo Activo' : 'Grupo Inactivo';
-                }
+                checkActivo.checked = !!grupo.activo;
+                document.getElementById('estadoLabel').innerText = checkActivo.checked ? 'Grupo Activo' : 'Grupo Inactivo';
 
-                // 3. Cargar Usuarios (Personas) y Grupos Destino
+                // 2. Cargar Usuarios del Grupo y Grupos Destino
                 if (ROL_ACTUAL === 'super_admin') {
                     const [resUsers, resLista] = await Promise.all([
                         fetch(`/api/usuarios/grupo/${idGrupo}`),
                         fetch('/api/grupos/lista')
                     ]);
 
+                    // Tabla de usuarios
                     if (resUsers.ok && tbody) {
                         const personas = await resUsers.json();
-                        tbody.innerHTML = '';
-                        if (personas.length === 0) {
-                            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Sin usuarios en este grupo</td></tr>';
-                        } else {
-                            personas.forEach(p => {
-                                const nombre = p.nombre_completo || `${p.nombres || ''} ${p.apellido_paterno || ''}`.trim();
-                                const run = p.run ? `${p.run}-${p.dv || ''}` : '---';
-                                const email = p.email || p.correo || '---';
-
-                                tbody.innerHTML += `
-                                    <tr>
-                                        <td><input type="checkbox" class="usuario-checkbox" value="${p.id_persona}"></td>
-                                        <td>${nombre}</td>
-                                        <td>${run}</td>
-                                        <td>${email}</td>
-                                    </tr>`;
-                            });
-                        }
+                        tbody.innerHTML = personas.length ? personas.map(p => `
+                            <tr>
+                                <td><input type="checkbox" class="usuario-checkbox" value="${p.id_persona}"></td>
+                                <td>${p.nombres} ${p.apellido_paterno}</td>
+                                <td>${p.run}-${p.dv}</td>
+                                <td>${p.email || 'N/A'}</td>
+                            </tr>
+                        `).join('') : '<tr><td colspan="4" class="text-center">Sin usuarios registrados.</td></tr>';
                     }
 
-                    if (resLista.ok) {
+                    // Select destino
+                    const select = document.getElementById('selectGrupoDestino');
+                    if (resLista.ok && select) {
                         const grupos = await resLista.json();
-                        const select = document.getElementById('selectGrupoDestino');
-                        if (select) {
-                            select.innerHTML = '<option value="">Seleccionar grupo destino...</option>';
-                            grupos.filter(g => g.id_grupo != idGrupo).forEach(g => {
-                                select.innerHTML += `<option value="${g.id_grupo}">${g.nombre_grupo}</option>`;
-                            });
-                        }
+                        select.innerHTML = '<option value="">Seleccionar grupo destino...</option>' + 
+                            grupos.filter(g => g.id_grupo != idGrupo).map(g => `<option value="${g.id_grupo}">${g.nombre_grupo}</option>`).join('');
                     }
                 }
             } catch (error) {
-                console.error("Error al cargar datos:", error);
-                if (tbody) tbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">Error al cargar datos. Verifique la conexión.</td></tr>`;
-            }
-        }
-
-        async function moverUsuariosSeleccionados() {
-            const destino = document.getElementById('selectGrupoDestino').value;
-            const seleccionados = Array.from(document.querySelectorAll('.usuario-checkbox:checked')).map(cb => cb.value);
-
-            if (!destino || seleccionados.length === 0) {
-                return alert("Selecciona usuarios y un grupo de destino.");
-            }
-
-            if (!confirm("¿Mover usuarios seleccionados?")) return;
-
-            try {
-                const res = await fetch('/api/usuarios/cambiar-grupo-multiple', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ usuarios: seleccionados, id_grupo_nuevo: destino })
-                });
-
-                if (res.ok) {
-                    alert("Usuarios movidos correctamente");
-                    location.reload();
-                } else {
-                    throw new Error("Error en el servidor al mover usuarios");
-                }
-            } catch (e) {
-                alert(e.message);
+                console.error(error);
+                alert("Error al cargar los datos del grupo");
             }
         }
 
@@ -1134,23 +1077,36 @@
                     body: JSON.stringify(data)
                 });
                 if (res.ok) {
-                    alert("Grupo actualizado con éxito");
+                    alert("Grupo actualizado");
                     location.reload();
-                } else {
-                    alert("Error al actualizar el grupo");
                 }
-            } catch (e) {
-                console.error(e);
-                alert("Error de conexión");
-            }
+            } catch (e) { alert("Error al guardar cambios"); }
+        }
+
+        async function moverUsuariosSeleccionados() {
+            const destino = document.getElementById('selectGrupoDestino').value;
+            const seleccionados = Array.from(document.querySelectorAll('.usuario-checkbox:checked')).map(cb => cb.value);
+
+            if (!destino || !seleccionados.length) return alert("Selecciona usuarios y un grupo de destino.");
+            if (!confirm("¿Mover usuarios seleccionados?")) return;
+
+            try {
+                const res = await fetch('/api/usuarios/cambiar-grupo-multiple', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usuarios: seleccionados, id_grupo_nuevo: destino })
+                });
+                if (res.ok) {
+                    alert("Usuarios movidos con éxito");
+                    abrirEditorGrupo(document.getElementById('editIdGrupo').value, document.getElementById('txtNombreGrupo').innerText);
+                }
+            } catch (e) { alert("Error al realizar el cambio"); }
         }
 
         function toggleSeleccionarTodos() {
-            const selectAll = document.getElementById('seleccionarTodos');
-            const checkboxes = document.querySelectorAll('.usuario-checkbox');
-            checkboxes.forEach(cb => cb.checked = selectAll.checked);
+            const master = document.getElementById('seleccionarTodos');
+            document.querySelectorAll('.usuario-checkbox').forEach(cb => cb.checked = master.checked);
         }
-
         function cambiarVista(vista) {
             const vistaCards = document.getElementById('vistaCardsContainer');
             const vistaTabla = document.getElementById('vistaTablaContainer');
@@ -1166,35 +1122,18 @@
                 document.getElementById('vistaCards').classList.remove('active');
             }
         }
-
-        function limpiarFiltros() {
-            document.getElementById('buscarGrupo').value = '';
-            document.getElementById('filtroEstado').value = 'todos';
-            filtrarYOrdenar();
-        }
         function filtrarYOrdenar() {
-            const busqueda = document.getElementById('buscarGrupo').value.toLowerCase();
-            const estado = document.getElementById('filtroEstado').value;
-            const items = document.querySelectorAll('.grupo-item');
-
-            items.forEach(item => {
-                const nombre = item.dataset.nombre;
-                const itemEstado = item.dataset.estado;
-                const cumpleBusqueda = busqueda === '' || nombre.includes(busqueda);
-                const cumpleEstado = estado === 'todos' || itemEstado === (estado === 'activos' ? 'activo' : 'inactivo');
-                item.style.display = (cumpleBusqueda && cumpleEstado) ? '' : 'none';
+            const val = document.getElementById('buscarGrupo').value.toLowerCase();
+            document.querySelectorAll('.grupo-item').forEach(item => {
+                item.style.display = item.dataset.nombre.includes(val) ? '' : 'none';
             });
         }
-            document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('buscarGrupo').addEventListener('input', filtrarYOrdenar);
-            document.getElementById('filtroEstado').addEventListener('change', filtrarYOrdenar);
-
-            const editActivo = document.getElementById('editActivo');
-            if (editActivo) {
-                editActivo.addEventListener('change', function () {
-                    document.getElementById('estadoLabel').innerText = this.checked ? 'Grupo Activo' : 'Grupo Inactivo';
-                });
-            }
+            const sw = document.getElementById('editActivo');
+            if (sw) sw.addEventListener('change', function() {
+                document.getElementById('estadoLabel').innerText = this.checked ? 'Grupo Activo' : 'Grupo Inactivo';
+            });
         });
     </script>
 </body>
