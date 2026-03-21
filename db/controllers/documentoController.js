@@ -127,7 +127,9 @@ const documentoVehiculoController = {
                 fecha: new Date(),
                 success_msg: req.query.success || null,
                 error_msg: req.query.error || null,
-                debug: process.env.NODE_ENV === 'development'
+                debug: process.env.NODE_ENV === 'development',
+                // SE AGREGA USER PARA EJS
+                user: req.session.usuario || req.user || null 
             });
 
         } catch (err) {
@@ -147,7 +149,9 @@ const documentoVehiculoController = {
                 documentosVencidos: 0,
                 fecha: new Date(),
                 error_msg: 'Error al cargar los documentos: ' + err.message,
-                debug: process.env.NODE_ENV === 'development'
+                debug: process.env.NODE_ENV === 'development',
+                // SE AGREGA USER PARA EJS EN CASO DE ERROR
+                user: req.session.usuario || req.user || null
             });
         }
     },

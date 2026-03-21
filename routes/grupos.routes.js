@@ -3,12 +3,10 @@ const router = express.Router();
 const gruposController = require('../db/controllers/gruposController');
 
 router.get('/', gruposController.listar);
-router.get('/api/grupos/:id', gruposController.obtenerPorId); // Ruta vital para el modal
+router.get('/api/grupos/:id', gruposController.obtenerPorId);
 router.get('/api/usuarios/grupo/:id', gruposController.getUsuariosPorGrupo);
 router.get('/api/grupos/lista', gruposController.getListaGrupos); 
 router.post('/api/usuarios/cambiar-grupo-multiple', gruposController.cambiarGrupoMultiple);
-
-// Tus rutas de formularios y acciones POST
 router.get('/crear', gruposController.formCrear);
 router.post('/crear', gruposController.crear);
 router.post('/editar/:id', gruposController.actualizar);

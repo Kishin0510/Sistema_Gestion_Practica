@@ -4,9 +4,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const documentoVehiculoController = require('../db/controllers/documentoController');
-// Importamos tu middleware de permisos
 const { permisoPara } = require('../middlewares/roleAuth');
-
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         const dir = 'public/uploads/documentos/';
@@ -26,7 +24,6 @@ const storage = multer.diskStorage({
         cb(null, `doc_${name}_${uniqueSuffix}${ext}`);
     }
 });
-
 const upload = multer({
     storage: storage,
     limits: { fileSize: 10 * 1024 * 1024 },
@@ -46,8 +43,6 @@ const upload = multer({
         }
     }
 });
-
-// Rutas de visualización (Todos pueden ver)
 router.get('/', 
     permisoPara(['SUPER_ADMIN', 'ADMIN_CLIENTE', 'ACTUALIZADOR', 'VISUALIZADOR']), 
     documentoVehiculoController.mostrarDocumentos
@@ -68,14 +63,11 @@ router.get('/api/documento/:id',
     permisoPara(['SUPER_ADMIN', 'ADMIN_CLIENTE', 'ACTUALIZADOR', 'VISUALIZADOR']), 
     documentoVehiculoController.obtenerDocumentoPorId
 );
-
-// Rutas de registro y actualización (Solo Actualizador y Super Admin)
 router.post('/vehiculo/registrar',
     permisoPara(['SUPER_ADMIN', 'ACTUALIZADOR']),
     upload.single('archivo_documento'),
     documentoVehiculoController.agregarDocumento
 );
-
 router.post('/actualizar/:id',
     permisoPara(['SUPER_ADMIN', 'ACTUALIZADOR']),
     upload.single('archivo_documento'),
