@@ -1,4 +1,5 @@
 require('dotenv').config();
+//require('./services/tasks/cronTasks')
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
@@ -159,7 +160,6 @@ app.get('/grupos', authMiddleware, async (req, res) => {
                 cliente_nombre[grupo.id_cliente] = grupo.nombre_cliente;
             }
         });
-
         res.render('listaGrupos', {
             title: 'Mis Grupos',
             grupos: grupos,

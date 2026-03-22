@@ -1,3 +1,4 @@
+
 const db = require('../conexion');
 
 exports.listar = async (req, res) => {
@@ -8,7 +9,6 @@ exports.listar = async (req, res) => {
             LEFT JOIN clientes c ON g.id_cliente = c.id_cliente
             ORDER BY g.id_grupo DESC
         `);
-
         const [clientes] = await db.query('SELECT id_cliente, nombre FROM clientes WHERE activo = 1 ORDER BY nombre ASC');
 
         res.render('grupos/listar', {
@@ -24,6 +24,7 @@ exports.listar = async (req, res) => {
         res.status(500).send('Error en el servidor');
     }
 };
+
 exports.obtenerPorId = async (req, res) => {
     try {
         const { id } = req.params;
@@ -152,8 +153,16 @@ exports.eliminar = async (req, res) => {
     }
 };
 
-exports.formCrear = (req, res) => {
-    res.render('grupos/crear', { title: 'Registrar Grupo' });
+exports.formCrear = async (req, res) => {
+    try {
+        const [clientes] = await db.query('SELECT id_cliente, nombre FROM clientes WHERE activo = 1 ORDER BY nombre ASC');
+        res.render('grupos/crear', { 
+            title: 'Registrar Grupo',
+            clientes 
+        });
+    } catch (error) {
+        res.status(500).send('Error al cargar formulario');
+    }
 };
 
 exports.formEditar = async (req, res) => {

@@ -823,9 +823,7 @@
                 console.error(e);
                 alert("Error de servidor durante la transferencia");
             }
-        }
-
-        // --- Vistas, Filtros y Paginación ---
+        }  
         function cambiarVista(vista) {
             const vistaCards = document.getElementById('vistaCardsContainer');
             const vistaTabla = document.getElementById('vistaTablaContainer');
@@ -844,7 +842,6 @@
                 btnCards.classList.remove('active');
             }
         }
-
         function filtrarYOrdenar() {
             const busqueda = document.getElementById('buscarGrupo')?.value.toLowerCase() || '';
             const filtroEstado = document.getElementById('filtroEstado')?.value || 'todos';

@@ -128,7 +128,6 @@ const documentoVehiculoController = {
                 success_msg: req.query.success || null,
                 error_msg: req.query.error || null,
                 debug: process.env.NODE_ENV === 'development',
-                // SE AGREGA USER PARA EJS
                 user: req.session.usuario || req.user || null 
             });
 
