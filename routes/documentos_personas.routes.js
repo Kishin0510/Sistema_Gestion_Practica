@@ -5,11 +5,11 @@ const path = require('path');
 const fs = require('fs');
 const documentosPersonaController = require('../db/controllers/documentosPersonaController');
 
-// Configuración de carpetas
+
 const TEMP_PATH = path.join(__dirname, '../../uploads/temp');
 const DESCARGAS_PATH = path.join(__dirname, '../../descargas');
 
-// Crear carpetas si no existen
+
 [TEMP_PATH, DESCARGAS_PATH].forEach(dir => {
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
@@ -17,13 +17,13 @@ const DESCARGAS_PATH = path.join(__dirname, '../../descargas');
     }
 });
 
-// Configuración de multer para archivos temporales
+
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, TEMP_PATH);
     },
     filename: function (req, file, cb) {
-        // Limpiar nombre del archivo
+        
         const cleanName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
         const timestamp = Date.now();
         cb(null, `${timestamp}-${cleanName}`);
@@ -42,24 +42,24 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({ 
     storage: storage,
     fileFilter: fileFilter,
-    limits: { fileSize: 10 * 1024 * 1024 } // 10MB
+    limits: { fileSize: 10 * 1024 * 1024 } 
 });
 
-// Rutas principales
+
 router.get('/', documentosPersonaController.index);
 
-// Rutas para documentos
+ 
 router.post('/registrar', upload.single('archivo'), documentosPersonaController.registrar);
 router.get('/obtener/:id', documentosPersonaController.obtenerPorId);
 router.delete('/eliminar/:id', documentosPersonaController.eliminar);
 router.get('/descargar/:id', documentosPersonaController.descargarArchivo);
 router.get('/ver/:id', documentosPersonaController.verArchivo);
 
-// Rutas para exportar (como los Excel de vehículos)
+
 router.get('/exportar/excel', documentosPersonaController.exportarExcel);
 router.get('/exportar/resumen', documentosPersonaController.exportarResumen);
 
-// Ruta para servir archivos estáticos desde descargas
+
 router.use('/descargas', express.static(path.join(__dirname, '../../descargas')));
 
 module.exports = router;

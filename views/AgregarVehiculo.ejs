@@ -6,11 +6,8 @@
     <title>
         <%= title || 'Agregar Vehículo' %>
     </title>
-    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <!-- CSS Personalizado -->
     <link rel="stylesheet" href="/css/Index.css">
     <style>
         .form-section {
@@ -204,7 +201,7 @@
                                                                 Principales del Vehículo
                                                             </h5>
                                                             <div class="row">
-                                                                <!-- Patente -->
+                                                                
                                                                 <div class="col-md-4 mb-3">
                                                                     <label for="patente"
                                                                         class="form-label required-field">Patente</label>
@@ -225,7 +222,7 @@
                                                                     </div>
                                                                 </div>
 
-                                                                <!-- Tipo de Vehículo -->
+                                                                
                                                                 <div class="col-md-4 mb-3">
                                                                     <label for="tipo_vehiculo"
                                                                         class="form-label required-field">Tipo de
@@ -260,8 +257,6 @@
                                                                         </div>
                                                                         <% } %>
                                                                 </div>
-
-                                                                <!-- Capacidad -->
                                                                 <div class="col-md-4 mb-3">
                                                                     <label for="capacidad"
                                                                         class="form-label required-field">Capacidad</label>
@@ -280,14 +275,12 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-
-                                                        <!-- Sección: Información Técnica -->
                                                         <div class="form-section">
                                                             <h5 class="section-title">
                                                                 <i class="bi bi-gear me-2"></i>Información Técnica
                                                             </h5>
                                                             <div class="row">
-                                                                <!-- Marca -->
+                                                                
                                                                 <div class="col-md-4 mb-3">
                                                                     <label for="marca"
                                                                         class="form-label required-field">Marca</label>
@@ -300,8 +293,6 @@
                                                                         <i class="bi bi-tag"></i>
                                                                     </div>
                                                                 </div>
-
-                                                                <!-- Modelo -->
                                                                 <div class="col-md-4 mb-3">
                                                                     <label for="modelo"
                                                                         class="form-label required-field">Modelo</label>
@@ -315,7 +306,7 @@
                                                                     </div>
                                                                 </div>
 
-                                                                <!-- Año -->
+                                                                
                                                                 <div class="col-md-4 mb-3">
                                                                     <label for="anio"
                                                                         class="form-label required-field">Año</label>
@@ -334,7 +325,7 @@
                                                                                 + 1 %></small>
                                                                     </div>
                                                                 </div>
-                                                                <!-- Número de Chasis -->
+                                                                
                                                                 <div class="col-md-6 mb-3">
                                                                     <label for="numero_chasis" class="form-label">Número
                                                                         de Chasis (VIN)</label>
@@ -351,7 +342,7 @@
                                                                     </div>
                                                                 </div>
 
-                                                                <!-- Número de Motor -->
+                                                                
                                                                 <div class="col-md-6 mb-3">
                                                                     <label for="numero_motor" class="form-label">Número
                                                                         de Motor</label>
@@ -368,14 +359,12 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-
-                                                        <!-- Sección: Apariencia -->
                                                         <div class="form-section">
                                                             <h5 class="section-title">
                                                                 <i class="bi bi-palette me-2"></i>Apariencia
                                                             </h5>
                                                             <div class="row">
-                                                                <!-- Color -->
+                                                                
                                                                 <div class="col-md-6 mb-3">
                                                                     <label for="color"
                                                                         class="form-label required-field">Color</label>
@@ -393,7 +382,7 @@
                                                                     </div>
                                                                 </div>
 
-                                                                <!-- Estado Activo -->
+                                                               
                                                                 <div class="col-md-6 mb-3 d-flex align-items-end">
                                                                     <div class="form-check">
                                                                         <input class="form-check-input" type="checkbox"
@@ -435,7 +424,7 @@
                     </div>
                 </div>
 
-                <!-- Información de ayuda -->
+                
                 <div class="card mt-3 border-info">
                     <div class="card-body">
                         <h6 class="card-title text-info">
@@ -456,8 +445,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Footer -->
     <footer class="bg-primary-custom text-center text-white mt-5 py-4">
         <div class="container">
             <p class="mb-1">
@@ -466,14 +453,10 @@
             <small>Control • Seguridad • Reportes</small>
         </div>
     </footer>
-
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Scripts -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Elementos del DOM
+            
             const patenteInput = document.getElementById('patente');
             const colorInput = document.getElementById('color');
             const colorPreview = document.getElementById('colorPreview');
@@ -481,14 +464,14 @@
             const form = document.getElementById('formAgregarVehiculo');
             const btnSubmit = document.getElementById('btnSubmit');
 
-            // 1. Convertir patente a mayúsculas
+            
             if (patenteInput) {
                 patenteInput.addEventListener('input', function () {
                     this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
                 });
             }
 
-            // 2. Previsualización de color
+            
             if (colorInput && colorPreview) {
                 const colorMap = {
                     'rojo': '#ff0000', 'azul': '#0000ff', 'verde': '#008000',
@@ -510,13 +493,13 @@
                     colorPreview.style.backgroundColor = colorValue;
                 });
 
-                // Color inicial
+                
                 colorPreview.style.backgroundColor = colorInput.value ?
                     (colorInput.value.startsWith('#') ? colorInput.value :
                         colorMap[colorInput.value.toLowerCase()] || colorInput.value) : '#cccccc';
             }
 
-            // 3. Validación del año
+            
             if (yearInput) {
                 const currentYear = new Date().getFullYear();
                 const maxYear = currentYear + 1;
@@ -528,16 +511,16 @@
                 });
             }
 
-            // 4. Validación del formulario
+            
             if (form) {
                 form.addEventListener('submit', function (e) {
-                    // Deshabilitar botón
+                    
                     if (btnSubmit) {
                         btnSubmit.disabled = true;
                         btnSubmit.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Procesando...';
                     }
 
-                    // Obtener valores
+                    
                     const patente = patenteInput ? patenteInput.value.trim() : '';
                     const marca = document.getElementById('marca') ? document.getElementById('marca').value.trim() : '';
                     const modelo = document.getElementById('modelo') ? document.getElementById('modelo').value.trim() : '';
@@ -550,7 +533,7 @@
 
                     let errores = [];
 
-                    // Validaciones
+                    
                     if (!/^[A-Z0-9]{6,7}$/.test(patente)) {
                         errores.push('La patente debe tener 6 o 7 caracteres alfanuméricos (sin guiones ni espacios)');
                     }
@@ -597,8 +580,6 @@
                     return true;
                 });
             }
-
-            // 5. Focus inicial
             if (patenteInput && !patenteInput.value.trim()) {
                 patenteInput.focus();
             }

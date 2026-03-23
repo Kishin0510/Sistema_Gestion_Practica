@@ -3,7 +3,7 @@ const db = require('../conexion');
 const logsController = {
     listarLogs: async (req, res) => {
         try {
-            const id_cliente_session = 1; // Acceso libre para cliente 1
+            const id_cliente_session = 1;
 
             const query = `
                 SELECT 
@@ -35,7 +35,7 @@ const logsController = {
                 deletes: logs.filter(l => l.operacion === 'DELETE').length
             };
 
-            // CAMBIO AQUÍ: Nombre exacto de tu archivo .ejs
+            
             res.render('LogsCambio', {
                 title: 'Registro de Auditoría y Cambios',
                 logs: logs,
@@ -71,7 +71,7 @@ const logsController = {
 
             if (rows.length === 0) return res.status(404).json({ error: 'No encontrado' });
             
-            // Enviamos el objeto directo para que el JS de la vista lo entienda
+            
             res.json(rows[0]);
         } catch (error) {
             res.status(500).json({ error: error.message });

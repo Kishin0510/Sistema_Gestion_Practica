@@ -314,7 +314,7 @@ const personasController = {
         }
     },
 
-    // Actualizar persona
+    
     actualizarPersona: async (req, res) => {
         try {
             const { id } = req.params;
@@ -334,7 +334,7 @@ const personasController = {
                 activo
             } = req.body;
 
-            // Validación de campos obligatorios
+            
             const camposObligatorios = [
                 { campo: id_cliente, nombre: 'Cliente' },
                 { campo: run, nombre: 'RUN' },
@@ -361,7 +361,7 @@ const personasController = {
                 return res.redirect('/personas?error=Persona no encontrada');
             }
 
-            // Verificar RUN único (excluyendo el actual) - usar id_persona
+            
             const [runDuplicado] = await db.query(
                 'SELECT id_persona FROM personas WHERE id_cliente = ? AND run = ? AND id_persona != ?',
                 [id_cliente, run, id]
@@ -371,7 +371,7 @@ const personasController = {
                 return res.redirect(`/personas/editar/${id}?error=El RUN ya existe para otra persona de este cliente`);
             }
 
-            // Actualizar persona - usar id_persona
+            
             const [result] = await db.query(
                 `UPDATE personas SET
                     id_cliente = ?,
@@ -411,7 +411,7 @@ const personasController = {
         }
     },
 
-    // Eliminar persona
+    
     eliminarPersona: async (req, res) => {
         try {
             const { id } = req.params;

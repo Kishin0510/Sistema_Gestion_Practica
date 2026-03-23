@@ -48,8 +48,6 @@
             font-weight: bold;
             letter-spacing: 1px;
         }
-
-        /* Estilo para el botón de Excel */
         .btn-excel {
             background-color: #1e7e34;
             border-color: #1c6b2b;
@@ -63,7 +61,6 @@
         }
     </style>
 </head>
-
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
         <div class="container">
@@ -84,7 +81,7 @@
         </div>
     </nav>
     <main class="container-fluid mt-4">
-        <!-- Encabezado -->
+        
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card shadow">
@@ -96,7 +93,7 @@
                             <small class="opacity-75">Gestión completa de vehículos registrados</small>
                         </div>
                     </div>
-                    <!-- Mensajes de éxito/error -->
+                    
                     <% if (typeof success !=='undefined' && success) { %>
                         <div class="alert alert-success alert-dismissible fade show m-3" role="alert">
                             <i class="bi bi-check-circle me-2"></i>
@@ -132,8 +129,6 @@
                                 </a>
                             </div>
                             <% } else { %>
-                                <!-- ... mantén el header y navbar igual ... -->
-
                                 <div class="table-responsive">
                                     <table class="table table-hover">
                                         <thead class="table-light">
@@ -204,8 +199,6 @@
                                         </tbody>
                                     </table>
                                 </div>
-
-                                <!-- ... mantén el footer y modales igual ... -->
                                 <div class="d-flex justify-content-between align-items-center mt-3">
                                     <div>
                                         <span class="text-muted">
@@ -215,7 +208,7 @@
                                         </span>
                                     </div>
                                     <div class="d-flex gap-2">
-                                        <!-- NUEVO BOTÓN DE EXCEL TAMBIÉN AQUÍ -->
+                                        
                                         <a href="/vehiculos/exportar-excel" class="btn btn-excel"
                                             id="exportarExcelFooter">
                                             <i class="bi bi-file-excel me-1"></i>Descargar Lista Excel
@@ -257,7 +250,7 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" id="modalDetallesContent">
-                    <!-- Contenido dinámico -->
+                   
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
@@ -265,7 +258,6 @@
             </div>
         </div>
     </div>
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
@@ -281,16 +273,16 @@
                 }
             });
 
-            // Feedback visual para el botón de Excel
+            
             $('#exportarExcel, #exportarExcelFooter').on('click', function (e) {
                 const $btn = $(this);
                 const textoOriginal = $btn.html();
 
-                // Cambiar botón a estado de carga
+                
                 $btn.html('<span class="spinner-border spinner-border-sm me-2"></span>Generando Excel...');
                 $btn.prop('disabled', true);
 
-                // Restaurar después de 2 segundos (asumiendo que la descarga comenzó)
+                
                 setTimeout(function () {
                     $btn.html(textoOriginal);
                     $btn.prop('disabled', false);
@@ -298,13 +290,13 @@
             });
         });
 
-        // Función para ver detalles del vehículo
+        
         async function verDetalles(idVehiculo) {
             try {
-                // Convertir a número si es string
+                
                 idVehiculo = parseInt(idVehiculo);
 
-                // Mostrar loading
+                
                 document.getElementById('modalDetallesContent').innerHTML =
                     `<div class="text-center py-4">
                     <div class="spinner-border text-success" role="status">
@@ -316,7 +308,7 @@
                 const modal = new bootstrap.Modal(document.getElementById('detallesModal'));
                 modal.show();
 
-                // Hacer petición para obtener detalles
+                
                 const response = await fetch('/vehiculos/detalles/' + idVehiculo);
 
                 if (!response.ok) {
@@ -325,7 +317,7 @@
 
                 const vehiculo = await response.json();
 
-                // Mostrar detalles - escapando las comillas simples
+                
                 const content =
                     `<div class="row">
                     <div class="col-md-6">

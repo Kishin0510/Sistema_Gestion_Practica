@@ -14,7 +14,7 @@ class Conexion {
             queueLimit: 0
         });
 
-        // 🔎 Verificar conexión al iniciar la app
+        
         this.pool.getConnection((err, connection) => {
             if (err) {
                 console.error(' Error al conectar a MySQL:', err.message);

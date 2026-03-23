@@ -1,5 +1,4 @@
 require('dotenv').config();
-//require('./services/tasks/cronTasks')
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
@@ -67,7 +66,6 @@ cargarRutas('Personas', '/personas', './routes/personas.routes');
 cargarRutas('Vehículos', '/vehiculos', './routes/vehiculos.routes');
 cargarRutas('Documentos', '/documentos', './routes/documentos.routes');
 cargarRutas('Logs', '/registro-cambios', './routes/logs.routes');
-//NUEVA RUTA DE MANTENCIONES DE VEHÍCULOS COMO DATO TAMBIEN DENTRO DE LA GESTION DOCUMENTAL
 cargarRutas('Mantenciones', '/mantenciones', './routes/mantencion.routes');
 
 app.get('/', authMiddleware, async (req, res) => {

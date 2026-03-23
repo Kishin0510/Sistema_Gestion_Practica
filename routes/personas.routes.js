@@ -4,7 +4,7 @@ const personasController = require('../db/controllers/personasController');
 const ExcelJS = require('exceljs');
 const conexion = require('../db/conexion');
 
-// Ruta para listar personas
+
 router.get('/', personasController.listarPersonas);
 router.get('/agregar', personasController.mostrarFormularioAgregar);
 router.post('/agregar', personasController.agregarPersona);
@@ -13,7 +13,7 @@ router.post('/editar/:id', personasController.actualizarPersona);
 router.get('/eliminar/:id', personasController.eliminarPersona);
 router.get('/exportar-excel', async (req, res) => {
     try {
-        // Obtener personas - SIN la referencia a grupos
+        
         const [personas] = await conexion.query(`
             SELECT 
                 p.*
@@ -31,21 +31,19 @@ router.get('/exportar-excel', async (req, res) => {
             pageSetup: { paperSize: 9, orientation: 'landscape' }
         });
 
-        // Título
+        
         worksheet.mergeCells('A1:J1');
         const titleRow = worksheet.getCell('A1');
         titleRow.value = 'REPORTE DE PERSONAS';
         titleRow.font = { size: 16, bold: true, color: { argb: '0D6EFD' } };
         titleRow.alignment = { horizontal: 'center', vertical: 'middle' };
 
-        // Fecha de generación
+        
         worksheet.mergeCells('A2:J2');
         const dateRow = worksheet.getCell('A2');
         dateRow.value = 'Fecha de generación: ' + new Date().toLocaleString('es-CL');
         dateRow.font = { italic: true, size: 11 };
         dateRow.alignment = { horizontal: 'center' };
-
-        // Definir columnas - SIN la columna de GRUPO
         worksheet.columns = [
             { header: 'ID', key: 'id_persona', width: 8 },
             { header: 'NOMBRES', key: 'nombres', width: 20 },
@@ -58,7 +56,7 @@ router.get('/exportar-excel', async (req, res) => {
             { header: 'ESTADO', key: 'estado', width: 10 }
         ];
 
-        // Estilo del encabezado
+        
         const headerRow = worksheet.getRow(3);
         headerRow.font = { bold: true, color: { argb: 'FFFFFF' }, size: 12 };
         headerRow.fill = {
@@ -83,14 +81,14 @@ router.get('/exportar-excel', async (req, res) => {
                     estado: persona.activo ? 'Activo' : 'Inactivo'
                 });
 
-                // Centrar algunas columnas
+                
                 row.getCell(1).alignment = { horizontal: 'center' };
                 row.getCell(5).alignment = { horizontal: 'center' };
                 row.getCell(6).alignment = { horizontal: 'center' };
                 row.getCell(9).alignment = { horizontal: 'center' };
             });
 
-            // Aplicar estilos a las filas de datos
+            
             worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
                 if (rowNumber > 3) {
                     // Zebra striping
@@ -102,7 +100,7 @@ router.get('/exportar-excel', async (req, res) => {
                         };
                     }
 
-                    // Estilo para el estado
+                    
                     const estadoCell = row.getCell(9);
                     if (estadoCell.value === 'Activo') {
                         estadoCell.font = { color: { argb: '198754' }, bold: true };
@@ -112,7 +110,7 @@ router.get('/exportar-excel', async (req, res) => {
                 }
             });
 
-            // Fila de total
+            
             worksheet.addRow([]);
             const totalRow = worksheet.addRow(['', '', '', '', '', '', '', '', 'TOTAL PERSONAS:', personas.length]);
             totalRow.getCell(8).font = { bold: true };
@@ -123,7 +121,7 @@ router.get('/exportar-excel', async (req, res) => {
             worksheet.addRow(['', '', '', '', '', '', '', '', 'No hay personas registradas', '']);
         }
 
-        // Agregar bordes a todas las celdas
+        
         for (let i = 3; i <= worksheet.rowCount; i++) {
             worksheet.getRow(i).eachCell({ includeEmpty: true }, (cell) => {
                 cell.border = {

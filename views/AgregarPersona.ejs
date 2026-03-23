@@ -341,7 +341,7 @@
                     if (!validarRUT(run, dv)) {
                         e.preventDefault();
                         alert('El RUT ingresado no es válido');
-                        // Volver a la primera pestaña si hay error
+                        
                         const firstTab = new bootstrap.Tab(document.getElementById('datos-tab'));
                         firstTab.show();
                         return false;

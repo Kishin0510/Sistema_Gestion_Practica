@@ -371,12 +371,9 @@ const documentoVehiculoController = {
                 enviar_alerta
             } = req.body;
 
-            // Validaciones básicas
             if (!id_vehiculo || !tipo_documento_nombre || !numero_documento || !fecha_vencimiento) {
                 throw new Error('Faltan campos obligatorios');
             }
-
-            // Obtener el documento actual
             const [documentoActual] = await conn.execute(
                 'SELECT id_vehiculo, ruta_archivo, nombre_archivo FROM documentos_vehiculo WHERE id_documento_veh = ?',
                 [id]
@@ -385,8 +382,6 @@ const documentoVehiculoController = {
             if (documentoActual.length === 0) {
                 throw new Error('Documento no encontrado');
             }
-
-            // Verificar que el vehículo existe
             const [vehiculo] = await conn.execute(
                 'SELECT id_vehiculo, id_cliente FROM vehiculos WHERE id_vehiculo = ? AND activo = 1',
                 [id_vehiculo]
@@ -398,10 +393,8 @@ const documentoVehiculoController = {
 
             const id_cliente = vehiculo[0].id_cliente;
 
-            // PROCESAR TIPO DE DOCUMENTO
             let id_tipo_documento_veh = null;
 
-            // Buscar si ya existe el tipo de documento por nombre
             const [tipoExistente] = await conn.execute(
                 'SELECT id_tipo_documento_veh FROM tipos_documento_veh WHERE nombre_documento = ? AND activo = 1',
                 [tipo_documento_nombre.trim()]
@@ -410,7 +403,6 @@ const documentoVehiculoController = {
             if (tipoExistente.length > 0) {
                 id_tipo_documento_veh = tipoExistente[0].id_tipo_documento_veh;
             } else {
-                // Crear nuevo tipo de documento
                 const [nuevoTipo] = await conn.execute(
                     `INSERT INTO tipos_documento_veh 
                      (id_cliente, nombre_documento, descripcion, dias_alerta, obligatorio, activo) 
@@ -425,36 +417,32 @@ const documentoVehiculoController = {
                 );
                 id_tipo_documento_veh = nuevoTipo.insertId;
             }
-
-            // Manejo de archivos - CORREGIDO
             let nombre_archivo = documentoActual[0].nombre_archivo;
             let ruta_archivo = documentoActual[0].ruta_archivo;
 
-            // Si se subió un archivo nuevo
+            
             if (req.file) {
-                // Eliminar archivo anterior si existe
+                
                 if (documentoActual[0].ruta_archivo) {
                     try {
-                        // Construir la ruta completa del archivo anterior
+                        
                         const oldFilePath = path.join(__dirname, '../public', documentoActual[0].ruta_archivo);
-
-                        // Verificar si el archivo existe antes de intentar eliminarlo
                         if (fs.existsSync(oldFilePath)) {
                             fs.unlinkSync(oldFilePath);
                             console.log(`Archivo anterior eliminado: ${oldFilePath}`);
                         }
                     } catch (fileErr) {
-                        // Solo loguear el error pero continuar con la actualización
+                       
                         console.error('Error al eliminar archivo anterior:', fileErr.message);
                     }
                 }
 
-                // Asignar nuevo archivo
+                
                 nombre_archivo = req.file.filename;
                 ruta_archivo = `/uploads/documentos/${req.file.filename}`;
             }
 
-            // Actualizar documento
+            
             await conn.execute(`
                 UPDATE documentos_vehiculo SET
                     id_vehiculo = ?,
@@ -483,12 +471,12 @@ const documentoVehiculoController = {
                 id
             ]);
 
-            // Manejar alertas
+            
             if (enviar_alerta === 'on' || enviar_alerta === 'true') {
                 const diasParaVencer = Math.ceil((new Date(fecha_vencimiento) - new Date()) / (1000 * 60 * 60 * 24));
 
                 if (diasParaVencer <= 30 && diasParaVencer > 0) {
-                    // Verificar si ya existe alerta para este documento
+                
                     const [alertaExistente] = await conn.execute(
                         'SELECT id_alerta FROM alertas WHERE id_documento = ?',
                         [id]

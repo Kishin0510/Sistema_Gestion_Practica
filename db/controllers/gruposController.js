@@ -164,7 +164,6 @@ exports.formCrear = async (req, res) => {
         res.status(500).send('Error al cargar formulario');
     }
 };
-
 exports.formEditar = async (req, res) => {
     const { id } = req.params;
     const [grupo] = await db.query('SELECT * FROM grupos WHERE id_grupo = ?', [id]);

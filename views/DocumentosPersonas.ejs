@@ -13,7 +13,6 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
-        /* Estructura para footer pegado abajo */
         body {
             min-height: 100vh;
             display: flex;
@@ -315,8 +314,6 @@
                     order: [[0, 'desc']]
                 });
             }
-
-            // Al seleccionar persona, mostrar sus datos dinámicos
             $('#id_persona').on('change', function () {
                 const sel = $(this).find(':selected');
                 if (sel.val()) {
@@ -327,8 +324,6 @@
                     $('#infoPersonaSeleccionada').addClass('d-none');
                 }
             });
-
-            // Preview archivo
             $('#archivo_documento').on('change', function () {
                 if (this.files && this.files[0]) {
                     $('#nombreArchivo').text(this.files[0].name);
@@ -340,8 +335,6 @@
                 $('#archivo_documento').val('');
                 $('#previewArchivo').addClass('d-none');
             });
-
-            // Eliminar con SweetAlert
             $('.btn-eliminar').on('click', function () {
                 const id = $(this).data('id');
                 Swal.fire({

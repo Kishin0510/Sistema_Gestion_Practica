@@ -229,7 +229,7 @@ const documentosPersonaController = {
 
             const doc = documento[0];
 
-            // Formatear fechas
+            
             if (doc.fecha_emision) {
                 const fecha = new Date(doc.fecha_emision);
                 doc.fecha_emision = fecha.toISOString().split('T')[0];
@@ -247,9 +247,7 @@ const documentosPersonaController = {
         }
     },
 
-    // ===============================
-    // DESCARGAR ARCHIVO
-    // ===============================
+    
     async descargarArchivo(req, res) {
         try {
             const { id } = req.params;
@@ -263,7 +261,7 @@ const documentosPersonaController = {
                 return res.status(404).send('Archivo no encontrado');
             }
 
-            // Construir ruta completa del archivo
+            
             const rutaCompleta = path.join(__dirname, '../..', documento[0].ruta_archivo);
 
             if (!fs.existsSync(rutaCompleta)) {
@@ -278,9 +276,7 @@ const documentosPersonaController = {
         }
     },
 
-    // ===============================
-    // VER ARCHIVO EN LÍNEA
-    // ===============================
+    
     async verArchivo(req, res) {
         try {
             const { id } = req.params;
@@ -308,9 +304,7 @@ const documentosPersonaController = {
         }
     },
 
-    // ===============================
-    // ELIMINAR DOCUMENTO (con archivo)
-    // ===============================
+    
     async eliminar(req, res) {
         let conn;
         try {
@@ -319,7 +313,7 @@ const documentosPersonaController = {
             conn = await db.pool.promise().getConnection();
             await conn.beginTransaction();
 
-            // Obtener información del archivo
+            
             const [documento] = await conn.execute(
                 'SELECT ruta_archivo FROM documentos_persona WHERE id_documento = ?',
                 [id]
@@ -329,7 +323,7 @@ const documentosPersonaController = {
                 throw new Error('Documento no encontrado');
             }
 
-            // Eliminar archivo físico si existe
+            
             if (documento[0].ruta_archivo) {
                 const rutaCompleta = path.join(__dirname, '../..', documento[0].ruta_archivo);
                 if (fs.existsSync(rutaCompleta)) {
@@ -354,9 +348,7 @@ const documentosPersonaController = {
         }
     },
 
-    // ===============================
-    // EXPORTAR A EXCEL (como los vehículos)
-    // ===============================
+    
     async exportarExcel(req, res) {
         try {
             const [documentos] = await db.query(`
@@ -382,11 +374,11 @@ const documentosPersonaController = {
                 ORDER BY dp.fecha_vencimiento ASC
             `);
 
-            // Crear archivo Excel
+            
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('Documentos Personas');
 
-            // Definir columnas
+           
             worksheet.columns = [
                 { header: 'Persona', key: 'persona', width: 40 },
                 { header: 'RUN', key: 'run', width: 15 },
@@ -400,7 +392,7 @@ const documentosPersonaController = {
                 { header: 'Tiene Archivo', key: 'tiene_archivo', width: 12 }
             ];
 
-            // Agregar filas
+            
             documentos.forEach(doc => {
                 worksheet.addRow({
                     persona: doc.persona,
@@ -416,7 +408,7 @@ const documentosPersonaController = {
                 });
             });
 
-            // Estilo para el encabezado
+            
             worksheet.getRow(1).font = { bold: true };
             worksheet.getRow(1).fill = {
                 type: 'pattern',
@@ -425,14 +417,14 @@ const documentosPersonaController = {
             };
             worksheet.getRow(1).font = { color: { argb: 'FFFFFFFF' }, bold: true };
 
-            // Generar nombre de archivo
+            
             const fecha = new Date().toISOString().slice(0, 10).replace(/-/g, '');
             const nombreArchivo = `documentos_personas_${fecha}.xlsx`;
 
-            // Guardar en descargas/excel
+            
             const excelPath = path.join(DESCARGAS_PATH, 'excel', nombreArchivo);
 
-            // Asegurar que la carpeta existe
+            
             const excelDir = path.join(DESCARGAS_PATH, 'excel');
             if (!fs.existsSync(excelDir)) {
                 fs.mkdirSync(excelDir, { recursive: true });
@@ -440,7 +432,7 @@ const documentosPersonaController = {
 
             await workbook.xlsx.writeFile(excelPath);
 
-            // Enviar archivo para descarga
+            
             res.download(excelPath, nombreArchivo);
 
         } catch (error) {
@@ -449,9 +441,7 @@ const documentosPersonaController = {
         }
     },
 
-    // ===============================
-    // EXPORTAR RESUMEN (como los vehículos)
-    // ===============================
+    
     async exportarResumen(req, res) {
         try {
             const [documentos] = await db.query(`
@@ -490,7 +480,7 @@ const documentosPersonaController = {
                 });
             });
 
-            // Totales
+            
             const totalGeneral = documentos.reduce((sum, doc) => sum + doc.total, 0);
             const totalVigentes = documentos.reduce((sum, doc) => sum + doc.vigentes, 0);
             const totalPorVencer = documentos.reduce((sum, doc) => sum + doc.por_vencer, 0);
