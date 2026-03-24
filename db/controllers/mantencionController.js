@@ -2,9 +2,11 @@ require('dotenv').config();
 const db = require('../conexion');
 const fs = require('fs');
 const path = require('path');
+
 const logError = (tag, err) => console.error(` ${tag}`, err.message || err);
+
 const mantencionController = {
-    
+
     listarMantenciones: async (req, res) => {
         try {
             const [mantenciones] = await db.execute(`
@@ -13,6 +15,7 @@ const mantencionController = {
                     m.id_vehiculo,
                     m.tipo_mantencion,
                     m.kilometraje,
+                    m.horas,
                     m.fecha_mantencion,
                     m.costo_total,
                     m.taller_proveedor,
@@ -26,7 +29,9 @@ const mantencionController = {
                 JOIN vehiculos v ON m.id_vehiculo = v.id_vehiculo
                 ORDER BY m.fecha_mantencion DESC
             `);
+
             res.json({ success: true, mantenciones });
+
         } catch (err) {
             logError('LISTAR MANTENCIONES', err);
             res.status(500).json({ success: false, error: err.message });
@@ -43,6 +48,7 @@ const mantencionController = {
                 id_vehiculo,
                 tipo_mantencion,
                 kilometraje,
+                horas,
                 fecha_mantencion,
                 costo,
                 taller,
@@ -57,11 +63,16 @@ const mantencionController = {
                 ruta_archivo = `/uploads/mantenciones/${req.file.filename}`;
             }
 
-            const [result] = await conn.execute(`
+            const horasVal = (horas && horas.trim() !== "") ? parseInt(horas) : null;
+            const kmVal = parseInt(kilometraje) || 0;
+            const costoVal = parseFloat(costo) || 0;
+
+            await conn.execute(`
                 INSERT INTO mantenciones_vehiculo (
                     id_vehiculo,
                     tipo_mantencion,
                     kilometraje,
+                    horas,
                     fecha_mantencion,
                     costo_total,
                     taller_proveedor,
@@ -69,13 +80,14 @@ const mantencionController = {
                     ruta_archivo,
                     observaciones,
                     usuario_id
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `, [
                 id_vehiculo,
                 tipo_mantencion.trim(),
-                kilometraje,
+                kmVal,
+                horasVal,
                 fecha_mantencion,
-                costo || 0,
+                costoVal,
                 taller || null,
                 nombre_archivo,
                 ruta_archivo,
@@ -84,7 +96,7 @@ const mantencionController = {
             ]);
 
             await conn.commit();
-            res.redirect(`/documentos?success=Mantención registrada exitosamente`);
+            res.redirect(`/documentos?success=${encodeURIComponent('Mantención registrada exitosamente')}`);
 
         } catch (err) {
             if (conn) await conn.rollback();
@@ -94,32 +106,42 @@ const mantencionController = {
             if (conn) conn.release();
         }
     },
+
     obtenerMantencionPorId: async (req, res) => {
         try {
             const { id } = req.params;
+
             const [rows] = await db.execute(`
-                SELECT * FROM mantenciones_vehiculo WHERE id_mantencion = ?
+                SELECT m.*, v.patente, v.marca, v.modelo 
+                FROM mantenciones_vehiculo m
+                JOIN vehiculos v ON m.id_vehiculo = v.id_vehiculo
+                WHERE m.id_mantencion = ?
             `, [id]);
 
             if (rows.length === 0) {
                 return res.status(404).json({ success: false, message: 'No encontrada' });
             }
 
-            
             const mantencion = rows[0];
+
             if (mantencion.fecha_mantencion) {
-                mantencion.fecha_mantencion = new Date(mantencion.fecha_mantencion).toISOString().split('T')[0];
+                mantencion.fecha_mantencion = new Date(mantencion.fecha_mantencion)
+                    .toISOString()
+                    .split('T')[0];
             }
 
             res.json({ success: true, mantencion });
+
         } catch (err) {
             res.status(500).json({ success: false, error: err.message });
         }
     },
+
     actualizarMantencion: async (req, res) => {
         let conn;
         try {
             const { id } = req.params;
+
             conn = await db.pool.promise().getConnection();
             await conn.beginTransaction();
 
@@ -127,54 +149,98 @@ const mantencionController = {
                 id_vehiculo,
                 tipo_mantencion,
                 kilometraje,
+                horas,
                 fecha_mantencion,
                 costo,
                 taller,
                 observaciones
             } = req.body;
 
-            const [actual] = await conn.execute('SELECT ruta_archivo FROM mantenciones_vehiculo WHERE id_mantencion = ?', [id]);
-            let nombre_archivo = actual[0].nombre_archivo;
-            let ruta_archivo = actual[0].ruta_archivo;
+            const [actual] = await conn.execute(
+                'SELECT nombre_archivo, ruta_archivo FROM mantenciones_vehiculo WHERE id_mantencion = ?',
+                [id]
+            );
+
+            let nombre_archivo = actual[0]?.nombre_archivo;
+            let ruta_archivo = actual[0]?.ruta_archivo;
+
             if (req.file) {
-                
                 if (ruta_archivo) {
-                    const oldPath = path.join(__dirname, '../public', ruta_archivo);
+                    const oldPath = path.join(__dirname, '../../public', ruta_archivo);
                     if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
                 }
+
                 nombre_archivo = req.file.filename;
                 ruta_archivo = `/uploads/mantenciones/${req.file.filename}`;
             }
+
+            const horasVal = (horas && horas.trim() !== "") ? parseInt(horas) : null;
+            const kmVal = parseInt(kilometraje) || 0;
+            const costoVal = parseFloat(costo) || 0;
+
             await conn.execute(`
                 UPDATE mantenciones_vehiculo SET
-                    id_vehiculo = ?, tipo_mantencion = ?, kilometraje = ?,
-                    fecha_mantencion = ?, costo_total = ?, taller_proveedor = ?,
-                    nombre_archivo = ?, ruta_archivo = ?, observaciones = ?
+                    id_vehiculo = ?,
+                    tipo_mantencion = ?,
+                    kilometraje = ?,
+                    horas = ?,
+                    fecha_mantencion = ?,
+                    costo_total = ?,
+                    taller_proveedor = ?,
+                    nombre_archivo = ?,
+                    ruta_archivo = ?,
+                    observaciones = ?
                 WHERE id_mantencion = ?
-            `, [id_vehiculo, tipo_mantencion, kilometraje, fecha_mantencion, costo, taller, nombre_archivo, ruta_archivo, observaciones, id]);
+            `, [
+                id_vehiculo,
+                tipo_mantencion,
+                kmVal,
+                horasVal,
+                fecha_mantencion,
+                costoVal,
+                taller,
+                nombre_archivo,
+                ruta_archivo,
+                observaciones,
+                id
+            ]);
 
             await conn.commit();
-            res.redirect(`/documentos?success=Mantención actualizada`);
+            res.redirect(`/documentos?success=${encodeURIComponent('Mantención actualizada')}`);
+
         } catch (err) {
             if (conn) await conn.rollback();
+            logError('ACTUALIZAR MANTENCION', err);
             res.redirect(`/documentos?error=${encodeURIComponent(err.message)}`);
         } finally {
             if (conn) conn.release();
         }
     },
+
     eliminarMantencion: async (req, res) => {
         try {
             const { id } = req.params;
-            const [mantencion] = await db.execute('SELECT ruta_archivo FROM mantenciones_vehiculo WHERE id_mantencion = ?', [id]);
+
+            const [mantencion] = await db.execute(
+                'SELECT ruta_archivo FROM mantenciones_vehiculo WHERE id_mantencion = ?',
+                [id]
+            );
 
             if (mantencion.length > 0 && mantencion[0].ruta_archivo) {
-                const filePath = path.join(__dirname, '../public', mantencion[0].ruta_archivo);
+                const filePath = path.join(__dirname, '../../public', mantencion[0].ruta_archivo);
                 if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
             }
-            await db.execute('DELETE FROM mantenciones_vehiculo WHERE id_mantencion = ?', [id]);
-            res.json({ success: true, message: 'Mantención eliminada' });
+
+            await db.execute(
+                'DELETE FROM mantenciones_vehiculo WHERE id_mantencion = ?',
+                [id]
+            );
+
+            res.redirect(`/documentos?success=${encodeURIComponent('Mantención eliminada')}`);
+
         } catch (err) {
-            res.status(500).json({ success: false, error: err.message });
+            logError('ELIMINAR MANTENCION', err);
+            res.redirect(`/documentos?error=${encodeURIComponent(err.message)}`);
         }
     }
 };

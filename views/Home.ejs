@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="/css/Index.css">
 </head>
-
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary-custom shadow-sm">
         <div class="container">
@@ -24,9 +23,7 @@
                     <li class="nav-item">
                         <a class="nav-link active" href="/">Inicio</a>
                     </li>
-
                     <% if (usuario.rol !== 'visualizador') { %>
-                        
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownPersonas" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-people me-1"></i>Personas

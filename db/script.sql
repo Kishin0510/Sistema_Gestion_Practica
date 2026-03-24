@@ -111,19 +111,21 @@ CREATE TABLE mantenciones_vehiculo (
     id_mantencion INT AUTO_INCREMENT PRIMARY KEY,
     id_vehiculo INT NOT NULL,               
     tipo_mantencion VARCHAR(150) NOT NULL,   
-    kilometraje INT NOT NULL,               
+    kilometraje INT NOT NULL,   
+    horas INT NULL,             
     fecha_mantencion DATE NOT NULL,         
     costo_total DECIMAL(12, 2) DEFAULT 0.00, 
     taller_proveedor VARCHAR(255),          
     nombre_archivo VARCHAR(255),            
     ruta_archivo LONGBLOB,                  
     observaciones TEXT,                     
-    
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
     usuario_id INT,                         
     
-    CONSTRAINT fk_vehiculo_mantencion FOREIGN KEY (id_vehiculo) 
-        REFERENCES vehiculos(id_vehiculo) ON DELETE CASCADE
+    CONSTRAINT fk_vehiculo_mantencion 
+        FOREIGN KEY (id_vehiculo) 
+        REFERENCES vehiculos(id_vehiculo) 
+        ON DELETE CASCADE
 );
 CREATE TABLE tipos_vehiculo (
     id_tipo_vehiculo INT AUTO_INCREMENT PRIMARY KEY,

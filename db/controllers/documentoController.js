@@ -502,9 +502,7 @@ const documentoVehiculoController = {
                     }
                 }
             }
-
             await conn.commit();
-
             res.redirect(`/documentos?success=Documento actualizado exitosamente`);
 
         } catch (err) {
@@ -523,7 +521,6 @@ const documentoVehiculoController = {
             if (conn) conn.release();
         }
     },
-
     buscarVehiculoPorPatente: async (req, res) => {
         try {
             const { patente } = req.params;
@@ -565,7 +562,6 @@ const documentoVehiculoController = {
             });
         }
     },
-
     apiVehiculos: async (req, res) => {
         try {
             const [vehiculos] = await db.execute(`
