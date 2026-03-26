@@ -128,7 +128,7 @@ const documentoVehiculoController = {
                 success_msg: req.query.success || null,
                 error_msg: req.query.error || null,
                 debug: process.env.NODE_ENV === 'development',
-                user: req.session.usuario || req.user || null 
+                user: req.session.usuario || req.user || null
             });
 
         } catch (err) {
@@ -149,7 +149,6 @@ const documentoVehiculoController = {
                 fecha: new Date(),
                 error_msg: 'Error al cargar los documentos: ' + err.message,
                 debug: process.env.NODE_ENV === 'development',
-                // SE AGREGA USER PARA EJS EN CASO DE ERROR
                 user: req.session.usuario || req.user || null
             });
         }
@@ -273,7 +272,6 @@ const documentoVehiculoController = {
             await conn.commit();
 
             console.log(`Documento registrado exitosamente. ID: ${result.insertId}, Tipo: ${tipo_documento_nombre}`);
-
             res.redirect(`/documentos?success=Documento registrado exitosamente`);
 
         } catch (err) {
@@ -330,7 +328,6 @@ const documentoVehiculoController = {
 
             const doc = documento[0];
 
-            
             if (doc.fecha_emision) {
                 const fecha = new Date(doc.fecha_emision);
                 doc.fecha_emision = fecha.toISOString().split('T')[0];
@@ -354,6 +351,150 @@ const documentoVehiculoController = {
         }
     },
 
+    // NUEVO: ACTUALIZAR SOLO FECHAS DESDE EL MODAL
+    // MEJORA: SI YA EXISTE ALERTA DEL DOCUMENTO, LA ACTUALIZA EN VEZ DE DUPLICARLA
+    actualizarFechasDocumento: async (req, res) => {
+        let conn;
+        try {
+            const { id } = req.params;
+            const {
+                id_vehiculo,
+                fecha_emision,
+                fecha_vencimiento,
+                motivo_cambio
+            } = req.body;
+
+            if (!fecha_vencimiento) {
+                throw new Error('La fecha de vencimiento es obligatoria');
+            }
+
+            conn = await db.pool.promise().getConnection();
+            await conn.beginTransaction();
+
+            const [documentoActual] = await conn.execute(`
+                SELECT 
+                    dv.id_documento_veh,
+                    dv.id_vehiculo,
+                    dv.numero_documento,
+                    dv.fecha_emision,
+                    dv.fecha_vencimiento,
+                    dv.estado,
+                    COALESCE(td.nombre_documento, 'Sin tipo') AS tipo_documento_nombre,
+                    v.patente,
+                    v.marca,
+                    v.modelo
+                FROM documentos_vehiculo dv
+                LEFT JOIN tipos_documento_veh td ON dv.id_tipo_documento_veh = td.id_tipo_documento_veh
+                LEFT JOIN vehiculos v ON dv.id_vehiculo = v.id_vehiculo
+                WHERE dv.id_documento_veh = ?
+            `, [id]);
+
+            if (documentoActual.length === 0) {
+                throw new Error('Documento no encontrado');
+            }
+
+            const doc = documentoActual[0];
+            const vehiculoIdFinal = id_vehiculo || doc.id_vehiculo;
+
+            await conn.execute(`
+                UPDATE documentos_vehiculo
+                SET
+                    fecha_emision = ?,
+                    fecha_vencimiento = ?,
+                    estado = CASE 
+                        WHEN ? < CURDATE() THEN 'vencido'
+                        WHEN ? <= DATE_ADD(CURDATE(), INTERVAL 30 DAY) THEN 'por_vencer'
+                        ELSE 'vigente'
+                    END
+                WHERE id_documento_veh = ?
+            `, [
+                fecha_emision || null,
+                fecha_vencimiento,
+                fecha_vencimiento,
+                fecha_vencimiento,
+                id
+            ]);
+
+            const fechaEmisionAnterior = doc.fecha_emision
+                ? new Date(doc.fecha_emision).toLocaleDateString('es-CL')
+                : 'Sin registro';
+
+            const fechaVencAnterior = doc.fecha_vencimiento
+                ? new Date(doc.fecha_vencimiento).toLocaleDateString('es-CL')
+                : 'Sin registro';
+
+            const nuevaFechaEmision = fecha_emision || 'Sin registro';
+            const nuevaFechaVencimiento = fecha_vencimiento;
+
+            const mensajeAlerta = `Se modificaron las fechas del documento ${doc.tipo_documento_nombre} N°${doc.numero_documento}. Vehículo: ${doc.patente || 'N/A'} - ${doc.marca || ''} ${doc.modelo || ''}. Fecha emisión anterior: ${fechaEmisionAnterior}. Nueva fecha emisión: ${nuevaFechaEmision}. Fecha vencimiento anterior: ${fechaVencAnterior}. Nueva fecha vencimiento: ${nuevaFechaVencimiento}. Motivo: ${motivo_cambio || 'No informado'}`;
+
+            const [alertaExistente] = await conn.execute(
+                `SELECT id_alerta 
+                 FROM alertas 
+                 WHERE id_documento = ? 
+                 ORDER BY id_alerta DESC 
+                 LIMIT 1`,
+                [id]
+            );
+
+            if (alertaExistente.length > 0) {
+                await conn.execute(`
+                    UPDATE alertas
+                    SET
+                        tipo_entidad = ?,
+                        id_entidad = ?,
+                        tipo_alerta = ?,
+                        mensaje = ?,
+                        fecha_generacion = NOW(),
+                        fecha_envio = NULL,
+                        enviado = FALSE,
+                        metodo_envio = 'sistema',
+                        leido = FALSE
+                    WHERE id_alerta = ?
+                `, [
+                    'vehiculo',
+                    vehiculoIdFinal,
+                    'modificacion_fechas',
+                    mensajeAlerta,
+                    alertaExistente[0].id_alerta
+                ]);
+            } else {
+                await conn.execute(`
+                    INSERT INTO alertas (
+                        tipo_entidad,
+                        id_entidad,
+                        id_documento,
+                        tipo_alerta,
+                        mensaje,
+                        fecha_generacion,
+                        metodo_envio,
+                        enviado,
+                        leido
+                    ) VALUES (?, ?, ?, ?, ?, NOW(), ?, ?, ?)
+                `, [
+                    'vehiculo',
+                    vehiculoIdFinal,
+                    id,
+                    'modificacion_fechas',
+                    mensajeAlerta,
+                    'sistema',
+                    false,
+                    false
+                ]);
+            }
+
+            await conn.commit();
+            res.redirect('/documentos?success=Fechas actualizadas correctamente');
+
+        } catch (err) {
+            if (conn) await conn.rollback();
+            logError('ACTUALIZAR FECHAS DOCUMENTO', err);
+            res.redirect(`/documentos?error=${encodeURIComponent(err.message || 'Error al actualizar fechas del documento')}`);
+        } finally {
+            if (conn) conn.release();
+        }
+    },
+
     actualizarDocumento: async (req, res) => {
         let conn;
         try {
@@ -374,6 +515,7 @@ const documentoVehiculoController = {
             if (!id_vehiculo || !tipo_documento_nombre || !numero_documento || !fecha_vencimiento) {
                 throw new Error('Faltan campos obligatorios');
             }
+
             const [documentoActual] = await conn.execute(
                 'SELECT id_vehiculo, ruta_archivo, nombre_archivo FROM documentos_vehiculo WHERE id_documento_veh = ?',
                 [id]
@@ -382,6 +524,7 @@ const documentoVehiculoController = {
             if (documentoActual.length === 0) {
                 throw new Error('Documento no encontrado');
             }
+
             const [vehiculo] = await conn.execute(
                 'SELECT id_vehiculo, id_cliente FROM vehiculos WHERE id_vehiculo = ? AND activo = 1',
                 [id_vehiculo]
@@ -392,7 +535,6 @@ const documentoVehiculoController = {
             }
 
             const id_cliente = vehiculo[0].id_cliente;
-
             let id_tipo_documento_veh = null;
 
             const [tipoExistente] = await conn.execute(
@@ -417,32 +559,27 @@ const documentoVehiculoController = {
                 );
                 id_tipo_documento_veh = nuevoTipo.insertId;
             }
+
             let nombre_archivo = documentoActual[0].nombre_archivo;
             let ruta_archivo = documentoActual[0].ruta_archivo;
 
-            
             if (req.file) {
-                
                 if (documentoActual[0].ruta_archivo) {
                     try {
-                        
                         const oldFilePath = path.join(__dirname, '../public', documentoActual[0].ruta_archivo);
                         if (fs.existsSync(oldFilePath)) {
                             fs.unlinkSync(oldFilePath);
                             console.log(`Archivo anterior eliminado: ${oldFilePath}`);
                         }
                     } catch (fileErr) {
-                       
                         console.error('Error al eliminar archivo anterior:', fileErr.message);
                     }
                 }
 
-                
                 nombre_archivo = req.file.filename;
                 ruta_archivo = `/uploads/documentos/${req.file.filename}`;
             }
 
-            
             await conn.execute(`
                 UPDATE documentos_vehiculo SET
                     id_vehiculo = ?,
@@ -471,12 +608,10 @@ const documentoVehiculoController = {
                 id
             ]);
 
-            
             if (enviar_alerta === 'on' || enviar_alerta === 'true') {
                 const diasParaVencer = Math.ceil((new Date(fecha_vencimiento) - new Date()) / (1000 * 60 * 60 * 24));
 
                 if (diasParaVencer <= 30 && diasParaVencer > 0) {
-                
                     const [alertaExistente] = await conn.execute(
                         'SELECT id_alerta FROM alertas WHERE id_documento = ?',
                         [id]
@@ -499,9 +634,31 @@ const documentoVehiculoController = {
                             'documento_por_vencer',
                             `Documento ${tipo_documento_nombre} N°${numero_documento} vence en ${diasParaVencer} días`
                         ]);
+                    } else {
+                        await conn.execute(`
+                            UPDATE alertas
+                            SET
+                                tipo_entidad = ?,
+                                id_entidad = ?,
+                                tipo_alerta = ?,
+                                mensaje = ?,
+                                fecha_generacion = NOW(),
+                                fecha_envio = NULL,
+                                enviado = FALSE,
+                                metodo_envio = 'sistema',
+                                leido = FALSE
+                            WHERE id_alerta = ?
+                        `, [
+                            'vehiculo',
+                            id_vehiculo,
+                            'documento_por_vencer',
+                            `Documento ${tipo_documento_nombre} N°${numero_documento} vence en ${diasParaVencer} días`,
+                            alertaExistente[0].id_alerta
+                        ]);
                     }
                 }
             }
+
             await conn.commit();
             res.redirect(`/documentos?success=Documento actualizado exitosamente`);
 
@@ -521,6 +678,7 @@ const documentoVehiculoController = {
             if (conn) conn.release();
         }
     },
+
     buscarVehiculoPorPatente: async (req, res) => {
         try {
             const { patente } = req.params;
@@ -562,6 +720,7 @@ const documentoVehiculoController = {
             });
         }
     },
+
     apiVehiculos: async (req, res) => {
         try {
             const [vehiculos] = await db.execute(`

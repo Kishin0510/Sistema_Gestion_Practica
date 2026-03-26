@@ -67,23 +67,66 @@ cargarRutas('Vehículos', '/vehiculos', './routes/vehiculos.routes');
 cargarRutas('Documentos', '/documentos', './routes/documentos.routes');
 cargarRutas('Logs', '/registro-cambios', './routes/logs.routes');
 cargarRutas('Mantenciones', '/mantenciones', './routes/mantencion.routes');
+cargarRutas('Alertas', '/alertas', './routes/alertas.routes');
 
 app.get('/', authMiddleware, async (req, res) => {
     try {
         const [rows] = await db.query('SELECT NOW() AS fecha');
+
+        let alertas = [];
+        let totalAlertas = 0;
+        let alertasNoLeidas = 0;
+        let alertasLeidas = 0;
+
+        if (req.session.usuario && req.session.usuario.rol === 'admin_cliente') {
+            const [alertasRows] = await db.query(`
+                SELECT 
+                    id_alerta,
+                    tipo_entidad,
+                    id_entidad,
+                    id_documento,
+                    tipo_alerta,
+                    mensaje,
+                    fecha_generacion,
+                    fecha_envio,
+                    enviado,
+                    metodo_envio,
+                    leido
+                FROM alertas
+                ORDER BY leido ASC, fecha_generacion DESC
+                LIMIT 10
+            `);
+
+            alertas = alertasRows;
+            totalAlertas = alertasRows.length;
+            alertasNoLeidas = alertasRows.filter(a => !a.leido).length;
+            alertasLeidas = alertasRows.filter(a => !!a.leido).length;
+        }
+
         res.render('Home', {
             title: 'Inicio',
             fecha: rows[0].fecha,
-            usuario: req.session.usuario
+            usuario: req.session.usuario,
+            alertas,
+            totalAlertas,
+            alertasNoLeidas,
+            alertasLeidas
         });
     } catch (error) {
+        console.error('Error al cargar Home:', error);
+
         res.render('Home', {
             title: 'Inicio',
             fecha: new Date(),
-            usuario: req.session.usuario
+            usuario: req.session.usuario,
+            alertas: [],
+            totalAlertas: 0,
+            alertasNoLeidas: 0,
+            alertasLeidas: 0
         });
     }
 });
+
 app.get('/login', (req, res) => {
     if (req.session.usuario) return res.redirect('/');
     res.render('Login', {
@@ -92,6 +135,7 @@ app.get('/login', (req, res) => {
         success: null
     });
 });
+
 app.get('/documentos-personas', authMiddleware, async (req, res) => {
     res.render('DocumentosPersonas', {
         title: 'Gestión Documental - Personas',
@@ -99,6 +143,7 @@ app.get('/documentos-personas', authMiddleware, async (req, res) => {
         usuario: req.session.usuario
     });
 });
+
 app.get('/grupos/crear', authMiddleware, async (req, res) => {
     try {
         const [clientes] = await db.query('SELECT id_cliente, nombre_cliente as nombre FROM clientes WHERE activo = 1');
@@ -116,6 +161,7 @@ app.get('/grupos/crear', authMiddleware, async (req, res) => {
         res.status(500).send('Error al cargar el formulario de grupos');
     }
 });
+
 app.post('/grupos/crear', authMiddleware, async (req, res) => {
     let { id_cliente, nombre_grupo, nombre_compania, nombre_contacto, email_contacto, direccion, ciudad, activo } = req.body;
 
@@ -127,6 +173,7 @@ app.post('/grupos/crear', authMiddleware, async (req, res) => {
             );
             id_cliente = nuevoCliente.insertId;
         }
+
         await db.query(`
             INSERT INTO grupos 
             (id_cliente, nombre_grupo, nombre_compania, nombre_contacto, email_contacto, direccion, ciudad, activo)
@@ -143,6 +190,7 @@ app.post('/grupos/crear', authMiddleware, async (req, res) => {
         res.redirect('/grupos/crear');
     }
 });
+
 app.get('/grupos', authMiddleware, async (req, res) => {
     try {
         const [grupos] = await db.query(`
@@ -158,6 +206,7 @@ app.get('/grupos', authMiddleware, async (req, res) => {
                 cliente_nombre[grupo.id_cliente] = grupo.nombre_cliente;
             }
         });
+
         res.render('listaGrupos', {
             title: 'Mis Grupos',
             grupos: grupos,
@@ -173,6 +222,7 @@ app.get('/grupos', authMiddleware, async (req, res) => {
 });
 const documentosPersonaRoutes = require('./routes/documentos_personas.routes');
 app.use('/documentos-persona', documentosPersonaRoutes);
+
 app.use((req, res) => {
     res.status(404).render('Home', {
         title: 'Página no encontrada',
