@@ -1,14 +1,14 @@
 const permisoPara = (rolesPermitidos) => {
     return (req, res, next) => {
-        
-        if (!req.session.usuario || !req.session.usuario.id) {
+        if (!req.session.usuario || (!req.session.usuario.id && !req.session.usuario.id_usuario)) {
             return res.redirect('/login');
         }
+
         console.log("=== VERIFICACIÓN DE PERMISOS ===");
         console.log("Rol del usuario en sesión:", req.session.usuario.rol);
         console.log("Roles que permite esta ruta:", rolesPermitidos);
 
-        if (rolesPermitidos.map(r => r.toLowerCase()).includes(req.session.usuario.rol.toLowerCase())) {
+        if (rolesPermitidos.map(r => String(r).toLowerCase()).includes(String(req.session.usuario.rol).toLowerCase())) {
             return next();
         } else {
             return res.status(403).send(`
@@ -20,4 +20,5 @@ const permisoPara = (rolesPermitidos) => {
         }
     };
 };
+
 module.exports = { permisoPara };

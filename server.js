@@ -5,7 +5,7 @@ const session = require('express-session');
 const db = require('./db/conexion');
 const authController = require('./db/controllers/authController');
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000; //PUERTO DE EJECUCIÓN DEL SERVER
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -60,7 +60,7 @@ const cargarRutas = (nombre, ruta, pathArchivo) => {
         console.error(` Error al cargar rutas de ${nombre}:`, error.message);
     }
 };
-
+// ACÁ SE CARGAN TODAS LAS RUTAS DE LA PÁGINA WEB CON SUS LISTAS, TODO!!!!
 cargarRutas('Autenticación', '/auth', './routes/auth.routes');
 cargarRutas('Personas', '/personas', './routes/personas.routes');
 cargarRutas('Vehículos', '/vehiculos', './routes/vehiculos.routes');
@@ -68,6 +68,8 @@ cargarRutas('Documentos', '/documentos', './routes/documentos.routes');
 cargarRutas('Logs', '/registro-cambios', './routes/logs.routes');
 cargarRutas('Mantenciones', '/mantenciones', './routes/mantencion.routes');
 cargarRutas('Alertas', '/alertas', './routes/alertas.routes');
+cargarRutas('Grupos', '/grupos', './routes/grupos.routes');
+
 
 app.get('/', authMiddleware, async (req, res) => {
     try {
@@ -173,7 +175,7 @@ app.post('/grupos/crear', authMiddleware, async (req, res) => {
             );
             id_cliente = nuevoCliente.insertId;
         }
-
+        //QUERY QUE PERMITE AGREGAR GRUPOS ALA BASE DE DATOS TOMANDO TODOS LOS DATOS ANTES DE PROCESAR
         await db.query(`
             INSERT INTO grupos 
             (id_cliente, nombre_grupo, nombre_compania, nombre_contacto, email_contacto, direccion, ciudad, activo)
@@ -190,7 +192,6 @@ app.post('/grupos/crear', authMiddleware, async (req, res) => {
         res.redirect('/grupos/crear');
     }
 });
-
 app.get('/grupos', authMiddleware, async (req, res) => {
     try {
         const [grupos] = await db.query(`
@@ -222,7 +223,6 @@ app.get('/grupos', authMiddleware, async (req, res) => {
 });
 const documentosPersonaRoutes = require('./routes/documentos_personas.routes');
 app.use('/documentos-persona', documentosPersonaRoutes);
-
 app.use((req, res) => {
     res.status(404).render('Home', {
         title: 'Página no encontrada',
@@ -231,6 +231,7 @@ app.use((req, res) => {
         usuario: req.session.usuario
     });
 });
+//ACA TOMA EL PUERTO POR EL CUAL SE TIENE QUE SI O SI ACCEDER AL SISTEMA EL CUAL ARRIBA ESTA FIJADO PUERTO 3000
 app.listen(PORT, () => {
     console.log('='.repeat(50));
     console.log(` Servidor corriendo en: http://localhost:${PORT}`);

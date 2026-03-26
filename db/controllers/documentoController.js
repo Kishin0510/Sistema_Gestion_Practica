@@ -6,10 +6,8 @@ const path = require('path');
 const logError = (tag, err) => console.error(` ${tag}`, err.message || err);
 
 const documentoVehiculoController = {
-
     mostrarDocumentos: async (req, res) => {
         try {
-
             const [vehiculos] = await db.execute(`
                 SELECT 
                     v.id_vehiculo,
@@ -56,6 +54,7 @@ const documentoVehiculoController = {
                     v.patente,
                     v.marca,
                     v.modelo,
+                    v.id_cliente,
                     COALESCE(td.nombre_documento, 'Sin tipo') as tipo_documento_nombre,
                     u.nombre_completo as usuario_subida_nombre
                 FROM documentos_vehiculo dv
@@ -63,6 +62,25 @@ const documentoVehiculoController = {
                 LEFT JOIN tipos_documento_veh td ON dv.id_tipo_documento_veh = td.id_tipo_documento_veh
                 LEFT JOIN usuarios u ON dv.usuario_subida = u.id_usuario
                 ORDER BY dv.fecha_vencimiento ASC, dv.fecha_subida DESC
+            `);
+
+            const [mantenciones] = await db.execute(`
+                SELECT 
+                    m.id_mantencion,
+                    m.id_vehiculo,
+                    m.tipo_mantencion,
+                    m.kilometraje,
+                    m.horas,
+                    m.fecha_mantencion,
+                    m.costo_total,
+                    m.taller_proveedor,
+                    m.nombre_archivo,
+                    m.ruta_archivo,
+                    m.observaciones,
+                    v.patente
+                FROM mantenciones_vehiculo m
+                LEFT JOIN vehiculos v ON m.id_vehiculo = v.id_vehiculo
+                ORDER BY m.fecha_mantencion DESC, m.id_mantencion DESC
             `);
 
             const hoy = new Date();
@@ -113,35 +131,36 @@ const documentoVehiculoController = {
             const documentosPorVencer = documentosConEstado.filter(d => d.dias_restantes > 0 && d.dias_restantes <= 30).length;
             const documentosVencidos = documentosConEstado.filter(d => d.dias_restantes <= 0).length;
 
-            res.render('documentos', {
+            res.render('Documentos', {
                 title: 'Gestión Documental - Vehículos',
-                layout: 'layouts/main',
-                vehiculos: vehiculos,
-                tiposDocumentos: tiposDocumentos,
+                vehiculos,
+                tiposDocumentos,
                 documentos: documentosConEstado,
-                documentosProximos: documentosProximos,
-                totalDocumentos: totalDocumentos,
-                documentosVigentes: documentosVigentes,
-                documentosPorVencer: documentosPorVencer,
-                documentosVencidos: documentosVencidos,
+                documentosProximos,
+                mantenciones: mantenciones || [],
+                totalDocumentos,
+                documentosVigentes,
+                documentosPorVencer,
+                documentosVencidos,
                 fecha: new Date(),
                 success_msg: req.query.success || null,
                 error_msg: req.query.error || null,
                 debug: process.env.NODE_ENV === 'development',
-                user: req.session.usuario || req.user || null
+                user: req.session.usuario || req.user || null,
+                usuario: req.session.usuario || req.user || null
             });
 
         } catch (err) {
             logError('MOSTRAR DOCUMENTOS', err);
             console.error('Error detallado:', err);
 
-            res.render('documentos', {
+            res.render('Documentos', {
                 title: 'Gestión Documental',
-                layout: 'layouts/main',
                 vehiculos: [],
                 tiposDocumentos: [],
                 documentos: [],
                 documentosProximos: [],
+                mantenciones: [],
                 totalDocumentos: 0,
                 documentosVigentes: 0,
                 documentosPorVencer: 0,
@@ -149,7 +168,8 @@ const documentoVehiculoController = {
                 fecha: new Date(),
                 error_msg: 'Error al cargar los documentos: ' + err.message,
                 debug: process.env.NODE_ENV === 'development',
-                user: req.session.usuario || req.user || null
+                user: req.session.usuario || req.user || null,
+                usuario: req.session.usuario || req.user || null
             });
         }
     },
@@ -184,7 +204,6 @@ const documentoVehiculoController = {
             }
 
             const id_cliente = vehiculo[0].id_cliente;
-
             let id_tipo_documento_veh = null;
 
             const [tipoExistente] = await conn.execute(
@@ -208,8 +227,6 @@ const documentoVehiculoController = {
                     ]
                 );
                 id_tipo_documento_veh = nuevoTipo.insertId;
-
-                console.log(` Nuevo tipo de documento creado: ${tipo_documento_nombre} (ID: ${id_tipo_documento_veh})`);
             }
 
             let nombre_archivo = null;
@@ -270,8 +287,6 @@ const documentoVehiculoController = {
             }
 
             await conn.commit();
-
-            console.log(`Documento registrado exitosamente. ID: ${result.insertId}, Tipo: ${tipo_documento_nombre}`);
             res.redirect(`/documentos?success=Documento registrado exitosamente`);
 
         } catch (err) {
@@ -351,8 +366,6 @@ const documentoVehiculoController = {
         }
     },
 
-    // NUEVO: ACTUALIZAR SOLO FECHAS DESDE EL MODAL
-    // MEJORA: SI YA EXISTE ALERTA DEL DOCUMENTO, LA ACTUALIZA EN VEZ DE DUPLICARLA
     actualizarFechasDocumento: async (req, res) => {
         let conn;
         try {
@@ -566,10 +579,9 @@ const documentoVehiculoController = {
             if (req.file) {
                 if (documentoActual[0].ruta_archivo) {
                     try {
-                        const oldFilePath = path.join(__dirname, '../public', documentoActual[0].ruta_archivo);
+                        const oldFilePath = path.join(__dirname, '../../public', documentoActual[0].ruta_archivo);
                         if (fs.existsSync(oldFilePath)) {
                             fs.unlinkSync(oldFilePath);
-                            console.log(`Archivo anterior eliminado: ${oldFilePath}`);
                         }
                     } catch (fileErr) {
                         console.error('Error al eliminar archivo anterior:', fileErr.message);
@@ -591,8 +603,8 @@ const documentoVehiculoController = {
                     ruta_archivo = ?,
                     observaciones = ?,
                     estado = CASE 
-                        WHEN fecha_vencimiento < CURDATE() THEN 'vencido'
-                        WHEN fecha_vencimiento <= DATE_ADD(CURDATE(), INTERVAL 30 DAY) THEN 'por_vencer'
+                        WHEN ? < CURDATE() THEN 'vencido'
+                        WHEN ? <= DATE_ADD(CURDATE(), INTERVAL 30 DAY) THEN 'por_vencer'
                         ELSE 'vigente'
                     END
                 WHERE id_documento_veh = ?
@@ -605,6 +617,8 @@ const documentoVehiculoController = {
                 nombre_archivo,
                 ruta_archivo,
                 observaciones || null,
+                fecha_vencimiento,
+                fecha_vencimiento,
                 id
             ]);
 
@@ -787,31 +801,45 @@ const documentoVehiculoController = {
             conn = await db.pool.promise().getConnection();
             await conn.beginTransaction();
 
-            const [documento] = await conn.execute(
-                'SELECT id_vehiculo, ruta_archivo FROM documentos_vehiculo WHERE id_documento_veh = ?',
-                [id]
-            );
+            const [documento] = await conn.execute(`
+                SELECT 
+                    dv.id_documento_veh,
+                    dv.id_vehiculo,
+                    dv.ruta_archivo,
+                    v.id_cliente
+                FROM documentos_vehiculo dv
+                LEFT JOIN vehiculos v ON dv.id_vehiculo = v.id_vehiculo
+                WHERE dv.id_documento_veh = ?
+            `, [id]);
 
             if (documento.length === 0) {
                 throw new Error('Documento no encontrado');
             }
 
-            if (documento[0].ruta_archivo) {
-                const filePath = path.join(__dirname, '../public', documento[0].ruta_archivo);
+            const doc = documento[0];
+            const usuario = req.session?.usuario || null;
+            const rol = usuario?.rol || '';
+
+            if (rol === 'admin_cliente') {
+                if (!usuario.id_cliente || Number(usuario.id_cliente) !== Number(doc.id_cliente)) {
+                    await conn.rollback();
+                    return res.status(403).json({
+                        success: false,
+                        error: 'No tienes permiso para eliminar este documento'
+                    });
+                }
+            }
+
+            if (doc.ruta_archivo) {
+                const filePath = path.join(process.cwd(), 'public', doc.ruta_archivo.replace(/^\/+/, ''));
+
                 if (fs.existsSync(filePath)) {
                     fs.unlinkSync(filePath);
                 }
             }
 
-            await conn.execute(
-                'DELETE FROM alertas WHERE id_documento = ?',
-                [id]
-            );
-
-            await conn.execute(
-                'DELETE FROM documentos_vehiculo WHERE id_documento_veh = ?',
-                [id]
-            );
+            await conn.execute('DELETE FROM alertas WHERE id_documento = ?', [id]);
+            await conn.execute('DELETE FROM documentos_vehiculo WHERE id_documento_veh = ?', [id]);
 
             await conn.commit();
 
@@ -861,4 +889,5 @@ const documentoVehiculoController = {
         }
     }
 };
+
 module.exports = documentoVehiculoController;

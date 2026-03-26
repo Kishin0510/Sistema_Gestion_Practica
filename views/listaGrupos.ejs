@@ -10,7 +10,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="/public/css/Index.css">
+    <link rel="stylesheet" href="/css/Index.css">
     <style>
         :root {
             --primary: #1e3a8a;
@@ -36,7 +36,6 @@
             flex: 1 0 auto;
         }
         
-        /* Navbar */
         .navbar-custom { background: var(--primary); }
         .navbar.navbar-custom .navbar-brand {
             color: white;
@@ -59,7 +58,6 @@
             transform: translateY(-1px);
         }
 
-        /* Botones */
         .btn-primary-custom {
             background-color: var(--primary);
             border: none;
@@ -70,9 +68,7 @@
             background-color: var(--primary-dark);
             color: white;
         }
-        .btn-primary-custom i { margin-right: 8px; }
 
-        /* Componentes de Grupos (Cards y Tabla) */
         .grupo-card {
             transition: transform 0.3s, box-shadow 0.3s;
             border: none;
@@ -87,6 +83,7 @@
             transform: translateY(-8px);
             box-shadow: 0 15px 30px rgba(var(--primary-rgb), 0.15);
         }
+
         .card-header-grupo {
             background: var(--gradient);
             color: white;
@@ -96,30 +93,18 @@
             justify-content: space-between;
             align-items: center;
         }
-        .card-header-grupo h5 {
-            margin: 0;
-            font-weight: 600;
-            letter-spacing: 0.3px;
-            font-size: 1.1rem;
-        }
-        .card-header-grupo h5 i {
-            margin-right: 8px;
-            opacity: 0.9;
-        }
+
         .badge-estado {
             padding: 0.5rem 1.2rem;
             border-radius: 50px;
             font-size: 0.8rem;
             font-weight: 600;
-            letter-spacing: 0.3px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             display: inline-flex;
             align-items: center;
         }
-        .badge-estado i { margin-right: 5px; font-size: 0.9rem; }
         .badge-activo { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; }
         .badge-inactivo { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; }
-        
+
         .info-item {
             padding: 0.6rem 0;
             border-bottom: 1px solid #edf2f7;
@@ -127,6 +112,7 @@
             align-items: flex-start;
         }
         .info-item:last-child { border-bottom: none; }
+
         .info-label {
             font-weight: 600;
             color: #4a5568;
@@ -135,12 +121,14 @@
             display: flex;
             align-items: center;
         }
+
         .info-label i {
             width: 20px;
             color: var(--primary);
             margin-right: 8px;
             font-size: 1rem;
         }
+
         .info-value {
             color: #2d3748;
             flex: 1;
@@ -148,7 +136,6 @@
             font-weight: 500;
         }
 
-        /* Acciones y Botones Pequeños */
         .action-btn {
             border-radius: 50px;
             padding: 0.4rem 1rem;
@@ -165,9 +152,7 @@
         .action-btn.btn-warning { background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%); color: #2d3748; }
         .action-btn.btn-info { background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; }
         .action-btn.btn-danger { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; }
-        .action-btn:hover { transform: scale(1.05); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); }
 
-        /* Estilos de Tabla Grupos */
         .table-grupos {
             background: white;
             border-radius: 12px;
@@ -175,22 +160,7 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         }
         .table-grupos thead { background: var(--gradient); color: white; }
-        .table-grupos th {
-            font-weight: 600;
-            padding: 1rem;
-            font-size: 0.9rem;
-            letter-spacing: 0.5px;
-            border-bottom: none;
-        }
-        .table-grupos td {
-            padding: 1rem;
-            vertical-align: middle;
-            border-bottom: 1px solid #edf2f7;
-            color: #2d3748;
-        }
-        .table-grupos tbody tr { transition: background-color 0.2s; }
-        .table-grupos tbody tr:hover { background-color: #f8fafc; }
-        
+
         .filtro-section {
             background: white;
             padding: 1.8rem;
@@ -199,32 +169,22 @@
             margin-bottom: 2rem;
             border: 1px solid #edf2f7;
         }
-        .empty-state {
-            text-align: center;
-            padding: 4rem 2rem;
-            background: white;
-            border-radius: 20px;
-            margin: 2rem 0;
-            border: 2px dashed #cbd5e1;
-        }
 
         .text-primary-custom { color: var(--primary) !important; font-weight: 600; }
-        .text-primary-custom i { color: var(--primary); }
-        
+
         footer {
             flex-shrink: 0;
             width: 100%;
             background: var(--gradient) !important;
-            border-top: 3px solid rgba(255, 255, 255, 0.1);
             padding: 2rem 0 !important;
         }
-        
+
         .modal-header-custom {
             background: var(--primary-dark) !important;
             color: #ffffff !important;
             border-bottom: none;
         }
-        
+
         .required-field::after {
             content: " *";
             color: red;
@@ -233,6 +193,10 @@
 </head>
 
 <body>
+    <%
+        const esSuperAdmin = locals.usuario && usuario.rol === 'super_admin';
+    %>
+
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom shadow-sm">
         <div class="container">
             <a class="navbar-brand fw-bold" href="/">
@@ -253,7 +217,7 @@
                         <li class="nav-item">
                             <span class="nav-link text-white small">
                                 <i class="bi bi-person-circle me-1"></i>
-                                <%= usuario.nombre %> (<%= usuario.rol %>)
+                                <%= usuario.nombre || usuario.nombre_completo %> (<%= usuario.rol %>)
                             </span>
                         </li>
                     <% } %>
@@ -264,7 +228,7 @@
 
     <div class="content-wrapper">
         <div class="container mt-4">
-            <% if (locals.success_msg && success_msg.length > 0) { %>
+            <% if (locals.success_msg) { %>
                 <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
                     <i class="bi bi-check-circle-fill me-2"></i>
                     <%= success_msg %>
@@ -272,7 +236,7 @@
                 </div>
             <% } %>
 
-            <% if (locals.error_msg && error_msg.length > 0) { %>
+            <% if (locals.error_msg) { %>
                 <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
                     <i class="bi bi-exclamation-triangle-fill me-2"></i>
                     <%= error_msg %>
@@ -288,9 +252,11 @@
                     <p class="text-muted">Gestiona todos los grupos registrados en el sistema</p>
                 </div>
                 <div class="mt-3 mt-md-0">
-                    <a href="/grupos/crear" class="btn btn-light shadow-sm fw-bold text-primary border">
-                        <i class="fas fa-plus-circle me-2"></i> Nuevo Grupo
-                    </a>
+                    <% if (esSuperAdmin) { %>
+                        <a href="/grupos/crear" class="btn btn-light shadow-sm fw-bold text-primary border">
+                            <i class="fas fa-plus-circle me-2"></i> Nuevo Grupo
+                        </a>
+                    <% } %>
                 </div>
             </div>
 
@@ -347,8 +313,7 @@
                                 data-compania="<%= (grupo.nombre_compania || '').toLowerCase() %>"
                                 data-contacto="<%= (grupo.nombre_contacto || '').toLowerCase() %>"
                                 data-estado="<%= grupo.activo ? 'activo' : 'inactivo' %>"
-                                data-fecha="<%= new Date(grupo.fecha_creacion).getTime() %>"
-                                data-id="<%= grupo.id_grupo %>">
+                                data-fecha="<%= new Date(grupo.fecha_creacion).getTime() %>">
                                 <div class="card grupo-card shadow-sm h-100">
                                     <div class="card-header-grupo d-flex justify-content-between align-items-center">
                                         <h5 class="mb-0 fw-bold">
@@ -365,8 +330,8 @@
                                             <div class="info-label"><i class="fas fa-id-card"></i>ID:</div>
                                             <div class="info-value">
                                                 <%= grupo.id_cliente %>
-                                                <% if (locals.cliente_nombre && cliente_nombre[grupo.id_cliente]) { %>
-                                                    <span class="text-muted">(<%= cliente_nombre[grupo.id_cliente] %>)</span>
+                                                <% if (grupo.nombre_cliente) { %>
+                                                    <span class="text-muted">(<%= grupo.nombre_cliente %>)</span>
                                                 <% } %>
                                             </div>
                                         </div>
@@ -390,48 +355,39 @@
                                         <% } %>
                                     </div>
                                     <div class="card-footer bg-white border-0 pb-3 d-flex justify-content-end gap-2 flex-wrap">
-                                        
-                                        <button type="button" class="btn btn-secondary btn-sm action-btn shadow-sm"
-                                                data-bs-toggle="modal" data-bs-target="#modalTransferir"
-                                                data-id-origen="<%= grupo.id_grupo %>"
-                                                data-nombre-origen="<%= grupo.nombre_grupo %>"
-                                                title="Transferir Usuarios/Vehículos">
-                                            <i class="fas fa-exchange-alt me-1"></i>
-                                            <span class="d-none d-md-inline">Transferir</span> 
-                                        </button>
+                                        <% if (esSuperAdmin) { %>
+                                            <button type="button" class="btn btn-warning btn-sm action-btn shadow-sm"
+                                                data-bs-toggle="modal" data-bs-target="#modalEditarGrupo"
+                                                data-id="<%= grupo.id_grupo %>"
+                                                data-nombre="<%= grupo.nombre_grupo %>"
+                                                data-cliente="<%= grupo.id_cliente %>"
+                                                data-clientenombre="<%= grupo.nombre_cliente || '' %>"
+                                                data-compania="<%= grupo.nombre_compania || '' %>"
+                                                data-contacto="<%= grupo.nombre_contacto || '' %>"
+                                                data-email="<%= grupo.email_contacto || '' %>"
+                                                data-activo="<%= grupo.activo ? '1' : '0' %>">
+                                                <i class="fas fa-pencil-alt me-1"></i>Editar
+                                            </button>
 
-                                        <button type="button" class="btn btn-warning btn-sm action-btn shadow-sm"
-                                            data-bs-toggle="modal" data-bs-target="#modalEditarGrupo"
-                                            data-id="<%= grupo.id_grupo %>"
-                                            data-nombre="<%= grupo.nombre_grupo %>"
-                                            data-cliente="<%= grupo.id_cliente %>"
-                                            data-clientenombre="<%= locals.cliente_nombre ? cliente_nombre[grupo.id_cliente] : '' %>"
-                                            data-compania="<%= grupo.nombre_compania || '' %>"
-                                            data-contacto="<%= grupo.nombre_contacto || '' %>"
-                                            data-email="<%= grupo.email_contacto || '' %>"
-                                            data-activo="<%= grupo.activo ? '1' : '0' %>">
-                                            <i class="fas fa-pencil-alt me-1"></i>Editar
-                                        </button>
+                                            <button class="btn btn-danger btn-sm action-btn shadow-sm"
+                                                onclick="eliminarGrupo('<%= grupo.id_grupo %>', '<%= grupo.nombre_grupo %>')">
+                                                <i class="fas fa-trash me-1"></i>
+                                            </button>
+                                        <% } %>
+
                                         <a href="/grupos/ver/<%= grupo.id_grupo %>" class="btn btn-info btn-sm action-btn text-white shadow-sm">
                                             <i class="fas fa-eye me-1"></i>Ver
                                         </a>
-                                        <button class="btn btn-danger btn-sm action-btn shadow-sm"
-                                            onclick="eliminarGrupo('<%= grupo.id_grupo %>', '<%= grupo.nombre_grupo %>')">
-                                            <i class="fas fa-trash me-1"></i>
-                                        </button>
                                     </div>
                                 </div>
                             </div>
                         <% }); %>
                     </div>
                 <% } else { %>
-                    <div class="empty-state shadow-sm">
+                    <div class="text-center p-5 bg-white rounded shadow-sm">
                         <i class="bi bi-people" style="font-size: 4rem; color: #0d6efd;"></i>
                         <h3 class="mt-3">No hay grupos registrados</h3>
-                        <p class="text-muted mb-4">Comienza creando tu primer grupo para organizar vehículos y personas</p>
-                        <a href="/grupos/crear" class="btn btn-primary-custom btn-lg">
-                            <i class="bi bi-plus-circle me-2"></i>Crear mi primer grupo
-                        </a>
+                        <p class="text-muted mb-4">Comienza creando tu primer grupo</p>
                     </div>
                 <% } %>
             </div>
@@ -471,33 +427,29 @@
                                         </td>
                                         <td>
                                             <div class="btn-group shadow-sm" role="group">
-                                                
-                                                <button type="button" class="btn btn-sm btn-outline-secondary" title="Transferir"
-                                                        data-bs-toggle="modal" data-bs-target="#modalTransferir"
-                                                        data-id-origen="<%= grupo.id_grupo %>"
-                                                        data-nombre-origen="<%= grupo.nombre_grupo %>">
-                                                    <i class="fas fa-exchange-alt"></i>
-                                                </button>
+                                                <% if (esSuperAdmin) { %>
+                                                    <button type="button" class="btn btn-sm btn-outline-warning"
+                                                        data-bs-toggle="modal" data-bs-target="#modalEditarGrupo"
+                                                        data-id="<%= grupo.id_grupo %>"
+                                                        data-nombre="<%= grupo.nombre_grupo %>"
+                                                        data-cliente="<%= grupo.id_cliente %>"
+                                                        data-clientenombre="<%= grupo.nombre_cliente || '' %>"
+                                                        data-compania="<%= grupo.nombre_compania || '' %>"
+                                                        data-contacto="<%= grupo.nombre_contacto || '' %>"
+                                                        data-email="<%= grupo.email_contacto || '' %>"
+                                                        data-activo="<%= grupo.activo ? '1' : '0' %>">
+                                                        <i class="fas fa-pencil-alt"></i>
+                                                    </button>
 
-                                                <button type="button" class="btn btn-sm btn-outline-warning" title="Editar" 
-                                                    data-bs-toggle="modal" data-bs-target="#modalEditarGrupo"
-                                                    data-id="<%= grupo.id_grupo %>"
-                                                    data-nombre="<%= grupo.nombre_grupo %>"
-                                                    data-cliente="<%= grupo.id_cliente %>"
-                                                    data-clientenombre="<%= locals.cliente_nombre ? cliente_nombre[grupo.id_cliente] : '' %>"
-                                                    data-compania="<%= grupo.nombre_compania || '' %>"
-                                                    data-contacto="<%= grupo.nombre_contacto || '' %>"
-                                                    data-email="<%= grupo.email_contacto || '' %>"
-                                                    data-activo="<%= grupo.activo ? '1' : '0' %>">
-                                                    <i class="fas fa-pencil-alt"></i>
-                                                </button>
-                                                <a href="/grupos/ver/<%= grupo.id_grupo %>" class="btn btn-sm btn-outline-info" title="Ver">
+                                                    <button class="btn btn-sm btn-outline-danger"
+                                                        onclick="eliminarGrupo('<%= grupo.id_grupo %>', '<%= grupo.nombre_grupo %>')">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                <% } %>
+
+                                                <a href="/grupos/ver/<%= grupo.id_grupo %>" class="btn btn-sm btn-outline-info">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <button class="btn btn-sm btn-outline-danger" title="Eliminar"
-                                                    onclick="eliminarGrupo('<%= grupo.id_grupo %>', '<%= grupo.nombre_grupo %>')">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -510,39 +462,34 @@
         </div>
     </div>
 
+    <% if (esSuperAdmin) { %>
     <div class="modal fade" id="modalEditarGrupo" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content border-0 shadow">
-                
                 <div class="modal-header modal-header-custom py-3">
                     <h5 class="modal-title fw-bold text-white">
                         <i class="fas fa-edit me-2"></i> Editar Grupo: <span id="txtNombreGrupo"></span>
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                
+
                 <form id="formEditarGrupo" onsubmit="guardarCambiosGrupo(event)">
                     <div class="modal-body p-4">
                         <input type="hidden" id="editIdGrupo">
 
                         <div class="row g-3">
-                            
                             <div class="col-md-6">
                                 <label for="editNombreGrupo" class="form-label fw-bold required-field">Nombre del Grupo</label>
                                 <input type="text" class="form-control shadow-sm" id="editNombreGrupo" required>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <label class="form-label fw-bold required-field">Cliente Responsable</label>
-                                <select class="form-select shadow-sm" name="id_cliente" id="edit_id_cliente" required>
+                                <select class="form-select shadow-sm" id="edit_id_cliente" required>
                                     <option value="">Seleccionar...</option>
                                     <% if (locals.clientes && locals.clientes.length > 0) { %>
-                                        <% clientes.forEach(c=> { %>
+                                        <% clientes.forEach(c => { %>
                                             <option value="<%= c.id_cliente %>"><%= c.nombre %></option>
-                                        <% }); %>
-                                    <% } else if (locals.cliente_nombre) { %>
-                                        <% Object.keys(cliente_nombre).forEach(id => { %>
-                                            <option value="<%= id %>"><%= cliente_nombre[id] %></option>
                                         <% }); %>
                                     <% } %>
                                 </select>
@@ -557,22 +504,21 @@
                                 <label for="editNombreContacto" class="form-label fw-bold">Nombre del Contacto</label>
                                 <input type="text" class="form-control shadow-sm" id="editNombreContacto">
                             </div>
-                            
+
                             <div class="col-md-6 mt-4">
                                 <label for="editEmailContacto" class="form-label fw-bold">Email de Contacto</label>
                                 <input type="email" class="form-control shadow-sm" id="editEmailContacto">
                             </div>
-                            
+
                             <div class="col-12 mt-4 mb-2">
                                 <div class="form-check form-switch d-flex align-items-center bg-light p-3 rounded shadow-sm border">
                                     <input class="form-check-input ms-0 me-3" type="checkbox" id="editActivo" style="transform: scale(1.3); cursor: pointer;" checked>
                                     <label class="form-check-label fw-bold" for="editActivo" id="estadoLabel">Grupo Activo</label>
                                 </div>
                             </div>
-
                         </div>
                     </div>
-                    
+
                     <div class="modal-footer bg-light border-top">
                         <button type="button" class="btn btn-outline-secondary px-4 bg-white" data-bs-dismiss="modal">Cancelar</button>
                         <button type="submit" class="btn btn-primary-custom px-4 shadow-sm fw-bold">Actualizar Grupo</button>
@@ -581,57 +527,7 @@
             </div>
         </div>
     </div>
-
-    <div class="modal fade" id="modalTransferir" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-secondary text-white border-bottom-0">
-                    <h5 class="modal-title fw-bold">
-                        <i class="fas fa-exchange-alt me-2"></i>Transferir desde: <span id="lblGrupoOrigen"></span>
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                
-                <form id="formTransferir" onsubmit="procesarTransferencia(event)">
-                    <div class="modal-body p-4">
-                        <input type="hidden" id="transfIdOrigen">
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold required-field">¿Qué deseas transferir?</label>
-                            <select class="form-select shadow-sm" id="transfTipo" required onchange="cargarElementosGrupo()">
-                                <option value="">Selecciona tipo...</option>
-                                <option value="usuario">Usuario / Persona</option>
-                                <option value="vehiculo">Vehículo / Equipo</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold required-field">Selecciona el elemento</label>
-                            <select class="form-select shadow-sm" id="transfElemento" required disabled>
-                                <option value="">Primero selecciona el tipo...</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold required-field">Grupo de Destino</label>
-                            <select class="form-select shadow-sm" id="transfIdDestino" required>
-                                <option value="">Selecciona el nuevo grupo...</option>
-                                <% if (locals.grupos && grupos.length > 0) { %>
-                                    <% grupos.forEach(g => { %>
-                                        <option value="<%= g.id_grupo %>"><%= g.nombre_grupo %></option>
-                                    <% }); %>
-                                <% } %>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="modal-footer bg-light border-top">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-secondary shadow-sm fw-bold">Ejecutar Transferencia</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    <% } %>
 
     <footer class="text-center text-white py-4 mt-auto">
         <div class="container">
@@ -640,26 +536,23 @@
             <small class="text-white-50"><i class="fas fa-users me-1"></i> Módulo de Grupos v2.0.0</small>
         </div>
     </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        let paginaActual = 1;
-        const elementosPorPagina = 6;
-        
-        // --- Lógica Modal Editar Grupo ---
         const modalEditarGrupoEl = document.getElementById('modalEditarGrupo');
+
         if (modalEditarGrupoEl) {
             modalEditarGrupoEl.addEventListener('show.bs.modal', event => {
                 const button = event.relatedTarget;
                 const id = button.getAttribute('data-id');
                 const nombre = button.getAttribute('data-nombre');
-                const clienteId = button.getAttribute('data-cliente'); 
-                const clienteNombre = button.getAttribute('data-clientenombre'); 
+                const clienteId = button.getAttribute('data-cliente');
+                const clienteNombre = button.getAttribute('data-clientenombre');
                 const compania = button.getAttribute('data-compania');
                 const contacto = button.getAttribute('data-contacto');
                 const email = button.getAttribute('data-email');
                 const activo = button.getAttribute('data-activo');
 
-                
                 document.getElementById('txtNombreGrupo').innerText = nombre;
                 document.getElementById('editIdGrupo').value = id;
                 document.getElementById('editNombreGrupo').value = nombre;
@@ -667,23 +560,21 @@
                 document.getElementById('editNombreContacto').value = contacto;
                 document.getElementById('editEmailContacto').value = email;
 
-                
                 const selectCliente = document.getElementById('edit_id_cliente');
-                
                 let optionExists = Array.from(selectCliente.options).some(opt => opt.value == clienteId);
-                
+
                 if (!optionExists && clienteId && clienteNombre) {
                     const newOption = new Option(clienteNombre, clienteId);
                     selectCliente.add(newOption);
                 }
-                
+
                 selectCliente.value = clienteId;
 
                 const checkActivo = document.getElementById('editActivo');
                 const labelEstado = document.getElementById('estadoLabel');
-                
+
                 checkActivo.checked = (activo === '1' || activo === 'true');
-                
+
                 if (checkActivo.checked) {
                     labelEstado.innerText = 'Grupo Activo';
                     labelEstado.classList.remove('text-muted');
@@ -695,8 +586,10 @@
                 }
             });
         }
+
         async function guardarCambiosGrupo(event) {
             event.preventDefault();
+
             const id = document.getElementById('editIdGrupo').value;
             const data = {
                 nombre_grupo: document.getElementById('editNombreGrupo').value,
@@ -706,130 +599,55 @@
                 email_contacto: document.getElementById('editEmailContacto').value,
                 activo: document.getElementById('editActivo').checked ? 1 : 0
             };
+
+            console.log('Enviando datos:', data);
+
             try {
-                const res = await fetch(`/api/grupos/${id}`, {
+                const res = await fetch(`/grupos/api/${id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
+
+                const result = await res.json();
+                console.log('Respuesta backend:', result);
+
                 if (res.ok) {
                     alert("Grupo actualizado correctamente");
                     location.reload();
                 } else {
-                    const error = await res.json();
-                    alert("Error: " + (error.error || "No se pudo actualizar el grupo"));
+                    alert("Error: " + (result.error || "No se pudo actualizar el grupo"));
                 }
             } catch (e) {
                 console.error(e);
                 alert("Error de servidor al actualizar el grupo");
             }
         }
+
         async function eliminarGrupo(idGrupo, nombreGrupo) {
             if (!confirm(`¿Eliminar el grupo "${nombreGrupo}"? Esta acción no se puede deshacer.`)) return;
+
             try {
-                const res = await fetch(`/api/grupos/${idGrupo}`, { method: 'DELETE' });
+                const res = await fetch(`/grupos/api/${idGrupo}`, { method: 'DELETE' });
+                const result = await res.json();
+
                 if (res.ok) {
                     alert("Grupo eliminado");
                     location.reload();
                 } else {
-                    const error = await res.json();
-                    alert("Error: " + (error.error || "No se pudo eliminar"));
+                    alert("Error: " + (result.error || "No se pudo eliminar"));
                 }
             } catch (e) {
                 alert("Error de servidor");
             }
         }
-        const modalTransferirEl = document.getElementById('modalTransferir');
-        if (modalTransferirEl) {
-            modalTransferirEl.addEventListener('show.bs.modal', event => {
-                const button = event.relatedTarget;
-                const idOrigen = button.getAttribute('data-id-origen');
-                const nombreOrigen = button.getAttribute('data-nombre-origen');
 
-                document.getElementById('lblGrupoOrigen').innerText = nombreOrigen;
-                document.getElementById('transfIdOrigen').value = idOrigen;
-                
-                document.getElementById('formTransferir').reset();
-                document.getElementById('transfElemento').innerHTML = '<option value="">Primero selecciona el tipo...</option>';
-                document.getElementById('transfElemento').disabled = true;
-
-                const selectDestino = document.getElementById('transfIdDestino');
-                Array.from(selectDestino.options).forEach(opt => {
-                    opt.style.display = (opt.value === idOrigen) ? 'none' : 'block';
-                });
-            });
-        }
-
-        async function cargarElementosGrupo() {
-            const tipo = document.getElementById('transfTipo').value;
-            const idOrigen = document.getElementById('transfIdOrigen').value;
-            const selectElemento = document.getElementById('transfElemento');
-
-            if (!tipo) {
-                selectElemento.innerHTML = '<option value="">Primero selecciona el tipo...</option>';
-                selectElemento.disabled = true;
-                return;
-            }
-
-            selectElemento.innerHTML = '<option value="">Cargando elementos...</option>';
-            selectElemento.disabled = true;
-
-            try {
-                const res = await fetch(`/api/grupos/${idOrigen}/elementos?tipo=${tipo}`);
-                if (!res.ok) throw new Error("Error al cargar datos");
-                const data = await res.json();
-
-                selectElemento.innerHTML = '<option value="">Selecciona el elemento...</option>';
-                
-                if (data.length === 0) {
-                    selectElemento.innerHTML = `<option value="">No hay ${tipo}s en este grupo</option>`;
-                } else {
-                    data.forEach(item => {
-                        selectElemento.innerHTML += `<option value="${item.id}">${item.nombre} ${item.identificador ? '('+item.identificador+')' : ''}</option>`;
-                    });
-                    selectElemento.disabled = false;
-                }
-            } catch (e) {
-                console.error("Error cargando elementos", e);
-                selectElemento.innerHTML = '<option value="">Error al cargar datos</option>';
-            }
-        }
-
-        async function procesarTransferencia(event) {
-            event.preventDefault();
-            
-            const data = {
-                tipo: document.getElementById('transfTipo').value,
-                id_elemento: document.getElementById('transfElemento').value,
-                id_grupo_origen: document.getElementById('transfIdOrigen').value,
-                id_grupo_destino: document.getElementById('transfIdDestino').value
-            };
-
-            try {
-                const res = await fetch(`/api/grupos/transferir`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-
-                if (res.ok) {
-                    alert("Transferencia completada con éxito");
-                    location.reload();
-                } else {
-                    const error = await res.json();
-                    alert("Error: " + (error.error || "No se pudo realizar la transferencia"));
-                }
-            } catch (e) {
-                console.error(e);
-                alert("Error de servidor durante la transferencia");
-            }
-        }  
         function cambiarVista(vista) {
             const vistaCards = document.getElementById('vistaCardsContainer');
             const vistaTabla = document.getElementById('vistaTablaContainer');
             const btnCards = document.getElementById('vistaCards');
             const btnTabla = document.getElementById('vistaTabla');
-            
+
             if (vista === 'cards') {
                 vistaCards.style.display = 'block';
                 vistaTabla.style.display = 'none';
@@ -842,59 +660,40 @@
                 btnCards.classList.remove('active');
             }
         }
+
+        function limpiarFiltros() {
+            document.getElementById('buscarGrupo').value = '';
+            document.getElementById('filtroEstado').value = 'todos';
+            document.getElementById('ordenarPor').value = 'reciente';
+            filtrarYOrdenar();
+        }
+
         function filtrarYOrdenar() {
             const busqueda = document.getElementById('buscarGrupo')?.value.toLowerCase() || '';
             const filtroEstado = document.getElementById('filtroEstado')?.value || 'todos';
             const items = document.querySelectorAll('.grupo-item, .grupo-item-tabla');
-            
+
             items.forEach(item => {
                 const nombre = item.dataset.nombre || '';
                 const compania = item.dataset.compania || '';
                 const contacto = item.dataset.contacto || '';
                 const estado = item.dataset.estado;
-                
+
                 const cumpleBusqueda = busqueda === '' || nombre.includes(busqueda) || compania.includes(busqueda) || contacto.includes(busqueda);
                 const cumpleEstado = filtroEstado === 'todos' || estado === (filtroEstado === 'activos' ? 'activo' : 'inactivo');
-                
+
                 item.style.display = (cumpleBusqueda && cumpleEstado) ? '' : 'none';
             });
-            paginaActual = 1;
-            aplicarPaginacion();
-        }
-        function aplicarPaginacion() {
-            const items = document.querySelectorAll('.grupo-item');
-            const itemsVisibles = Array.from(items).filter(item => item.style.display !== 'none');
-            const totalPaginas = Math.ceil(itemsVisibles.length / elementosPorPagina);
-            
-            itemsVisibles.forEach((item, index) => {
-                const pagina = Math.floor(index / elementosPorPagina) + 1;
-                item.style.display = (pagina === paginaActual) ? '' : 'none';
-            });
-            const prevLi = document.getElementById('prevPage');
-            const nextLi = document.getElementById('nextPage');
-            if (prevLi) prevLi.classList.toggle('disabled', paginaActual === 1);
-            if (nextLi) nextLi.classList.toggle('disabled', paginaActual === totalPaginas || totalPaginas === 0);
-        }
-        function cambiarPagina(p) {
-            if (p === 'prev') paginaActual--;
-            else if (p === 'next') paginaActual++;
-            else paginaActual = p;
-            aplicarPaginacion();
-        }
-        function limpiarFiltros() {
-            document.getElementById('buscarGrupo').value = '';
-            document.getElementById('filtroEstado').value = 'todos';
-            filtrarYOrdenar();
         }
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('buscarGrupo')?.addEventListener('input', filtrarYOrdenar);
             document.getElementById('filtroEstado')?.addEventListener('change', filtrarYOrdenar);
-            aplicarPaginacion();
+
             const editActivo = document.getElementById('editActivo');
             if (editActivo) {
-                editActivo.addEventListener('change', function() {
+                editActivo.addEventListener('change', function () {
                     const labelEstado = document.getElementById('estadoLabel');
-                    if(this.checked) {
+                    if (this.checked) {
                         labelEstado.innerText = 'Grupo Activo';
                         labelEstado.classList.remove('text-muted');
                         labelEstado.classList.add('text-primary-custom');

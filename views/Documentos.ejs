@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="/css/Index.css">
-
     <style>
         :root {
             --primary: #1e3a8a;
@@ -18,19 +17,16 @@
             --info-custom: #0d6efd;
             --info-custom-dark: #0b5ed7;
         }
-
         html,
         body {
             height: 100%;
             margin: 0;
         }
-
         body {
             display: flex;
             flex-direction: column;
             min-height: 100vh;
         }
-
         .content-wrapper {
             flex: 1 0 auto;
         }
@@ -38,38 +34,30 @@
         .bg-primary {
             background-color: var(--primary) !important;
         }
-
         .btn-primary {
             background-color: var(--primary);
             border-color: var(--primary);
         }
-
         .btn-primary:hover {
             background-color: var(--primary-dark);
             border-color: var(--primary-dark);
         }
-
         .text-primary {
             color: var(--primary) !important;
         }
-
         .border-primary {
             border-color: var(--primary) !important;
         }
-
         .card-header.bg-primary {
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
         }
-
         .modal-header.bg-primary {
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
         }
-
         .modal-header.bg-info-custom {
             background: linear-gradient(135deg, var(--info-custom) 0%, var(--info-custom-dark) 100%) !important;
             color: white;
         }
-
         .card.text-white,
         .card.text-white .card-body,
         .card.text-white .card-title,
@@ -79,24 +67,20 @@
         .card.text-white span {
             color: #ffffff !important;
         }
-
         .card.text-white h2 {
             font-weight: 700;
             font-size: 2.2rem;
         }
-
         .resumen-doc {
             background: #f8f9fa;
             border: 1px solid #dee2e6;
             border-radius: 10px;
             padding: 1rem;
         }
-
         .label-strong {
             font-weight: 700;
             margin-bottom: .35rem;
         }
-
         footer {
             flex-shrink: 0;
             width: 100%;
@@ -105,7 +89,6 @@
         }
     </style>
 </head>
-
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
@@ -149,6 +132,8 @@
                 .split('\n').join(' ')
                 .split('\r').join(' ');
         }
+
+        const puedeEliminarDocumento = usuario && ['actualizador', 'admin_cliente', 'super_admin'].includes(usuario.rol);
     %>
 
     <div class="content-wrapper">
@@ -294,6 +279,17 @@
                                                     <a href="<%= doc.ruta_archivo %>" class="btn btn-sm btn-success" target="_blank">
                                                         <i class="fas fa-file-pdf"></i>
                                                     </a>
+                                                <% } %>
+
+                                                <% if (puedeEliminarDocumento) { %>
+                                                    <button
+                                                        type="button"
+                                                        class="btn btn-sm btn-danger eliminar-documento"
+                                                        data-id="<%= safeAttr(doc.id_documento_veh) %>"
+                                                        data-tipo="<%= safeAttr(doc.tipo_documento_nombre || '') %>"
+                                                        data-numero="<%= safeAttr(doc.numero_documento || '') %>">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
                                                 <% } %>
                                             </td>
                                         </tr>
@@ -508,7 +504,6 @@
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-
                 <form id="formEditarFechasDocumento" method="POST">
                     <div class="modal-body">
                         <input type="hidden" name="id_documento" id="ver_doc_id">
@@ -603,13 +598,11 @@
             </div>
         </div>
     </div>
-
     <footer class="text-center text-white py-4">
         <div class="container">
             <p class="mb-1">&copy; 2026 Sistema de Gestión Vehicular</p>
         </div>
     </footer>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
@@ -668,6 +661,41 @@
 
                 const modalDocumento = new bootstrap.Modal(document.getElementById('modalVerDocumento'));
                 modalDocumento.show();
+            });
+            $('.eliminar-documento').on('click', function () {
+                const id = $(this).data('id');
+                const tipo = $(this).data('tipo') || 'documento';
+                const numero = $(this).data('numero') || '';
+
+                const mensaje = numero
+                    ? `¿Estás seguro de eliminar el documento "${tipo}" N° ${numero}? Esta acción no se puede deshacer.`
+                    : `¿Estás seguro de eliminar este documento? Esta acción no se puede deshacer.`;
+
+                if (!confirm(mensaje)) return;
+
+                fetch(`/documentos/eliminar/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(async (res) => {
+                    let data = {};
+                    try {
+                        data = await res.json();
+                    } catch (e) {}
+
+                    if (res.ok) {
+                        alert(data.message || 'Documento eliminado correctamente');
+                        window.location.reload();
+                    } else {
+                        alert(data.error || 'No se pudo eliminar el documento');
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error al eliminar documento:', error);
+                    alert('Error de servidor al eliminar el documento');
+                });
             });
         });
     </script>
