@@ -1,6 +1,6 @@
 
 CREATE DATABASE IF NOT EXISTS sistema_gpv;
-USE sistema_gpv;
+USE railway;
 
 CREATE TABLE IF NOT EXISTS clientes (
     id_cliente INT AUTO_INCREMENT PRIMARY KEY,
