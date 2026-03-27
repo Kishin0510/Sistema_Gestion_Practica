@@ -71,6 +71,30 @@ CREATE TABLE grupos (
   fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente)
 );
+CREATE TABLE tipos_vehiculo (
+    id_tipo_vehiculo INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_tipo VARCHAR(50) NOT NULL,
+    descripcion TEXT
+);
+CREATE TABLE vehiculos (
+    id_vehiculo INT AUTO_INCREMENT PRIMARY KEY,
+    id_cliente INT NOT NULL,
+    patente VARCHAR(20) NOT NULL,
+    marca VARCHAR(50),
+    modelo VARCHAR(50),
+    anio INT,
+    numero_chasis VARCHAR(100),
+    numero_motor VARCHAR(100),
+    tipo_vehiculo INT,
+    capacidad VARCHAR(50),
+    color VARCHAR(30),
+    activo BOOLEAN DEFAULT TRUE,
+    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
+    fecha_actualizacion DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente),
+    FOREIGN KEY (tipo_vehiculo) REFERENCES tipos_vehiculo(id_tipo_vehiculo),
+    UNIQUE KEY idx_patente_cliente (id_cliente, patente)
+);
 CREATE TABLE vehiculo_grupos (
     id_vehiculo INT NOT NULL,
     id_grupo INT NOT NULL,
@@ -126,30 +150,6 @@ CREATE TABLE mantenciones_vehiculo (
         FOREIGN KEY (id_vehiculo) 
         REFERENCES vehiculos(id_vehiculo) 
         ON DELETE CASCADE
-);
-CREATE TABLE tipos_vehiculo (
-    id_tipo_vehiculo INT AUTO_INCREMENT PRIMARY KEY,
-    nombre_tipo VARCHAR(50) NOT NULL,
-    descripcion TEXT
-);
-CREATE TABLE vehiculos (
-    id_vehiculo INT AUTO_INCREMENT PRIMARY KEY,
-    id_cliente INT NOT NULL,
-    patente VARCHAR(20) NOT NULL,
-    marca VARCHAR(50),
-    modelo VARCHAR(50),
-    anio INT,
-    numero_chasis VARCHAR(100),
-    numero_motor VARCHAR(100),
-    tipo_vehiculo INT,
-    capacidad VARCHAR(50),
-    color VARCHAR(30),
-    activo BOOLEAN DEFAULT TRUE,
-    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
-    fecha_actualizacion DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente),
-    FOREIGN KEY (tipo_vehiculo) REFERENCES tipos_vehiculo(id_tipo_vehiculo),
-    UNIQUE KEY idx_patente_cliente (id_cliente, patente)
 );
 CREATE TABLE tipos_documento_veh (
     id_tipo_documento_veh INT AUTO_INCREMENT PRIMARY KEY,
