@@ -127,5 +127,4 @@ const alertasController = {
         }
     }
 };
-
 module.exports = alertasController;
