@@ -13,7 +13,6 @@ class Conexion {
             connectionLimit: 10,
             queueLimit: 0
         });
-
         
         this.pool.getConnection((err, connection) => {
             if (err) {

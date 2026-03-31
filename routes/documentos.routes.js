@@ -5,7 +5,6 @@ const path = require('path');
 const fs = require('fs');
 const documentoVehiculoController = require('../db/controllers/documentoController');
 const { permisoPara } = require('../middlewares/roleAuth');
-
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         const dir = 'public/uploads/documentos/';

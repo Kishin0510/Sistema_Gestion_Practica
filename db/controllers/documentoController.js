@@ -2,9 +2,36 @@ require('dotenv').config();
 const db = require('../conexion');
 const fs = require('fs');
 const path = require('path');
-
 const logError = (tag, err) => console.error(` ${tag}`, err.message || err);
 
+function normalizarRutaArchivo(rutaArchivo) {
+    if (!rutaArchivo) return null;
+
+    if (Buffer.isBuffer(rutaArchivo)) {
+        const texto = rutaArchivo.toString('utf8').trim();
+        return texto || null;
+    }
+
+    if (typeof rutaArchivo === 'string') {
+        const texto = rutaArchivo.trim();
+        return texto || null;
+    }
+
+    try {
+        const texto = String(rutaArchivo).trim();
+        return texto || null;
+    } catch (error) {
+        return null;
+    }
+}
+
+function obtenerRutaFisicaDesdePublic(rutaArchivo) {
+    const rutaNormalizada = normalizarRutaArchivo(rutaArchivo);
+    if (!rutaNormalizada) return null;
+
+    const rutaSinSlashInicial = rutaNormalizada.replace(/^\/+/, '');
+    return path.join(process.cwd(), 'public', rutaSinSlashInicial);
+}
 const documentoVehiculoController = {
     mostrarDocumentos: async (req, res) => {
         try {
@@ -579,8 +606,9 @@ const documentoVehiculoController = {
             if (req.file) {
                 if (documentoActual[0].ruta_archivo) {
                     try {
-                        const oldFilePath = path.join(__dirname, '../../public', documentoActual[0].ruta_archivo);
-                        if (fs.existsSync(oldFilePath)) {
+                        
+                        const oldFilePath = obtenerRutaFisicaDesdePublic(documentoActual[0].ruta_archivo);
+                        if (oldFilePath && fs.existsSync(oldFilePath)) {
                             fs.unlinkSync(oldFilePath);
                         }
                     } catch (fileErr) {
@@ -831,9 +859,10 @@ const documentoVehiculoController = {
             }
 
             if (doc.ruta_archivo) {
-                const filePath = path.join(process.cwd(), 'public', doc.ruta_archivo.replace(/^\/+/, ''));
+                
+                const filePath = obtenerRutaFisicaDesdePublic(doc.ruta_archivo);
 
-                if (fs.existsSync(filePath)) {
+                if (filePath && fs.existsSync(filePath)) {
                     fs.unlinkSync(filePath);
                 }
             }
@@ -889,5 +918,4 @@ const documentoVehiculoController = {
         }
     }
 };
-
 module.exports = documentoVehiculoController;
