@@ -74,7 +74,7 @@ const vehiculosController = {
                 } catch (e) { }
             }
 
-            res.render('agregarVehiculo', {
+            res.render('AgregarVehiculo', {
                 title: 'Agregar Vehículo',
                 clientes: clientes,
                 tiposVehiculo: tiposVehiculo,
