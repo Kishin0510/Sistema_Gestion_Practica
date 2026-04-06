@@ -88,7 +88,7 @@ const personasController = {
             
             const hayClientes = clientes && clientes.length > 0;
 
-            res.render('agregarPersona', {
+            res.render('AgregarPersona', {
                 title: 'Agregar Persona',
                 clientes: clientes,
                 datosFormulario: datosForm,
