@@ -66,6 +66,8 @@
 </head>
 
 <body>
+    <% const usuarioSafe = (typeof usuario !== 'undefined' && usuario) ? usuario : { rol: '', nombre: '' }; %>
+
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary-custom shadow-sm">
         <div class="container">
             <a class="navbar-brand fw-bold" href="/">
@@ -81,7 +83,7 @@
                         <a class="nav-link active" href="/">Inicio</a>
                     </li>
 
-                    <% if (typeof usuario !=='undefined' && usuario && usuario.rol==='visualizador' ) { %>
+                    <% if (typeof usuario !=='undefined' && usuario && usuarioSafe.rol==='visualizador' ) { %>
                         <li class="nav-item">
                             <a class="nav-link" href="/personas">
                                 <i class="bi bi-people me-1"></i>Personas
@@ -106,7 +108,7 @@
                                     <i class="bi bi-people me-1"></i>Personas
                                 </a>
                                 <ul class="dropdown-menu" aria-labelledby="navbarDropdownPersonas">
-                                    <% if (usuario.rol==='super_admin' ) { %>
+                                    <% if (usuarioSafe.rol==='super_admin' ) { %>
                                         <li>
                                             <a class="dropdown-item" href="/personas/agregar">
                                                 <i class="bi bi-person-plus me-2"></i>Agregar Persona
@@ -124,7 +126,7 @@
                                 </ul>
                             </li>
 
-                            <% if (usuario.rol==='super_admin' ) { %>
+                            <% if (usuarioSafe.rol==='super_admin' ) { %>
                                 <li class="nav-item">
                                     <a class="nav-link" href="/registro-cambios">
                                         <i class="bi bi-shield-check me-1"></i>Auditoría
@@ -138,7 +140,7 @@
                                             <i class="bi bi-truck me-1"></i>Vehículos
                                         </a>
                                         <ul class="dropdown-menu" aria-labelledby="navbarDropdownVehiculos">
-                                            <% if (usuario.rol==='super_admin' ) { %>
+                                            <% if (usuarioSafe.rol==='super_admin' ) { %>
                                                 <li>
                                                     <a class="dropdown-item" href="/vehiculos/agregar">
                                                         <i class="bi bi-plus-circle me-2"></i>Agregar Vehículo
@@ -153,14 +155,14 @@
                                         </ul>
                                     </li>
 
-                                    <% if (['super_admin', 'admin_cliente' ].includes(usuario.rol)) { %>
+                                    <% if (['super_admin', 'admin_cliente' ].includes(usuarioSafe.rol)) { %>
                                         <li class="nav-item dropdown">
                                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownGrupos"
                                                 role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                                 <i class="bi bi-people-fill me-1"></i>Grupos
                                             </a>
                                             <ul class="dropdown-menu" aria-labelledby="navbarDropdownGrupos">
-                                                <% if (usuario.rol==='super_admin' ) { %>
+                                                <% if (usuarioSafe.rol==='super_admin' ) { %>
                                                     <li>
                                                         <a class="dropdown-item" href="/grupos/crear">
                                                             <i class="bi bi-plus-circle me-2"></i>Crear Grupo
@@ -176,7 +178,7 @@
                                         </li>
                                         <% } %>
 
-                                            <% if (['super_admin', 'actualizador' ].includes(usuario.rol)) { %>
+                                            <% if (['super_admin', 'actualizador' ].includes(usuarioSafe.rol)) { %>
                                                 <li class="nav-item dropdown">
                                                     <a class="nav-link dropdown-toggle" href="#"
                                                         id="navbarDropdownDocumentos" role="button"
@@ -213,7 +215,7 @@
                                                 </li>
                                                 <% } %>
 
-                                                    <% if (usuario.rol==='admin_cliente' ) { %>
+                                                    <% if (usuarioSafe.rol==='admin_cliente' ) { %>
                                                         <li class="nav-item">
                                                             <a class="nav-link" href="/alertas">
                                                                 <i class="bi bi-bell me-1"></i>Alertas
@@ -236,7 +238,7 @@
                                                                             data-bs-toggle="dropdown"
                                                                             aria-expanded="false">
                                                                             <i class="bi bi-person-circle me-1"></i>
-                                                                            <%= usuario.nombre %>
+                                                                            <%= usuarioSafe.nombre %>
                                                                         </a>
                                                                         <ul class="dropdown-menu dropdown-menu-end"
                                                                             aria-labelledby="navbarUser">
@@ -260,7 +262,7 @@
         <h1 class="text-center text-primary-custom">Bienvenido al Sistema de Gestión Vehicular</h1>
         <p class="text-center">Plataforma centralizada para el control de vehículos, personas y documentos.</p>
 
-        <% if (usuario.rol==='visualizador' ) { %>
+        <% if (usuarioSafe.rol==='visualizador' ) { %>
             <div class="quick-actions">
                 <h3 class="text-center mb-4">
                     <i class="bi bi-eye me-2"></i>Accesos Disponibles
@@ -319,7 +321,7 @@
                     <h3 class="text-center mb-4"><i class="bi bi-lightning-charge me-2"></i>Acciones Rápidas</h3>
                     <div class="row justify-content-center">
 
-                        <% if (usuario.rol==='super_admin' ) { %>
+                        <% if (usuarioSafe.rol==='super_admin' ) { %>
                             <div class="col-md-4 mb-3">
                                 <div class="card action-card border-primary">
                                     <div class="card-body text-center">
@@ -360,7 +362,7 @@
                             </div>
                             <% } %>
 
-                                <% if (usuario.rol==='actualizador' ) { %>
+                                <% if (usuarioSafe.rol==='actualizador' ) { %>
                                     <div class="col-md-4 mb-3">
                                         <div class="card action-card border-info">
                                             <div class="card-body text-center">
@@ -378,7 +380,7 @@
                 </div>
                 <% } %>
 
-                    <% if (usuario.rol==='admin_cliente' ) { %>
+                    <% if (usuarioSafe.rol==='admin_cliente' ) { %>
                         <section class="alertas-home-wrapper">
                             <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
                                 <div>

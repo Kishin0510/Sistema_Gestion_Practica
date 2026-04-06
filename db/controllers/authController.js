@@ -26,11 +26,18 @@ authController.login = async (req, res) => {
     try {
         console.log(` Intentando login para: ${correo}`);
         
-        const [results] = await db.query('SELECT * FROM usuarios WHERE correo = ? AND activo = 1', [correo]);
+        const [results] = await db.query(
+            'SELECT * FROM usuarios WHERE correo = ? AND activo = 1',
+            [correo]
+        );
 
         if (results.length === 0) {
             console.log(" Usuario no encontrado");
-            return res.render('Login', { title: 'Iniciar Sesión', error: 'Credenciales inválidas.', success: null });
+            return res.render('Login', {
+                title: 'Iniciar Sesión',
+                error: 'Credenciales inválidas.',
+                success: null
+            });
         }
 
         let userFound = null;
@@ -43,10 +50,13 @@ authController.login = async (req, res) => {
         }
 
         if (!userFound) {
-            return res.render('Login', { title: 'Iniciar Sesión', error: 'Contraseña incorrecta.', success: null });
+            return res.render('Login', {
+                title: 'Iniciar Sesión',
+                error: 'Contraseña incorrecta.',
+                success: null
+            });
         }
 
-        
         console.log(`>>> Usuario verificado: ${userFound.nombre_completo} | ROL: ${userFound.tipo_usuario} | Cliente ID: ${userFound.id_cliente}`);
 
         req.session.usuario = {
@@ -56,15 +66,21 @@ authController.login = async (req, res) => {
         };
 
         req.session.save(() => {
-            
             console.log(` Login exitoso para [${userFound.tipo_usuario}], redirigiendo...`);
-            db.query('UPDATE usuarios SET ultimo_login = NOW() WHERE id_usuario = ?', [userFound.id_usuario]);
+            db.query(
+                'UPDATE usuarios SET ultimo_login = NOW() WHERE id_usuario = ?',
+                [userFound.id_usuario]
+            );
             res.redirect('/');
         });
 
     } catch (error) {
         console.error(" Error crítico en login:", error);
-        res.render('Login', { title: 'Iniciar Sesión', error: 'Error en el servidor.', success: null });
+        res.render('Login', {
+            title: 'Iniciar Sesión',
+            error: 'Error en el servidor.',
+            success: null
+        });
     }
 };
 
@@ -74,4 +90,55 @@ authController.logout = (req, res) => {
     });
 };
 
+authController.forgotPassword = async (req, res) => {
+    const { correo, nueva_contrasena, confirmar_contrasena, tipo_usuario } = req.body;
+
+    try {
+        if (!correo || !nueva_contrasena || !confirmar_contrasena || !tipo_usuario) {
+            return res.status(400).json({
+                error: 'Todos los campos son obligatorios.'
+            });
+        }
+
+        if (nueva_contrasena.length < 6) {
+            return res.status(400).json({
+                error: 'La nueva contraseña debe tener al menos 6 caracteres.'
+            });
+        }
+
+        if (nueva_contrasena !== confirmar_contrasena) {
+            return res.status(400).json({
+                error: 'Las contraseñas no coinciden.'
+            });
+        }
+
+        const [results] = await db.query(
+            'SELECT * FROM usuarios WHERE correo = ? AND tipo_usuario = ? AND activo = 1',
+            [correo, tipo_usuario]
+        );
+
+        if (results.length === 0) {
+            return res.status(404).json({
+                error: 'No existe un usuario activo con ese correo y tipo de usuario.'
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(nueva_contrasena, 10);
+
+        await db.query(
+            'UPDATE usuarios SET contrasena = ? WHERE correo = ? AND tipo_usuario = ? AND activo = 1',
+            [hashedPassword, correo, tipo_usuario]
+        );
+
+        return res.status(200).json({
+            success: 'Contraseña actualizada correctamente.'
+        });
+
+    } catch (error) {
+        console.error(" Error en recuperación de contraseña:", error);
+        return res.status(500).json({
+            error: 'Error interno al actualizar la contraseña.'
+        });
+    }
+};
 module.exports = authController;
