@@ -16,12 +16,10 @@ app.use(session({
     saveUninitialized: true,
     cookie: { secure: false }
 }));
-
 app.use((req, res, next) => {
     res.locals.usuario = req.session.usuario || null;
     next();
 });
-
 app.use((req, res, next) => {
     req.flash = (tipo, mensaje) => {
         if (!req.session.flashData) req.session.flashData = {};
@@ -37,17 +35,14 @@ app.use((req, res, next) => {
     res.locals.formData = flashMessages.formData || {};
     res.locals.usuario = req.session.usuario || null;
     delete req.session.flashData;
-
     next();
 });
-
 const authMiddleware = (req, res, next) => {
     if (!req.session.usuario) {
         return res.redirect('/login');
     }
     next();
 };
-
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
@@ -128,7 +123,6 @@ app.get('/', authMiddleware, async (req, res) => {
         });
     }
 });
-
 app.get('/login', (req, res) => {
     if (req.session.usuario) return res.redirect('/');
     res.render('Login', {
@@ -137,7 +131,6 @@ app.get('/login', (req, res) => {
         success: null
     });
 });
-
 app.get('/documentos-personas', authMiddleware, async (req, res) => {
     res.render('DocumentosPersonas', {
         title: 'Gestión Documental - Personas',
@@ -145,7 +138,6 @@ app.get('/documentos-personas', authMiddleware, async (req, res) => {
         usuario: req.session.usuario
     });
 });
-
 app.get('/grupos/crear', authMiddleware, async (req, res) => {
     try {
         const [clientes] = await db.query('SELECT id_cliente, nombre_cliente as nombre FROM clientes WHERE activo = 1');
@@ -163,7 +155,6 @@ app.get('/grupos/crear', authMiddleware, async (req, res) => {
         res.status(500).send('Error al cargar el formulario de grupos');
     }
 });
-
 app.post('/grupos/crear', authMiddleware, async (req, res) => {
     let { id_cliente, nombre_grupo, nombre_compania, nombre_contacto, email_contacto, direccion, ciudad, activo } = req.body;
 
