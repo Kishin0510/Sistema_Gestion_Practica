@@ -221,7 +221,6 @@ const vehiculosController = {
         try {
             const { id } = req.params;
             console.log(`  Eliminando vehículo ID: ${id}`);
-
             const [result] = await db.query('DELETE FROM vehiculos WHERE id_vehiculo = ?', [id]);
 
             if (result.affectedRows > 0) {
