@@ -2,6 +2,7 @@ require('dotenv').config();
 const db = require('../conexion');
 const fs = require('fs');
 const path = require('path');
+const { enviarCorreoCambioVencimiento } = require('../../services/emailService');
 const logError = (tag, err) => console.error(` ${tag}`, err.message || err);
 
 function normalizarRutaArchivo(rutaArchivo) {
@@ -11,12 +12,10 @@ function normalizarRutaArchivo(rutaArchivo) {
         const texto = rutaArchivo.toString('utf8').trim();
         return texto || null;
     }
-
     if (typeof rutaArchivo === 'string') {
         const texto = rutaArchivo.trim();
         return texto || null;
     }
-
     try {
         const texto = String(rutaArchivo).trim();
         return texto || null;
@@ -24,13 +23,20 @@ function normalizarRutaArchivo(rutaArchivo) {
         return null;
     }
 }
-
 function obtenerRutaFisicaDesdePublic(rutaArchivo) {
     const rutaNormalizada = normalizarRutaArchivo(rutaArchivo);
     if (!rutaNormalizada) return null;
 
     const rutaSinSlashInicial = rutaNormalizada.replace(/^\/+/, '');
     return path.join(process.cwd(), 'public', rutaSinSlashInicial);
+}
+function formatearFechaTexto(fecha) {
+    if (!fecha) return 'Sin registro';
+    try {
+        return new Date(fecha).toLocaleDateString('es-CL');
+    } catch (error) {
+        return 'Sin registro';
+    }
 }
 const documentoVehiculoController = {
     mostrarDocumentos: async (req, res) => {
@@ -523,6 +529,45 @@ const documentoVehiculoController = {
                 ]);
             }
 
+            const usuarioSesion = req.session?.usuario || req.user || null;
+            const rolUsuario = (usuarioSesion?.rol || '').toLowerCase();
+            const nombreUsuario =
+                usuarioSesion?.nombre_completo ||
+                usuarioSesion?.nombre ||
+                usuarioSesion?.usuario ||
+                'Usuario no identificado';
+
+            const fechaAnteriorBD = doc.fecha_vencimiento
+                ? new Date(doc.fecha_vencimiento).toISOString().split('T')[0]
+                : null;
+
+            const fechaNuevaBD = fecha_vencimiento
+                ? new Date(fecha_vencimiento).toISOString().split('T')[0]
+                : null;
+
+            const cambioFechaVencimiento = fechaAnteriorBD !== fechaNuevaBD;
+
+            if (rolUsuario === 'actualizador' && cambioFechaVencimiento && process.env.EMAIL_TO) {
+                try {
+                    await enviarCorreoCambioVencimiento(
+                        process.env.EMAIL_TO,
+                        {
+                            usuario: nombreUsuario,
+                            patente: doc.patente || 'N/A',
+                            marca: doc.marca || '',
+                            modelo: doc.modelo || '',
+                            tipo_documento: doc.tipo_documento_nombre || 'Sin tipo',
+                            numero_documento: doc.numero_documento || 'Sin número',
+                            fecha_anterior: fechaVencAnterior,
+                            fecha_nueva: formatearFechaTexto(fecha_vencimiento),
+                            motivo: motivo_cambio || 'No informado'
+                        }
+                    );
+                } catch (errorCorreo) {
+                    console.error('Error al enviar correo por cambio de vencimiento:', errorCorreo.message);
+                }
+            }
+
             await conn.commit();
             res.redirect('/documentos?success=Fechas actualizadas correctamente');
 
@@ -557,7 +602,13 @@ const documentoVehiculoController = {
             }
 
             const [documentoActual] = await conn.execute(
-                'SELECT id_vehiculo, ruta_archivo, nombre_archivo FROM documentos_vehiculo WHERE id_documento_veh = ?',
+                `SELECT 
+                    id_vehiculo,
+                    ruta_archivo,
+                    nombre_archivo,
+                    fecha_vencimiento
+                 FROM documentos_vehiculo 
+                 WHERE id_documento_veh = ?`,
                 [id]
             );
 
@@ -698,6 +749,45 @@ const documentoVehiculoController = {
                             alertaExistente[0].id_alerta
                         ]);
                     }
+                }
+            }
+
+            const usuarioSesion = req.session?.usuario || req.user || null;
+            const rolUsuario = (usuarioSesion?.rol || '').toLowerCase();
+            const nombreUsuario =
+                usuarioSesion?.nombre_completo ||
+                usuarioSesion?.nombre ||
+                usuarioSesion?.usuario ||
+                'Usuario no identificado';
+
+            const fechaAnteriorBD = documentoActual[0].fecha_vencimiento
+                ? new Date(documentoActual[0].fecha_vencimiento).toISOString().split('T')[0]
+                : null;
+
+            const fechaNuevaBD = fecha_vencimiento
+                ? new Date(fecha_vencimiento).toISOString().split('T')[0]
+                : null;
+
+            const cambioFechaVencimiento = fechaAnteriorBD !== fechaNuevaBD;
+
+            if (rolUsuario === 'actualizador' && cambioFechaVencimiento && process.env.EMAIL_TO) {
+                try {
+                    await enviarCorreoCambioVencimiento(
+                        process.env.EMAIL_TO,
+                        {
+                            usuario: nombreUsuario,
+                            patente: 'N/A',
+                            marca: '',
+                            modelo: '',
+                            tipo_documento: tipo_documento_nombre || 'Sin tipo',
+                            numero_documento: numero_documento || 'Sin número',
+                            fecha_anterior: formatearFechaTexto(documentoActual[0].fecha_vencimiento),
+                            fecha_nueva: formatearFechaTexto(fecha_vencimiento),
+                            motivo: 'Actualización general del documento'
+                        }
+                    );
+                } catch (errorCorreo) {
+                    console.error('Error al enviar correo por actualización de documento:', errorCorreo.message);
                 }
             }
 
