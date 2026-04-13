@@ -7,19 +7,31 @@ const authController = require('./db/controllers/authController');
 const app = express();
 const PORT = process.env.PORT || 3000; //PUERTO DE EJECUCIÓN DEL SERVER
 
+app.use((req, res, next) => {
+    res.setHeader("Content-Security-Policy", "frame-ancestors 'self' https://pegasus73.peginstances.com");
+    res.removeHeader("X-Frame-Options");
+    next();
+});    
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.set('trust proxy', 1);
 app.use(session({
     secret: process.env.SESSION_SECRET || 'mi_secreto_vehicular',
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false }
+    cookie: { secure: true,
+            sameSite: 'none'
+            },
+    proxy: true
 }));
 app.use((req, res, next) => {
     res.locals.usuario = req.session.usuario || null;
     next();
 });
+
 app.use((req, res, next) => {
     req.flash = (tipo, mensaje) => {
         if (!req.session.flashData) req.session.flashData = {};
