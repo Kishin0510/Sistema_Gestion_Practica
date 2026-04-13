@@ -8,7 +8,7 @@ const app = express();
 const PORT = process.env.PORT || 3000; //PUERTO DE EJECUCIÓN DEL SERVER
 
 app.use((req, res, next) => {
-    res.setHeader("Content-Security-Policy", "frame-ancestors 'self' https://pegasus73.peginstances.com");
+    res.setHeader("Content-Security-Policy", "frame-ancestors 'self' https://pegasus73.peginstances.com https://*.peginstances.com:*");
     res.removeHeader("X-Frame-Options");
     next();
 });    
